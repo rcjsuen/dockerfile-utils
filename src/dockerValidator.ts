@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
-} from 'vscode-languageserver';
+} from 'vscode-languageserver-types';
 import { Dockerfile, Flag, Instruction, Env, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationSeverity, ValidatorSettings } from './main';
 
