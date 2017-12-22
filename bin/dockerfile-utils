@@ -140,9 +140,9 @@ function parseFormattingOptions(args) {
 }
 
 function format(content, options) {
-    let dockerfileUtils = require("../out/src/main");
+    let dockerfileUtils = require("../lib/main");
     let vscodeLangserver = require("vscode-languageserver-types");
-    let formatter = require("../out/src/dockerFormatter");
+    let formatter = require("../lib/dockerFormatter");
     let document = vscodeLangserver.TextDocument.create("", "", 0, content);
     let dockerFormatter = new formatter.DockerFormatter();
     let edits = dockerfileUtils.format(content, options);
@@ -155,8 +155,8 @@ function format(content, options) {
 }
 
 function validate(content, json) {
-    let dockerfileUtils = require("../out/src/main");
-    let validator = require("../out/src/dockerValidator");
+    let dockerfileUtils = require("../lib/main");
+    let validator = require("../lib/dockerValidator");
     let vscodeLangserver = require("vscode-languageserver-types");
     let document = vscodeLangserver.TextDocument.create("", "", 0, content);
     let diagnostics = dockerfileUtils.validate(content);
