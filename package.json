@@ -1,0 +1,50 @@
+{
+  "name": "dockerfile-utils",
+  "description": "Utilities for formatting and linting a Dockerfile.",
+  "keywords": [
+    "docker",
+    "dockerfile",
+    "moby",
+    "lint",
+    "linter",
+    "validate",
+    "validator",
+    "check",
+    "format",
+    "formatter"
+  ],
+  "version": "0.0.1",
+  "author": "Remy Suen",
+  "license": "MIT",
+  "bugs": "https://github.com/rcjsuen/dockerfile-utils/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rcjsuen/dockerfile-utils.git"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "dependencies": {
+    "dockerfile-ast": "0.0.1",
+    "vscode-languageserver-types": "3.5.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.33",
+    "@types/node": "^6.0.52",
+    "mocha": "^3.2.0",
+    "typescript": "^2.1.5",
+    "nyc": "^11.0.2"
+  },
+  "bin": {
+    "dockerfile-utils": "./bin/dockerfile-utils"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "prepublish": "tsc -p ./src",
+    "watch": "tsc --watch -p .",
+    "test": "mocha out/test",
+    "nyc": "nyc mocha out/test",
+    "nyc-ci": "nyc --cache false mocha out/test",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  }
+}
