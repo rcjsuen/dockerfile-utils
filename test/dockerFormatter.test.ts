@@ -6,7 +6,7 @@ import * as assert from "assert";
 
 import {
 	TextEdit, TextDocument, Position, Range, FormattingOptions
-} from 'vscode-languageserver';
+} from 'vscode-languageserver-types';
 import { format } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
 
