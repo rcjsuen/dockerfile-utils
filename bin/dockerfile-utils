@@ -197,7 +197,8 @@ function validate(content, json) {
             let rangeOffsetStart = document.offsetAt(diagnostics[i].range.start);
             let rangeOffsetEnd = document.offsetAt(diagnostics[i].range.end);
             let x = document.offsetAt({ line: diagnostics[i].range.start.line, character: 0 });
-            let y = document.offsetAt({ line: diagnostics[i].range.end.line + 1, character: 0 }) - 1;
+            let y = document.lineCount - 1 === diagnostics[i].range.start.line ?
+                content.length : document.offsetAt({ line: diagnostics[i].range.end.line + 1, character: 0 }) - 1;
             let highlight = "";
             let spacing = rangeOffsetStart - x;
             for (let j = 0; j < spacing; j++) {
@@ -219,7 +220,8 @@ function validate(content, json) {
             console.log("Line: " + (diagnostics[i].range.start.line + 1) + "-" + (diagnostics[i].range.end.line + 1));
             for (let j = diagnostics[i].range.start.line; j < diagnostics[i].range.end.line + 1; j++) {
                 let x = document.offsetAt({ line: j, character: 0 });
-                let y = document.offsetAt({ line: j + 1, character: 0 }) - 1;
+                let y = document.lineCount === j + 1 ?
+                    content.length : document.offsetAt({ line: j + 1, character: 0 }) - 1;
                 if (content.charAt(y - 1) === '\r') {
                     y--;
                 }
