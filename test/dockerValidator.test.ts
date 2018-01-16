@@ -2779,6 +2779,14 @@ describe("Docker Validator Tests", function() {
             let diagnostics = validateDockerfile("FROM busybox\nSHELL \"/bin/sh\" ]");
             assert.equal(diagnostics.length, 1);
             assertShellJsonForm(diagnostics[0], 1, 6, 1, 17);
+
+            diagnostics = validate("FROM busybox\nSHELL \\a");
+            assert.equal(diagnostics.length, 1);
+            assertShellJsonForm(diagnostics[0], 1, 6, 1, 8);
+
+            diagnostics = validate("FROM busybox\nSHELL a \\ a");
+            assert.equal(diagnostics.length, 1);
+            assertShellJsonForm(diagnostics[0], 1, 6, 1, 11);
         });
 
         it("double starting [", function() {
