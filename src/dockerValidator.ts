@@ -488,7 +488,7 @@ export class Validator {
                         problems.push(Validator.createMissingArgument(range.start, range.end));
                     } else {
                         const regex = /^([0-9])+(-[0-9]+)?(:([0-9])+(-[0-9]*)?)?(\/(\w*))?(\/\w*)*$/;
-                        for (let i = 0; i < exposeArgs.length; i++) {
+                        argCheck: for (let i = 0; i < exposeArgs.length; i++) {
                             const value = exposeArgs[i].getValue()
                             const match = regex.exec(value);
                             if (match) {
@@ -506,6 +506,18 @@ export class Validator {
                                     }
                                 }
                             } else {
+                                let variables = instruction.getVariables();
+                                for (let variable of variables) {
+                                    let variableRange = variable.getRange();
+                                    let variableDefinition = this.document.getText().substring(
+                                        this.document.offsetAt(variableRange.start),
+                                        this.document.offsetAt(variableRange.end)
+                                    );
+                                    // an un-expanded variable is here
+                                    if (value.includes(variableDefinition)) {
+                                        continue argCheck;
+                                    }
+                                }
                                 problems.push(Validator.createInvalidPort(exposeArgs[i].getRange(), value));
                             }
                         }
@@ -1349,5 +1361,18 @@ export class Validator {
             code: code,
             source: "dockerfile-utils"
         };
+    }
+
+    private static isInsideRange(position: Position, range: Range): boolean {
+        if (range.start.line === range.end.line) {
+            return range.start.line === position.line
+                && range.start.character <= position.character
+                && position.character <= range.end.character;
+        } else if (range.start.line === position.line) {
+            return range.start.character <= position.character;
+        } else if (range.end.line === position.line) {
+            return position.character <= range.end.character;
+        }
+        return range.start.line < position.line && position.line < range.end.line;
     }
 }
