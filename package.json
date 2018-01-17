@@ -13,7 +13,7 @@
     "format",
     "formatter"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Remy Suen",
   "license": "MIT",
   "bugs": "https://github.com/rcjsuen/dockerfile-utils/",
