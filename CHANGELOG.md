@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [0.0.3] - 2018-01-17
 ### Added
 - create TypeScript typings ([#5](https://github.com/rcjsuen/dockerfile-utils/issues/5))
+- add the main field to package.json ([#6](https://github.com/rcjsuen/dockerfile-utils/issues/6))
 
 ## [0.0.2] - 2018-01-17
 ### Fixed
