@@ -24,6 +24,7 @@
   "engines": {
     "node": "*"
   },
+  "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
   "dependencies": {
     "dockerfile-ast": "0.0.1",
