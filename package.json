@@ -24,6 +24,7 @@
   "engines": {
     "node": "*"
   },
+  "types": "./lib/main.d.ts",
   "dependencies": {
     "dockerfile-ast": "0.0.1",
     "vscode-languageserver-types": "3.5.0"
