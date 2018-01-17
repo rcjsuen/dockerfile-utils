@@ -9,6 +9,69 @@ import { DockerFormatter } from './dockerFormatter';
 import { Validator } from './dockerValidator';
 
 /**
+ * Error codes that correspond to a given validation error. These
+ * values are exposed for the purpose of allowing clients to identify
+ * what kind of validation error has occurred and to then prompt
+ * action that is appropriate for resolving the error to the user.
+ * 
+ * Note that the names and values of these errors are not considered
+ * to be API and may change between releases of dockerfiles-util.
+ * This is because the Docker builder's errors and error messages are
+ * itself not considered to be API. Thus, Dockerfiles that originally
+ * would not build and throw an error may stop throwing an error 
+ * a future release of Docker due to newly added features. This would
+ * then mean that an error (code and message) is no longer valid and
+ * should thus be removed. Hence, this list of error codes is not
+ * stable and as aforementioned may change between releases of
+ * dockerfile-utils.
+ */
+export enum ValidationCode {
+    CASING_INSTRUCTION,
+    CASING_DIRECTIVE,
+    ARGUMENT_MISSING,
+    ARGUMENT_EXTRA,
+    ARGUMENT_REQUIRES_ONE,
+    ARGUMENT_REQUIRES_AT_LEAST_ONE,
+    ARGUMENT_REQUIRES_TWO,
+    ARGUMENT_REQUIRES_AT_LEAST_TWO,
+    ARGUMENT_REQUIRES_ONE_OR_THREE,
+    ARGUMENT_UNNECESSARY,
+    DUPLICATE_BUILD_STAGE_NAME,
+    EMPTY_CONTINUATION_LINE,
+    INVALID_BUILD_STAGE_NAME,
+    FLAG_AT_LEAST_ONE,
+    FLAG_DUPLICATE,
+    FLAG_INVALID_DURATION,
+    FLAG_LESS_THAN_1MS,
+    FLAG_MISSING_DURATION,
+    FLAG_MISSING_VALUE,
+    FLAG_UNKNOWN_UNIT,
+    NO_SOURCE_IMAGE,
+    INVALID_ESCAPE_DIRECTIVE,
+    INVALID_AS,
+    INVALID_PORT,
+    INVALID_PROTO,
+    INVALID_SIGNAL,
+    INVALID_SYNTAX,
+    ONBUILD_CHAINING_DISALLOWED,
+    ONBUILD_TRIGGER_DISALLOWED,
+    SHELL_JSON_FORM,
+    SHELL_REQUIRES_ONE,
+    SYNTAX_MISSING_EQUALS,
+    SYNTAX_MISSING_NAMES,
+    SYNTAX_MISSING_SINGLE_QUOTE,
+    SYNTAX_MISSING_DOUBLE_QUOTE,
+    MULTIPLE_INSTRUCTIONS,
+    UNKNOWN_INSTRUCTION,
+    UNKNOWN_ADD_FLAG,
+    UNKNOWN_COPY_FLAG,
+    UNKNOWN_HEALTHCHECK_FLAG,
+    UNKNOWN_TYPE,
+    DEPRECATED_MAINTAINER,
+    HEALTHCHECK_CMD_ARGUMENT_MISSING
+}
+
+/**
  * The severity options that may be defined for the validator.
  */
 export enum ValidationSeverity {

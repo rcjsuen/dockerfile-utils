@@ -5,8 +5,8 @@
 import * as assert from "assert";
 
 import { TextDocument, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
-import { Validator, ValidationCode } from '../src/dockerValidator';
-import { ValidatorSettings, ValidationSeverity, validate } from '../src/main';
+import { Validator } from '../src/dockerValidator';
+import { ValidationCode, ValidatorSettings, ValidationSeverity, validate } from '../src/main';
 
 let source = "dockerfile-utils";
 
