@@ -185,7 +185,7 @@ function validate(content, json) {
             message = "Error: ";
         }
         message = message + diagnostics[i].message;
-        if (diagnostics[i].code === validator.ValidationCode.EMPTY_CONTINUATION_LINE) {
+        if (diagnostics[i].code === dockerfileUtils.ValidationCode.EMPTY_CONTINUATION_LINE) {
             // empty continuation lines encountered, just print out the line
             // numbers and ignore the content (if any)
             for (let j = diagnostics[i].range.start.line + 1; j < diagnostics[i].range.end.line + 1; j++) {
