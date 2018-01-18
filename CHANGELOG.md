@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- warn if COPY's --from flag is invalid ([#9](https://github.com/rcjsuen/dockerfile-utils/issues/9))
+
 ### Fixed
 - correct import error in the CLI linter ([#8](https://github.com/rcjsuen/dockerfile-utils/issues/8))
 

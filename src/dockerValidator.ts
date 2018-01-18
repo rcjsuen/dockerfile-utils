@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, Env, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, Copy, Env, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -499,8 +499,9 @@ export class Validator {
                     this.checkDuplicateFlags(addFlags, ["chown"], problems);
                     break;
                 case "COPY":
+                    let copy = instruction as Copy;
                     let copyArgs = instruction.getArguments();
-                    let flags = (instruction as ModifiableInstruction).getFlags();
+                    let flags = copy.getFlags();
                     if (flags.length > 0) {
                         for (let flag of flags) {
                             const name = flag.getName();
@@ -510,6 +511,18 @@ export class Validator {
                             } else if (name !== "from" && name !== "chown") {
                                 let range = flag.getNameRange();
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, range.end, name));
+                            }
+                        }
+
+                        let flag = copy.getFromFlag();
+                        if (flag) {
+                            let value = flag.getValue();
+                            if (value !== null) {
+                                let regexp = new RegExp(/^[a-zA-Z0-9].*$/);
+                                if (!regexp.test(value)) {
+                                    let range = value === "" ? flag.getRange() : flag.getValueRange();
+                                    problems.push(Validator.createFlagInvalidFrom(range.start, range.end, value));
+                                }
                             }
                         }
                     }
@@ -891,6 +904,7 @@ export class Validator {
         "flagAtLeastOne": "${0} must be at least 1 (not ${1})",
         "flagDuplicate": "Duplicate flag specified: ${0}",
         "flagInvalidDuration": "time: invalid duration ${0}",
+        "flagInvalidFrom": "invalid from flag value ${0}: invalid reference format",
         "flagLessThan1ms": "Interval \"${0}\" cannot be less than 1ms",
         "flagMissingDuration": "time: missing unit in duration ${0}",
         "flagMissingValue": "Missing a value on flag: ${0}",
@@ -969,6 +983,10 @@ export class Validator {
 
     public static getDiagnosticMessage_FlagMissingDuration(duration: string) {
         return Validator.formatMessage(Validator.dockerProblems["flagMissingDuration"], duration);
+    }
+
+    public static getDiagnosticMessage_FlagInvalidFromValue(value: string): string {
+        return Validator.formatMessage(Validator.dockerProblems["flagInvalidFrom"], value);
     }
 
     public static getDiagnosticMessage_FlagMissingValue(flag: string) {
@@ -1125,6 +1143,10 @@ export class Validator {
 
     private static createFlagMissingDuration(start: Position, end: Position, duration: string): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagMissingDuration(duration), ValidationCode.FLAG_MISSING_DURATION);
+    }
+
+    private static createFlagInvalidFrom(start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag), ValidationCode.FLAG_INVALID_FROM_VALUE);
     }
 
     static createFlagMissingValue(start: Position, end: Position, flag: string): Diagnostic {
