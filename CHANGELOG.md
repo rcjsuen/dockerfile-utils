@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- create a Docker image for running the CLI ([#10](https://github.com/rcjsuen/dockerfile-utils/issues/10))
+
 ## [0.0.5] - 2018-01-18
 ### Added
 - warn if COPY's --from flag is invalid ([#9](https://github.com/rcjsuen/dockerfile-utils/issues/9))
@@ -27,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.5...HEAD
 [0.0.5]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.2...v0.0.3
