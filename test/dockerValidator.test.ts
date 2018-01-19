@@ -2910,65 +2910,84 @@ describe("Docker Validator Tests", function() {
     });
 
     describe("STOPSIGNAL", function() {
-        it("ok", function() {
-            testValidArgument("STOPSIGNAL", "9");
-            testValidArgument("STOPSIGNAL", "SIGKILL");
+        describe("standard", function() {
+            it("ok", function() {
+                testValidArgument("STOPSIGNAL", "9");
+                testValidArgument("STOPSIGNAL", "SIGKILL");
 
-            let diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL $x");
-            assert.equal(diagnostics.length, 0);
+            });
 
-            diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL ${x}");
-            assert.equal(diagnostics.length, 0);
+            it("escape", function() {
+                let diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\n9");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL s$x");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\n 9");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL s${x}");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL\\\n 9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\r\n9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL\\\r\n 9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\r\n 9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL 9\\\n");
+                assert.equal(diagnostics.length, 0);
+
+                testEscape("STOPSIGNAL", "SI", "GKILL");
+                testEscape("STOPSIGNAL", "SIGK", "ILL");
+            });
+
+            it("invalid stop signal", function() {
+                let diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a ");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a\n");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a\r");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
+            });
         });
 
-        it("escape", function() {
-            let diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\n9");
-            assert.equal(diagnostics.length, 0);
+        describe("environment variables", function() {
+            it("ok", function() {
+                let diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL $x");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\n 9");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL ${x}");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL\\\n 9");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL s$x");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\r\n9");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nARG x\nSTOPSIGNAL s${x}");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL\\\r\n 9");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nENV x=SIGKILL\nSTOPSIGNAL $x");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL \\\r\n 9");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nENV x=SIGKILL\nSTOPSIGNAL ${x}");
+                assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL 9\\\n");
-            assert.equal(diagnostics.length, 0);
+                diagnostics = validateDockerfile("FROM busybox\nENV x=IGKILL\nSTOPSIGNAL s$x");
+                assert.equal(diagnostics.length, 0);
 
-            testEscape("STOPSIGNAL", "SI", "GKILL");
-            testEscape("STOPSIGNAL", "SIGK", "ILL");
-        });
-
-        it("invalid stop signal", function() {
-            let diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a");
-            assert.equal(diagnostics.length, 1);
-            assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
-
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a ");
-            assert.equal(diagnostics.length, 1);
-            assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
-
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a\n");
-            assert.equal(diagnostics.length, 1);
-            assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
-
-            diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL a\r");
-            assert.equal(diagnostics.length, 1);
-            assertInvalidStopSignal(diagnostics[0], "a", 1, 11, 1, 12);
+                diagnostics = validateDockerfile("FROM busybox\nENV x=IGKILL\nSTOPSIGNAL s${x}");
+                assert.equal(diagnostics.length, 0);
+            });
         });
     });
 
