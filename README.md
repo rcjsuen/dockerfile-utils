@@ -75,8 +75,8 @@ Commands:
 
 To format or lint a Dockerfile in the current working directory, please use the following commands.
 ```
-> $ docker run -v `pwd`/Dockerfile:/Dockerfile rcjsuen/dockerfile-utils format /Dockerfile
+> docker run -v `pwd`/Dockerfile:/Dockerfile rcjsuen/dockerfile-utils format /Dockerfile
 ```
 ```
-> $ docker run -v `pwd`/Dockerfile:/Dockerfile rcjsuen/dockerfile-utils lint /Dockerfile
+> docker run -v `pwd`/Dockerfile:/Dockerfile rcjsuen/dockerfile-utils lint /Dockerfile
 ```
