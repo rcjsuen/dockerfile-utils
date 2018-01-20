@@ -2988,6 +2988,20 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM busybox\nENV x=IGKILL\nSTOPSIGNAL s${x}");
                 assert.equal(diagnostics.length, 0);
             });
+
+            it("invalid stop signal", function() {
+                let diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL $");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "$", 1, 11, 1, 12);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL $a");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "", 1, 11, 1, 13);
+
+                diagnostics = validateDockerfile("FROM node\nSTOPSIGNAL ${a");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidStopSignal(diagnostics[0], "${a", 1, 11, 1, 14);
+            });
         });
     });
 

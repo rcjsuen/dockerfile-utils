@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - create a Docker image for running the CLI ([#10](https://github.com/rcjsuen/dockerfile-utils/issues/10))
 
+### Fixed
+- warn if STOPSIGNAL uses invalid variables for its argument ([#11](https://github.com/rcjsuen/dockerfile-utils/issues/11))
+
 ## [0.0.5] - 2018-01-18
 ### Added
 - warn if COPY's --from flag is invalid ([#9](https://github.com/rcjsuen/dockerfile-utils/issues/9))

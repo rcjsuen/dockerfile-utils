@@ -434,6 +434,31 @@ export class Validator {
                         }
                         return null;
                     });
+                    let stopsignalArgs = instruction.getExpandedArguments();
+                    if (stopsignalArgs.length === 1) {
+                        let value = stopsignalArgs[0].getValue();
+                        let variables = instruction.getVariables();
+                        if (variables.length === 0) {
+                            if (value.indexOf('$') !== -1) {
+                                let range = stopsignalArgs[0].getRange();
+                                problems.push(Validator.createInvalidStopSignal(range. start, range.end, value));
+                            }
+                        } else {
+                            for (let variable of variables) {
+                                let variableRange = variable.getRange();
+                                let variableDefinition = this.document.getText().substring(
+                                    this.document.offsetAt(variableRange.start),
+                                    this.document.offsetAt(variableRange.end)
+                                );
+                                // an un-expanded variable is here
+                                if (value.includes(variableDefinition) && !variable.isDefined()) {
+                                    let range = stopsignalArgs[0].getRange();
+                                    problems.push(Validator.createInvalidStopSignal(range. start, range.end, ""));
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     break;
                 case "EXPOSE":
                     let exposeArgs = instruction.getExpandedArguments();
