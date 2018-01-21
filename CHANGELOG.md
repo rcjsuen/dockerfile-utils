@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - create a Docker image for running the CLI ([#10](https://github.com/rcjsuen/dockerfile-utils/issues/10))
+- create tags for the Docker image that corresponds to the Git commit's SHA hash ([#16](https://github.com/rcjsuen/dockerfile-utils/issues/16))
 
 ### Fixed
 - warn if STOPSIGNAL uses invalid variables for its argument ([#11](https://github.com/rcjsuen/dockerfile-utils/issues/11))
