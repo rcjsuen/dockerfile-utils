@@ -41,7 +41,7 @@ after_success:
   - npm pack
   - 'if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_NODE_VERSION" == "8" ]; then
       docker build -t rcjsuen/dockerfile-utils . || travis_terminate 1;
-      docker tag rcjsuen/dockerfile-utils rcjsuen/dockerfile-utils:$TRAVIS_COMMIT || travis_terminate 1
+      docker tag rcjsuen/dockerfile-utils rcjsuen/dockerfile-utils:$TRAVIS_COMMIT || travis_terminate 1;
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD" || travis_terminate 1;
       docker push rcjsuen/dockerfile-utils:latest || travis_terminate 1;
       docker push rcjsuen/dockerfile-utils:$TRAVIS_COMMIT || travis_terminate 1;
