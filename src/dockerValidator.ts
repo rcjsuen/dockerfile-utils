@@ -508,6 +508,12 @@ export class Validator {
                         problems.push(Validator.createADDRequiresAtLeastTwoArguments(addArgs[0].getRange()));
                     } else if (addArgs.length === 0) {
                         problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
+                    } else if (addArgs.length > 2) {
+                        let addDestination = addArgs[addArgs.length - 1].getValue();
+                        let lastChar = addDestination.charAt(addDestination.length - 1);
+                        if (lastChar !== '\\' && lastChar !== '/') {
+                            problems.push(Validator.createADDDestinationNotDirectory(addArgs[addArgs.length - 1].getRange()));
+                        }
                     }
                     const addFlags = (instruction as ModifiableInstruction).getFlags();
                     for (let flag of addFlags) {
@@ -1061,6 +1067,10 @@ export class Validator {
         return Validator.dockerProblems["instructionMissingArgument"];
     }
 
+    public static getDiagnosticMessage_ADDDestinationNotDirectory() {
+        return Validator.formatMessage(Validator.dockerProblems["invalidDestination"], "ADD");
+    }
+
     public static getDiagnosticMessage_ADDRequiresAtLeastTwoArguments() {
         return Validator.formatMessage(Validator.dockerProblems["instructionRequiresAtLeastTwoArguments"], "ADD");
     }
@@ -1239,6 +1249,10 @@ export class Validator {
 
     static createARGRequiresOneArgument(start: Position, end: Position): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_ARGRequiresOneArgument(), ValidationCode.ARGUMENT_REQUIRES_ONE);
+    }
+
+    private static createADDDestinationNotDirectory(range: Range): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ADDDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
     }
 
     private static createADDRequiresAtLeastTwoArguments(range: Range): Diagnostic {
