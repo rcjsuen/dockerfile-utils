@@ -555,6 +555,12 @@ export class Validator {
                         problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(copyArgs[0].getRange()));
                     } else if (copyArgs.length === 0) {
                         problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
+                    } else if (copyArgs.length > 2) {
+                        let copyDestination = copyArgs[copyArgs.length - 1].getValue();
+                        let lastChar = copyDestination.charAt(copyDestination.length - 1);
+                        if (lastChar !== '\\' && lastChar !== '/') {
+                            problems.push(Validator.createCOPYDestinationNotDirectory(copyArgs[copyArgs.length - 1].getRange()));
+                        }
                     }
                     this.checkFlagValue(flags, ["chown", "from"], problems);
                     this.checkDuplicateFlags(flags, ["chown", "from"], problems);
@@ -917,6 +923,7 @@ export class Validator {
         "invalidProtocol": "Invalid proto: ${0}",
         "invalidStopSignal": "Invalid signal: ${0}",
         "invalidSyntax": "parsing \"${0}\": invalid syntax",
+        "invalidDestination": "When using ${0} with more than one source file, the destination must be a directory and end with a / or a \\",
 
         "syntaxMissingEquals": "Syntax error - can't find = in \"${0}\". Must be of the form: name=value",
         "syntaxMissingNames": "${0} names can not be blank",
@@ -1060,6 +1067,10 @@ export class Validator {
 
     public static getDiagnosticMessage_ARGRequiresOneArgument() {
         return Validator.formatMessage(Validator.dockerProblems["instructionRequiresOneArgument"], "ARG");
+    }
+
+    public static getDiagnosticMessage_COPYDestinationNotDirectory() {
+        return Validator.formatMessage(Validator.dockerProblems["invalidDestination"], "COPY");
     }
 
     public static getDiagnosticMessage_COPYRequiresAtLeastTwoArguments() {
@@ -1232,6 +1243,10 @@ export class Validator {
 
     private static createADDRequiresAtLeastTwoArguments(range: Range): Diagnostic {
         return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ADDRequiresAtLeastTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
+    }
+
+    private static createCOPYDestinationNotDirectory(range: Range): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_COPYDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
     }
 
     private static createCOPYRequiresAtLeastTwoArguments(range: Range): Diagnostic {

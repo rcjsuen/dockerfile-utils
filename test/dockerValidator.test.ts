@@ -331,6 +331,17 @@ function assertADDRequiresAtLeastTwoArguments(diagnostic: Diagnostic, startLine:
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertCOPYDestinationNotDirectory(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.INVALID_DESTINATION);
+    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_COPYDestinationNotDirectory());
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function assertCOPYRequiresAtLeastTwoArguments(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
@@ -1642,6 +1653,12 @@ describe("Docker Validator Tests", function() {
             it("ok", function() {
                 let diagnostics = validateDockerfile("FROM alpine\nCOPY . .");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY Dockerfile Dockerfile2 /root/");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY Dockerfile Dockerfile2 C:\\tmp\\");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("requires at least two", function() {
@@ -1660,6 +1677,16 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine\nCOPY --from=busybox .");
                 assert.equal(diagnostics.length, 1);
                 assertCOPYRequiresAtLeastTwoArguments(diagnostics[0], 1, 20, 1, 21);
+            });
+
+            it("destination not a directory", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY Dockerfile Dockerfile2 /root");
+                assert.equal(diagnostics.length, 1);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 1, 28, 1, 33);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY Dockerfile Dockerfile2 C:\\tmp");
+                assert.equal(diagnostics.length, 1);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 2, 28, 2, 34);
             });
         });
 
