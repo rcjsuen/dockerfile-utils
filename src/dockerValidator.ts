@@ -757,7 +757,6 @@ export class Validator {
 
     private static isNumberRelated(character: string) {
         switch (character) {
-            case '-':
             case '.':
             case '0':
             case '1':
