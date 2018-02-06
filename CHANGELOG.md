@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - warn if STOPSIGNAL uses invalid variables for its argument ([#11](https://github.com/rcjsuen/dockerfile-utils/issues/11))
+- allow decimal values for duration flags ([#19](https://github.com/rcjsuen/dockerfile-utils/issues/19))
 
 ## [0.0.5] - 2018-01-18
 ### Added

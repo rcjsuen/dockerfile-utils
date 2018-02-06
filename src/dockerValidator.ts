@@ -609,6 +609,7 @@ export class Validator {
                         case '7':
                         case '8':
                         case '9':
+                        case '.':
                         case '-':
                             break;
                         default:
@@ -624,6 +625,7 @@ export class Validator {
                         durationSpecified = false;
                         switch (value.charAt(i)) {
                             case '-':
+                            case '.':
                             case '0':
                             case '1':
                             case '2':
