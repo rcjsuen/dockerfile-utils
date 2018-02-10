@@ -210,6 +210,17 @@ function assertInvalidProto(diagnostic: Diagnostic, protocol: string, startLine:
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertInvalidReferenceFormat(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.INVALID_REFERENCE_FORMAT);
+    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidReferenceFormat());
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function assertInvalidStopSignal(diagnostic: Diagnostic, signal: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.INVALID_SIGNAL);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
@@ -2177,6 +2188,27 @@ describe("Docker Validator Tests", function() {
             it("ok", function() {
                 let diagnostics = validateDockerfile("FROM node");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("invalid reference format (digest)", function() {
+                let diagnostics = validateDockerfile("FROM alpine@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 17);
+
+                diagnostics = validateDockerfile("FROM alpine@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 19);
+
+                diagnostics = validateDockerfile("FROM alpine@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 13);
+
+                diagnostics = validateDockerfile("FROM alpine@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 18);
             });
         });
 

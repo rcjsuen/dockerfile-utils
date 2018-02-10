@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - warn if COPY has more than two arguments and its last argument is not a directory ([#14](https://github.com/rcjsuen/dockerfile-utils/issues/14))
 - warn if ADD has more than two arguments and its last argument is not a directory ([#17](https://github.com/rcjsuen/dockerfile-utils/issues/17))
 - flag durations that include a hyphen as an error ([#18](https://github.com/rcjsuen/dockerfile-utils/issues/18))
+- warn if FROM's source image's digest is invalid ([#15](https://github.com/rcjsuen/dockerfile-utils/issues/15))
 
 ### Fixed
 - warn if STOPSIGNAL uses invalid variables for its argument ([#11](https://github.com/rcjsuen/dockerfile-utils/issues/11))

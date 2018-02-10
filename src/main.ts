@@ -52,6 +52,12 @@ export enum ValidationCode {
     INVALID_DESTINATION,
     INVALID_PORT,
     INVALID_PROTO,
+
+    /**
+     * The error code used if the base image of a FROM instruction
+     * has an invalid digest specified.
+     */
+    INVALID_REFERENCE_FORMAT,
     INVALID_SIGNAL,
     INVALID_SYNTAX,
     ONBUILD_CHAINING_DISALLOWED,

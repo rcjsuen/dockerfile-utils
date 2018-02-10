@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, Copy, Env, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, Copy, Env, From, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -327,6 +327,27 @@ export class Validator {
                 case "FROM":
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
+                            case 0:
+                                let index = argument.indexOf('@');
+                                if (index === -1) {
+                                    return null;
+                                }
+                                let endIndex = argument.indexOf(':');
+                                let from = instruction as From;
+                                if (endIndex === -1) {
+                                    return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
+                                }
+                                let algorithmRegexp = new RegExp(/[A-Fa-f0-9_+.-]+/);
+                                let algorithm = argument.substring(index + 1, endIndex);
+                                if (!algorithmRegexp.test(algorithm)) {
+                                    return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
+                                }
+                                let hex = argument.substring(endIndex + 1);
+                                let hexRegexp = new RegExp(/[A-Fa-f0-9]+/);
+                                if (hexRegexp.test(hex)) {
+                                    return null;
+                                }
+                                return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
                             case 1:
                                 return argument.toUpperCase() === "AS" ? null : Validator.createInvalidAs;
                             case 2:
@@ -928,6 +949,7 @@ export class Validator {
         "invalidAs": "Second argument should be AS",
         "invalidPort": "Invalid containerPort: ${0}",
         "invalidProtocol": "Invalid proto: ${0}",
+        "invalidReferenceFormat": "invalid reference format",
         "invalidStopSignal": "Invalid signal: ${0}",
         "invalidSyntax": "parsing \"${0}\": invalid syntax",
         "invalidDestination": "When using ${0} with more than one source file, the destination must be a directory and end with a / or a \\",
@@ -1050,6 +1072,10 @@ export class Validator {
 
     public static getDiagnosticMessage_InvalidProto(protocol: string) {
         return Validator.formatMessage(Validator.dockerProblems["invalidProtocol"], protocol);
+    }
+
+    public static getDiagnosticMessage_InvalidReferenceFormat() {
+        return Validator.dockerProblems["invalidReferenceFormat"];
     }
 
     public static getDiagnosticMessage_InvalidSignal(signal: string) {
@@ -1226,6 +1252,10 @@ export class Validator {
 
     private static createInvalidProto(start: Position, end: Position, protocol: string): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidProto(protocol), ValidationCode.INVALID_PROTO);
+    }
+
+    private static createInvalidReferenceFormat(range: Range,): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InvalidReferenceFormat(), ValidationCode.INVALID_REFERENCE_FORMAT);
     }
 
     static createInvalidStopSignal(start: Position, end: Position, signal: string): Diagnostic {
