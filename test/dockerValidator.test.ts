@@ -2189,8 +2189,38 @@ describe("Docker Validator Tests", function() {
                 let diagnostics = validateDockerfile("FROM node");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM node:8");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
                 assert.equal(diagnostics.length, 0);
+            });
+
+            it("invalid reference format (tag)", function() {
+                let diagnostics = validateDockerfile("FROM alpine:");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 12);
+
+                diagnostics = validateDockerfile("FROM alpine:^");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 13);
+
+                diagnostics = validateDockerfile("FROM alpine:.");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 13);
+
+                diagnostics = validateDockerfile("FROM alpine:-");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 13);
+
+                diagnostics = validateDockerfile("FROM alpine:a66^");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 16);
+
+                // tags may contain a maximum of 128 characters
+                diagnostics = validateDockerfile("FROM alpine:123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 141);
             });
 
             it("invalid reference format (digest)", function() {

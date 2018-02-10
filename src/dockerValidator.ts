@@ -328,12 +328,25 @@ export class Validator {
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
+                            let from = instruction as From;
                                 let index = argument.indexOf('@');
                                 if (index === -1) {
-                                    return null;
+                                    index = argument.indexOf(':');
+                                    if (index === -1) {
+                                        return null;
+                                    }
+                                    let tag = argument.substring(index + 1);
+                                    if (tag === "") {
+                                        // no tag specified, just highlight the whole argument
+                                        return Validator.createInvalidReferenceFormat(range);
+                                    }
+                                    let tagRegexp = new RegExp(/^[\w][\w.-]{0,127}$/);
+                                    if (tagRegexp.test(tag)) {
+                                        return null;
+                                    }
+                                    return Validator.createInvalidReferenceFormat(from.getImageTagRange());
                                 }
                                 let endIndex = argument.indexOf(':');
-                                let from = instruction as From;
                                 if (endIndex === -1) {
                                     return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
                                 }

@@ -55,7 +55,7 @@ export enum ValidationCode {
 
     /**
      * The error code used if the base image of a FROM instruction
-     * has an invalid digest specified.
+     * has an invalid tag or digest specified.
      */
     INVALID_REFERENCE_FORMAT,
     INVALID_SIGNAL,
