@@ -2224,7 +2224,11 @@ describe("Docker Validator Tests", function() {
             });
 
             it("invalid reference format (digest)", function() {
-                let diagnostics = validateDockerfile("FROM alpine@sha25");
+                let diagnostics = validateDockerfile("FROM alpine@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 12);
+
+                diagnostics = validateDockerfile("FROM alpine@sha25");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 17);
 

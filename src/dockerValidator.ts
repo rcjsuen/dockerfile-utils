@@ -348,6 +348,11 @@ export class Validator {
                                 }
                                 let endIndex = argument.indexOf(':');
                                 if (endIndex === -1) {
+                                    let digest = argument.substring(index + 1);
+                                    if (digest === "") {
+                                        // no digest specified, just highlight the whole argument
+                                        return Validator.createInvalidReferenceFormat(range);
+                                    }
                                     return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
                                 }
                                 let algorithmRegexp = new RegExp(/[A-Fa-f0-9_+.-]+/);
