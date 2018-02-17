@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, Copy, Env, From, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -138,31 +138,57 @@ export class Validator {
             problems.push(Validator.createNoSourceImage(document.positionAt(0), document.positionAt(0)));
         }
 
-        let cmds = dockerfile.getCMDs();
+        let cmds = [];
+        let entrypoints = [];
+        let healthchecks = [];
+        let duplicates = [];
+        for (let instruction of instructions) {
+            if (instruction instanceof Cmd) {
+                cmds.push(instruction);
+            } else if (instruction instanceof Entrypoint) {
+                entrypoints.push(instruction);
+            } else if (instruction instanceof Healthcheck) {
+                healthchecks.push(instruction);
+            } else if (instruction instanceof From) {
+                if (cmds.length > 1) {
+                    duplicates = duplicates.concat(cmds);
+                }
+                if (entrypoints.length > 1) {
+                    duplicates = duplicates.concat(entrypoints);
+                }
+                if (healthchecks.length > 1) {
+                    duplicates = duplicates.concat(healthchecks);
+                }
+                cmds = [];
+                entrypoints = [];
+                healthchecks = [];
+            }
+        }
         if (cmds.length > 1) {
-            // more than one CMD found, warn the user
-            for (let cmd of cmds) {
-                let diagnostic = this.createMultipleInstructions(cmd.getInstructionRange(), this.settings.instructionCmdMultiple, "CMD");
-                if (diagnostic) {
-                    problems.push(diagnostic);
-                }
-            }
+            duplicates = duplicates.concat(cmds);
         }
-        let entrypoints = dockerfile.getENTRYPOINTs();
         if (entrypoints.length > 1) {
-            // more than one ENTRYPOINT found, warn the user
-            for (let entrypoint of entrypoints) {
-                let diagnostic = this.createMultipleInstructions(entrypoint.getInstructionRange(), this.settings.instructionEntrypointMultiple, "ENTRYPOINT");
+            duplicates = duplicates.concat(entrypoints);
+        }
+        if (healthchecks.length > 1) {
+            duplicates = duplicates.concat(healthchecks);
+        }
+        for (let duplicate of duplicates) {
+            if (duplicate instanceof Cmd) {
+                // more than one CMD found, warn the user
+                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionCmdMultiple, "CMD");
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }
-            }
-        }
-        let healthchecks = dockerfile.getHEALTHCHECKs();
-        if (healthchecks.length > 1) {
-            // more than one HEALTHCHECK found, warn the user
-            for (let healthcheck of healthchecks) {
-                let diagnostic = this.createMultipleInstructions(healthcheck.getInstructionRange(), this.settings.instructionHealthcheckMultiple, "HEALTHCHECK");
+            } else if (duplicate instanceof Entrypoint) {
+                // more than one ENTRYPOINT found, warn the user
+                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionEntrypointMultiple, "ENTRYPOINT");
+                if (diagnostic) {
+                    problems.push(diagnostic);
+                }
+            } else if (duplicate instanceof Healthcheck) {
+                // more than one HEALTHCHECK found, warn the user
+                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionHealthcheckMultiple, "HEALTHCHECK");
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }

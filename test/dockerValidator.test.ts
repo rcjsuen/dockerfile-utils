@@ -1127,7 +1127,14 @@ describe("Docker Validator Tests", function() {
             function createMutiplesTest(instruction: string, args: string, settingsName: string) {
                 let line = instruction + " " + args;
                 let content = "FROM busybox\n" + line + "\n" + line;
+                let contentMultiStage = "FROM busybox\n" + line + "\n" + line + "\nFROM alpine\n" + line + "\n" + line;
                 let instructionLength = instruction.length;
+
+                it("ok", function() {
+                    let safe = "FROM busybox\n" + line + "\nFROM alpine\n" + line;
+                    let diagnostics = validateDockerfile(safe);
+                    assert.equal(diagnostics.length, 0);
+                });
 
                 it("default", function() {
                     let validator = new Validator();
@@ -1135,6 +1142,13 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 2);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
                     assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
+
+                    diagnostics = validator.validate(createDocument(contentMultiStage));
+                    assert.equal(diagnostics.length, 4);
+                    assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
+                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
+                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
+                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Warning, instruction, 5, 0, 5, instructionLength);
                 });
 
                 it("ignore", function() {
@@ -1149,8 +1163,13 @@ describe("Docker Validator Tests", function() {
                     settings[settingsName] = ValidationSeverity.WARNING;
                     let diagnostics = validateDockerfile(content, settings);
                     assert.equal(diagnostics.length, 2);
+
+                    diagnostics = validateDockerfile(contentMultiStage, settings);
+                    assert.equal(diagnostics.length, 4);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
                     assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
+                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
+                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Warning, instruction, 5, 0, 5, instructionLength);
                 });
 
                 it("error", function() {
@@ -1158,8 +1177,13 @@ describe("Docker Validator Tests", function() {
                     settings[settingsName] = ValidationSeverity.ERROR;
                     let diagnostics = validateDockerfile(content, settings);
                     assert.equal(diagnostics.length, 2);
+
+                    diagnostics = validateDockerfile(contentMultiStage, settings);
+                    assert.equal(diagnostics.length, 4);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Error, instruction, 1, 0, 1, instructionLength);
                     assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Error, instruction, 2, 0, 2, instructionLength);
+                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Error, instruction, 4, 0, 4, instructionLength);
+                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Error, instruction, 5, 0, 5, instructionLength);
                 });
             };
 
@@ -1172,7 +1196,13 @@ describe("Docker Validator Tests", function() {
             });
 
             describe("HEALTHCHECK", function() {
-                createMutiplesTest("HEALTHCHECK", "NONE", "instructionHealthcheckMultiple");
+                describe("CMD", function() {
+                    createMutiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
+                });
+
+                describe("NONE", function() {
+                    createMutiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
+                });
             });
         });
 
