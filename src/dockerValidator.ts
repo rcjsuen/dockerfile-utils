@@ -1298,7 +1298,7 @@ export class Validator {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidProto(protocol), ValidationCode.INVALID_PROTO);
     }
 
-    private static createInvalidReferenceFormat(range: Range,): Diagnostic {
+    private static createInvalidReferenceFormat(range: Range): Diagnostic {
         return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InvalidReferenceFormat(), ValidationCode.INVALID_REFERENCE_FORMAT);
     }
 
