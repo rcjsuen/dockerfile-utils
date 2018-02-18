@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - use a non-zero range for the diagnostic if FROM's base image's digest is the empty string ([#21](https://github.com/rcjsuen/dockerfile-utils/issues/21))
 - ignore multiple CMD, ENTRYPOINT, and HEALTHCHECK instructions in a Dockerfile if there is only ever one in a build stage ([#22](https://github.com/rcjsuen/dockerfile-utils/issues/22))
+- handle invalid decimal values without a leading zero for duration flags ([#23](https://github.com/rcjsuen/dockerfile-utils/issues/23))
 
 ## [0.0.6] - 2018-02-11
 ### Added

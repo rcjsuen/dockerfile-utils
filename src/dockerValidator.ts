@@ -703,7 +703,7 @@ export class Validator {
                             case '9':
                                 continue;
                             default:
-                                let time = parseInt(value.substring(start, i));
+                                let time = parseFloat(value.substring(start, i));
                                 for (let j = i + 1; j < value.length; j++) {
                                     if (Validator.isNumberRelated(value.charAt(j))) {
                                         let unit = value.substring(i, j);

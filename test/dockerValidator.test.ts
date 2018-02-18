@@ -2648,6 +2648,10 @@ describe("Docker Validator Tests", function() {
                         diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=-0s10s CMD ls");
                         assert.equal(diagnostics.length, 1);
                         assertFlagLessThan1ms(diagnostics[0], flag, 1, 14, 1, 14 + flag.length);
+
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=.1ms CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagLessThan1ms(diagnostics[0], flag, 1, 14, 1, 14 + flag.length);
                     });
                 }
 
