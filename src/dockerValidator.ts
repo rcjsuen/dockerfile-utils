@@ -687,6 +687,7 @@ export class Validator {
                     let start = 0;
                     let duration = 0;
                     let digitFound = false;
+                    let periodsDetected = 0;
                     durationParse: for (let i = 0; i < value.length; i++) {
                         durationSpecified = false;
                         switch (value.charAt(i)) {
@@ -698,6 +699,8 @@ export class Validator {
                                 }
                                 continue;
                             case '.':
+                                periodsDetected++;
+                                continue;
                             case '0':
                             case '1':
                             case '2':
@@ -711,6 +714,12 @@ export class Validator {
                                 digitFound = true;
                                 continue;
                             default:
+                                if (periodsDetected > 1) {
+                                    let range = flag.getValueRange();
+                                    problems.push(Validator.createFlagMissingDuration(range.start, range.end, value));
+                                    continue flagCheck;
+                                }
+                                periodsDetected = 0;
                                 let time = parseFloat(value.substring(start, i));
                                 for (let j = i + 1; j < value.length; j++) {
                                     if (Validator.isNumberRelated(value.charAt(j))) {
