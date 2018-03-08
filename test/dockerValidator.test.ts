@@ -2592,6 +2592,10 @@ describe("Docker Validator Tests", function() {
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5s-10ms CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertFlagUnknownUnit(diagnostics[0], "s-", "5s-10ms", 1, 22, 1, 29);
+
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5-5s CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagUnknownUnit(diagnostics[0], "-", "5-5s", 1, 22, 1, 26);
                 });
 
                 function createDurationTooShortTests(flag: string) {

@@ -686,10 +686,17 @@ export class Validator {
                     let durationSpecified = false;
                     let start = 0;
                     let duration = 0;
+                    let digitFound = false;
                     durationParse: for (let i = 0; i < value.length; i++) {
                         durationSpecified = false;
                         switch (value.charAt(i)) {
                             case '-':
+                                if (digitFound) {
+                                    let range = flag.getValueRange();
+                                    problems.push(Validator.createFlagUnknownUnit(range, value.charAt(i), value));
+                                    continue flagCheck;
+                                }
+                                continue;
                             case '.':
                             case '0':
                             case '1':
@@ -701,6 +708,7 @@ export class Validator {
                             case '7':
                             case '8':
                             case '9':
+                                digitFound = true;
                                 continue;
                             default:
                                 let time = parseFloat(value.substring(start, i));
