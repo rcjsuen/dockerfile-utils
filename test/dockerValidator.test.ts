@@ -2627,26 +2627,35 @@ describe("Docker Validator Tests", function() {
                     assertFlagMissingDuration(diagnostics[0], "5.5s10..0ms", 1, 22, 1, 33);
                 });
 
-                it("unknown unit", function() {
-                    let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=1x CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagUnknownUnit(diagnostics[0], "x", "1x", 1, 22, 1, 24);
+                function createDurationUnknownUnitTests(flag: string) {
+                    it(flag, function() {
+                        let length = flag.length;
+                        let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=1x CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagUnknownUnit(diagnostics[0], "x", "1x", 1, 15 + length, 1, 15 + length + 2);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=1s1x CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagUnknownUnit(diagnostics[0], "x", "1s1x", 1, 22, 1, 26);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=1s1x CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagUnknownUnit(diagnostics[0], "x", "1s1x", 1, 15 + length, 1, 15 + length + 4);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=1x1s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagUnknownUnit(diagnostics[0], "x", "1x1s", 1, 22, 1, 26);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=1x1s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagUnknownUnit(diagnostics[0], "x", "1x1s", 1, 15 + length, 1, 15 + length + 4);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5s-10ms CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagUnknownUnit(diagnostics[0], "s-", "5s-10ms", 1, 22, 1, 29);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5s-10ms CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagUnknownUnit(diagnostics[0], "s-", "5s-10ms", 1, 15 + length, 1, 15 + length + 7);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5-5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagUnknownUnit(diagnostics[0], "-", "5-5s", 1, 22, 1, 26);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5-5s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagUnknownUnit(diagnostics[0], "-", "5-5s", 1, 15 + length, 1, 15 + length + 4);
+                    });
+                }
+
+                describe("unknown unit", function() {
+                    createDurationUnknownUnitTests("interval");
+                    createDurationUnknownUnitTests("start-period");
+                    createDurationUnknownUnitTests("timeout");
                 });
 
                 function createDurationTooShortTests(flag: string) {
