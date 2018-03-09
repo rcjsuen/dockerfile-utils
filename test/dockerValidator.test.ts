@@ -2523,108 +2523,62 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 0);
                 });
 
-                it("invalid duration", function() {
-                    let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=a CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a", 1, 23, 1, 24);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=a1s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 23, 1, 26);
+                function createInvalidDurationTests(flag: string) {
+                    it(flag, function() {
+                        let length = flag.length;
+                        let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=a CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagInvalidDuration(diagnostics[0], "a", 1, 15 + length, 1, 15 + length + 1);
+                        
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=a1s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 15 + length, 1, 15 + length + 3);
+    
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=--5s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 15 + length, 1, 15 + length + 4);
+                    });
+                }
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=--5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 23, 1, 27);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=a CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a", 1, 27, 1, 28);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=a1s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 27, 1, 30);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=--5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 27, 1, 31);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=a CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a", 1, 22, 1, 23);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=a1s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 22, 1, 25);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=--5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 22, 1, 26);
+                describe("invalid duration", function() {
+                    createInvalidDurationTests("interval");
+                    createInvalidDurationTests("start-period");
+                    createInvalidDurationTests("timeout");
                 });
 
-                it("missing duration", function() {
-                    let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "10", 1, 23, 1, 25);
+                function createMissingDurationTests(flag: string) {
+                    it(flag, function() {
+                        let length = flag.length;
+                        let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=10 CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "10", 1, 15 + length, 1, 15 + length + 2);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=-10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "-10", 1, 23, 1, 26);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=-10 CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "-10", 1, 15 + length, 1, 15 + length + 3);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=5..5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5..5s", 1, 23, 1, 28);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5s5 CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "5s5", 1, 15 + length, 1, 15 + length + 3);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=5.5.5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5.5s", 1, 23, 1, 29);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5..5s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "5..5s", 1, 15 + length, 1, 15 + length + 5);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=5.5s10..0ms CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5s10..0ms", 1, 23, 1, 34);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5.5.5s CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "5.5.5s", 1, 15 + length, 1, 15 + length + 6);
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "10", 1, 27, 1, 29);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=-10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "-10", 1, 27, 1, 30);
+                        diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=5.5s10..0ms CMD ls");
+                        assert.equal(diagnostics.length, 1);
+                        assertFlagMissingDuration(diagnostics[0], "5.5s10..0ms", 1, 15 + length, 1, 15 + length + 11);
+                    });
+                }
 
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=5..5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5..5s", 1, 27, 1, 32);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=5.5.5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5.5s", 1, 27, 1, 33);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=5.5s10..0ms CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5s10..0ms", 1, 27, 1, 38);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "10", 1, 22, 1, 24);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=-10 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "-10", 1, 22, 1, 25);
-                    
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5s5 CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5s5", 1, 22, 1, 25);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5..5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5..5s", 1, 22, 1, 27);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5.5.5s CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5.5s", 1, 22, 1, 28);
-
-                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5.5s10..0ms CMD ls");
-                    assert.equal(diagnostics.length, 1);
-                    assertFlagMissingDuration(diagnostics[0], "5.5s10..0ms", 1, 22, 1, 33);
+                describe("missing duration", function() {
+                    createMissingDurationTests("interval");
+                    createMissingDurationTests("start-period");
+                    createMissingDurationTests("timeout");
                 });
 
                 function createDurationUnknownUnitTests(flag: string) {
