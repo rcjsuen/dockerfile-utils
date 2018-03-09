@@ -2532,6 +2532,10 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 1);
                     assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 23, 1, 26);
 
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval=--5s CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 23, 1, 27);
+
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=a CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertFlagInvalidDuration(diagnostics[0], "a", 1, 27, 1, 28);
@@ -2540,6 +2544,10 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 1);
                     assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 27, 1, 30);
 
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-period=--5s CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 27, 1, 31);
+
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=a CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertFlagInvalidDuration(diagnostics[0], "a", 1, 22, 1, 23);
@@ -2547,6 +2555,10 @@ describe("Docker Validator Tests", function() {
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=a1s CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertFlagInvalidDuration(diagnostics[0], "a1s", 1, 22, 1, 25);
+
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=--5s CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagInvalidDuration(diagnostics[0], "--5s", 1, 22, 1, 26);
                 });
 
                 it("missing duration", function() {

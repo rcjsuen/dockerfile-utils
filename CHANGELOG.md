@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - warn if hyphens are being parsed as a unit of time in HEALTHCHECK duration flags ([#24](https://github.com/rcjsuen/dockerfile-utils/issues/24))
 - warn if two or more decimals found in a unit of time in HEALTHCHECK duration flags ([#25](https://github.com/rcjsuen/dockerfile-utils/issues/25))
+- warn if two hyphens are found in HEALTHCHECK duration flags ([#26](https://github.com/rcjsuen/dockerfile-utils/issues/26))
 
 ## [0.0.7] - 2018-03-01
 ### Fixed

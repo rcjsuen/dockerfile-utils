@@ -687,6 +687,7 @@ export class Validator {
                     let start = 0;
                     let duration = 0;
                     let digitFound = false;
+                    let hyphenFound = false;
                     let periodsDetected = 0;
                     durationParse: for (let i = 0; i < value.length; i++) {
                         durationSpecified = false;
@@ -696,7 +697,12 @@ export class Validator {
                                     let range = flag.getValueRange();
                                     problems.push(Validator.createFlagUnknownUnit(range, value.charAt(i), value));
                                     continue flagCheck;
+                                } else if (hyphenFound) {
+                                    let range = flag.getValueRange();
+                                    problems.push(Validator.createFlagInvalidDuration(range.start, range.end, value));
+                                    continue flagCheck;
                                 }
+                                hyphenFound = true;
                                 continue;
                             case '.':
                                 periodsDetected++;
