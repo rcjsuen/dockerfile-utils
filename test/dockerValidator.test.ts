@@ -2659,7 +2659,7 @@ describe("Docker Validator Tests", function() {
                 });
 
                 function createDurationTooShortTests(flag: string) {
-                    it(flag + " too short", function() {
+                    it(flag, function() {
                         let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --" + flag + "=900ms CMD ls");
                         assert.equal(diagnostics.length, 0);
 
@@ -2719,9 +2719,11 @@ describe("Docker Validator Tests", function() {
                     });
                 }
 
-                createDurationTooShortTests("interval");
-                createDurationTooShortTests("start-period");
-                createDurationTooShortTests("timeout");
+                describe("too short", function() {
+                    createDurationTooShortTests("interval");
+                    createDurationTooShortTests("start-period");
+                    createDurationTooShortTests("timeout");
+                });
             });
         });
 
