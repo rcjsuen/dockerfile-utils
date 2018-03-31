@@ -627,10 +627,21 @@ export class Validator {
                     } else if (copyArgs.length === 0) {
                         problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
                     } else if (copyArgs.length > 2) {
-                        let copyDestination = copyArgs[copyArgs.length - 1].getValue();
-                        let lastChar = copyDestination.charAt(copyDestination.length - 1);
-                        if (lastChar !== '\\' && lastChar !== '/') {
-                            problems.push(Validator.createCOPYDestinationNotDirectory(copyArgs[copyArgs.length - 1].getRange()));
+                        if (copy.getClosingBracket()) {
+                            let jsonStrings = copy.getJSONStrings();
+                            if (jsonStrings.length > 2) {
+                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getRange()));
+                                }
+                            }
+                        } else {
+                            let copyDestination = copyArgs[copyArgs.length - 1].getValue();
+                            let lastChar = copyDestination.charAt(copyDestination.length - 1);
+                            if (lastChar !== '\\' && lastChar !== '/') {
+                                problems.push(Validator.createCOPYDestinationNotDirectory(copyArgs[copyArgs.length - 1].getRange()));
+                            }
                         }
                     }
                     this.checkFlagValue(flags, ["chown", "from"], problems);

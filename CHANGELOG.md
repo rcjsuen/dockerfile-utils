@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 - warn if two or more decimals found in a unit of time in HEALTHCHECK duration flags ([#25](https://github.com/rcjsuen/dockerfile-utils/issues/25))
 - warn if two hyphens are found in HEALTHCHECK duration flags ([#26](https://github.com/rcjsuen/dockerfile-utils/issues/26))
 
+### Fixed
+- fix incorrect validation error if a COPY uses JSON arguments and its last string argument is correctly defined as a folder ([#29](https://github.com/rcjsuen/dockerfile-utils/issues/29))
+
 ## [0.0.7] - 2018-03-01
 ### Fixed
 - use a non-zero range for the diagnostic if FROM's base image's digest is the empty string ([#21](https://github.com/rcjsuen/dockerfile-utils/issues/21))
