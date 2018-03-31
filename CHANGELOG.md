@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - fix incorrect validation error if a COPY uses JSON arguments and its last string argument is correctly defined as a folder ([#29](https://github.com/rcjsuen/dockerfile-utils/issues/29))
+- fix incorrect validation error if an ADD uses JSON arguments and its last string argument is correctly defined as a folder ([#30](https://github.com/rcjsuen/dockerfile-utils/issues/30))
 
 ## [0.0.7] - 2018-03-01
 ### Fixed

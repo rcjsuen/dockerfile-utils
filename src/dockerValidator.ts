@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, Add, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -568,19 +568,31 @@ export class Validator {
                     }
                     break;
                 case "ADD":
+                    const add = instruction as Add;
                     const addArgs = instruction.getArguments();
                     if (addArgs.length === 1) {
                         problems.push(Validator.createADDRequiresAtLeastTwoArguments(addArgs[0].getRange()));
                     } else if (addArgs.length === 0) {
                         problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
                     } else if (addArgs.length > 2) {
-                        let addDestination = addArgs[addArgs.length - 1].getValue();
-                        let lastChar = addDestination.charAt(addDestination.length - 1);
-                        if (lastChar !== '\\' && lastChar !== '/') {
-                            problems.push(Validator.createADDDestinationNotDirectory(addArgs[addArgs.length - 1].getRange()));
+                        if (add.getClosingBracket()) {
+                            const jsonStrings = add.getJSONStrings();
+                            if (jsonStrings.length > 2) {
+                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                const lastChar = addDestination.charAt(addDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getRange()));
+                                }
+                            }
+                        } else {
+                            const addDestination = addArgs[addArgs.length - 1].getValue();
+                            const lastChar = addDestination.charAt(addDestination.length - 1);
+                            if (lastChar !== '\\' && lastChar !== '/') {
+                                problems.push(Validator.createADDDestinationNotDirectory(addArgs[addArgs.length - 1].getRange()));
+                            }
                         }
                     }
-                    const addFlags = (instruction as ModifiableInstruction).getFlags();
+                    const addFlags = add.getFlags();
                     for (let flag of addFlags) {
                         const name = flag.getName();
                         const flagRange = flag.getRange();

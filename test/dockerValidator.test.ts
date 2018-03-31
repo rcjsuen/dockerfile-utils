@@ -1575,6 +1575,18 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD Dockerfile Dockerfile2 C:\\tmp\\");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"/root\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD [ \"Dockerfile\", \"C:\\tmp\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"Dockerfile2\", \"/root/\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD [ \"Dockerfile\", \"Dockerfile2\", \"C:\\tmp\\\\\" ]");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("requires at least two", function() {
@@ -1603,6 +1615,14 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD Dockerfile Dockerfile2 C:\\tmp");
                 assert.equal(diagnostics.length, 1);
                 assertADDDestinationNotDirectory(diagnostics[0], 2, 27, 2, 33);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"Dockerfile2\", \"/root\" ]");
+                assert.equal(diagnostics.length, 1);
+                assertADDDestinationNotDirectory(diagnostics[0], 1, 35, 1, 42);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD [ \"Dockerfile\", \"Dockerfile2\", \"C:\\tmp\" ]");
+                assert.equal(diagnostics.length, 1);
+                assertADDDestinationNotDirectory(diagnostics[0], 2, 35, 2, 43);
             });
         });
 
