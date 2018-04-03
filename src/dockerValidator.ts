@@ -960,6 +960,7 @@ export class Validator {
                             break argsCheck;
                         } else if (last !== ',') {
                             last = null;
+                            break argsCheck;
                         }
                     }
                     break;

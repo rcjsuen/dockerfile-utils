@@ -3036,6 +3036,18 @@ describe("Docker Validator Tests", function() {
 
             diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"\\\\[\" ]");
             assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\" ] ]");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\" ] [");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\" ] ,");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\" ] a");
+            assert.equal(diagnostics.length, 0);
         });
 
         it("invalid escape", function() {
@@ -3080,12 +3092,6 @@ describe("Docker Validator Tests", function() {
             let diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\"");
             assert.equal(diagnostics.length, 1);
             assertShellJsonForm(diagnostics[0], 1, 6, 1, 17);
-        });
-
-        it("double ending ]", function() {
-            let diagnostics = validateDockerfile("FROM busybox\nSHELL [ \"/bin/sh\" ] ]");
-            assert.equal(diagnostics.length, 1);
-            assertShellJsonForm(diagnostics[0], 1, 6, 1, 21);
         });
 
         it("comma with EOF", function() {
