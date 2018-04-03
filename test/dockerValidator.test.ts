@@ -1618,11 +1618,11 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"Dockerfile2\", \"/root\" ]");
                 assert.equal(diagnostics.length, 1);
-                assertADDDestinationNotDirectory(diagnostics[0], 1, 35, 1, 42);
+                assertADDDestinationNotDirectory(diagnostics[0], 1, 36, 1, 41);
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD [ \"Dockerfile\", \"Dockerfile2\", \"C:\\tmp\" ]");
                 assert.equal(diagnostics.length, 1);
-                assertADDDestinationNotDirectory(diagnostics[0], 2, 35, 2, 43);
+                assertADDDestinationNotDirectory(diagnostics[0], 2, 36, 2, 42);
             });
         });
 
@@ -1790,11 +1790,11 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"/root\" ]");
                 assert.equal(diagnostics.length, 1);
-                assertCOPYDestinationNotDirectory(diagnostics[0], 1, 36, 1, 43);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 1, 37, 1, 42);
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"C:\\tmp\" ]");
                 assert.equal(diagnostics.length, 1);
-                assertCOPYDestinationNotDirectory(diagnostics[0], 2, 36, 2, 44);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 2, 37, 2, 43);
             });
         });
 

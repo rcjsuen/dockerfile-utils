@@ -581,7 +581,7 @@ export class Validator {
                                 const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
                                 const lastChar = addDestination.charAt(addDestination.length - 2);
                                 if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getRange()));
+                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
                                 }
                             }
                         } else {
@@ -645,7 +645,7 @@ export class Validator {
                                 let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
                                 let lastChar = copyDestination.charAt(copyDestination.length - 2);
                                 if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getRange()));
+                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
                                 }
                             }
                         } else {
