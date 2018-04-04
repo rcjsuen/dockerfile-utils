@@ -594,6 +594,14 @@ export class Validator {
                             const jsonStrings = add.getJSONStrings();
                             if (jsonStrings.length === 0) {
                                 problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            } else if (jsonStrings.length === 1) {
+                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
+                            } else if (jsonStrings.length > 2) {
+                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                const lastChar = addDestination.charAt(addDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
+                                }
                             }
                         }
                     } else {
@@ -680,6 +688,14 @@ export class Validator {
                             const jsonStrings = copy.getJSONStrings();
                             if (jsonStrings.length === 0) {
                                 problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            } else if (jsonStrings.length === 1) {
+                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
+                            } else if (jsonStrings.length > 2) {
+                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
+                                }
                             }
                         }
                     } else {
