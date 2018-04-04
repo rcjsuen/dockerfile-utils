@@ -571,10 +571,32 @@ export class Validator {
                     const add = instruction as Add;
                     const addArgs = instruction.getArguments();
                     if (addArgs.length === 1) {
-                        problems.push(Validator.createADDRequiresAtLeastTwoArguments(addArgs[0].getRange()));
+                        if (add.getClosingBracket()) {
+                            const jsonStrings = add.getJSONStrings();
+                            if (jsonStrings.length === 0) {
+                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            } else if (jsonStrings.length === 1) {
+                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
+                            } else if (jsonStrings.length > 2) {
+                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                const lastChar = addDestination.charAt(addDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
+                                }
+                            }
+                        } else {
+                            problems.push(Validator.createADDRequiresAtLeastTwoArguments(addArgs[0].getRange()));
+                        }
                     } else if (addArgs.length === 0) {
                         problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
-                    } else if (addArgs.length > 2) {
+                    } else if (addArgs.length === 2) {
+                        if (add.getClosingBracket()) {
+                            const jsonStrings = add.getJSONStrings();
+                            if (jsonStrings.length === 0) {
+                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            }
+                        }
+                    } else {
                         if (add.getClosingBracket()) {
                             const jsonStrings = add.getJSONStrings();
                             if (jsonStrings.length > 2) {
@@ -635,10 +657,32 @@ export class Validator {
                         }
                     }
                     if (copyArgs.length === 1) {
-                        problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(copyArgs[0].getRange()));
+                        if (copy.getClosingBracket()) {
+                            const jsonStrings = copy.getJSONStrings();
+                            if (jsonStrings.length === 0) {
+                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            } else if (jsonStrings.length === 1) {
+                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
+                            } else if (jsonStrings.length > 2) {
+                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
+                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
+                                if (lastChar !== '\\' && lastChar !== '/') {
+                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
+                                }
+                            }
+                        } else {
+                            problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(copyArgs[0].getRange()));
+                        }
                     } else if (copyArgs.length === 0) {
                         problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
-                    } else if (copyArgs.length > 2) {
+                    } else if (copyArgs.length === 2) {
+                        if (copy.getClosingBracket()) {
+                            const jsonStrings = copy.getJSONStrings();
+                            if (jsonStrings.length === 0) {
+                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
+                            }
+                        }
+                    } else {
                         if (copy.getClosingBracket()) {
                             let jsonStrings = copy.getJSONStrings();
                             if (jsonStrings.length > 2) {
