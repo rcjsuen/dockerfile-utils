@@ -1032,6 +1032,10 @@ describe("Docker Validator Tests", function() {
                 return testMissingArgumentLoop("USER");
             });
 
+            it("VOLUME", function() {
+                return testMissingArgumentLoop("VOLUME");
+            });
+
             it("WORKDIR", function() {
                 return testMissingArgumentLoop("WORKDIR");
             });
