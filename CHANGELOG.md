@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 - warn if hyphens are being parsed as a unit of time in HEALTHCHECK duration flags ([#24](https://github.com/rcjsuen/dockerfile-utils/issues/24))
 - warn if two or more decimals found in a unit of time in HEALTHCHECK duration flags ([#25](https://github.com/rcjsuen/dockerfile-utils/issues/25))
 - warn if two hyphens are found in HEALTHCHECK duration flags ([#26](https://github.com/rcjsuen/dockerfile-utils/issues/26))
+- warn if instruction is written in JSON form incorrectly with single quotes ([#28](https://github.com/rcjsuen/dockerfile-utils/issues/28))
+  - `ValidationCode.JSON_IN_SINGLE_QUOTES`
+  - `ValidatorSettings.instructionJSONInSingleQuotes`
 
 ### Fixed
 - fix incorrect validation error if a COPY uses JSON arguments and its last string argument is correctly defined as a folder ([#29](https://github.com/rcjsuen/dockerfile-utils/issues/29))

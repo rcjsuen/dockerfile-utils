@@ -76,7 +76,14 @@ export enum ValidationCode {
     UNKNOWN_TYPE,
     DEPRECATED_MAINTAINER,
     HEALTHCHECK_CMD_ARGUMENT_MISSING,
-    FLAG_INVALID_FROM_VALUE
+    FLAG_INVALID_FROM_VALUE,
+
+    /**
+     * The error code used if an instruction has arguments written in
+     * JSON form except that it is not actually valid JSON because
+     * single quotes are used instead of double quotes.
+     */
+    JSON_IN_SINGLE_QUOTES
 }
 
 /**
@@ -140,6 +147,8 @@ export interface ValidatorSettings {
     instructionEntrypointMultiple?: ValidationSeverity;
 
     instructionHealthcheckMultiple?: ValidationSeverity;
+
+    instructionJSONInSingleQuotes?: ValidationSeverity;
 }
 
 /**

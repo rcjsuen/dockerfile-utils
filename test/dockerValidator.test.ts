@@ -430,6 +430,17 @@ function assertInstructionUnknown(diagnostic: Diagnostic, instruction: string, s
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertInstructionJSONInSingleQuotes(diagnostic: Diagnostic, severity: DiagnosticSeverity, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.JSON_IN_SINGLE_QUOTES);
+    assert.equal(diagnostic.severity, severity);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes());
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function assertOnbuildChainingDisallowed(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.ONBUILD_CHAINING_DISALLOWED);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
@@ -1568,6 +1579,45 @@ describe("Docker Validator Tests", function() {
         });
     });
 
+    function createSingleQuotedJSONTests(instruction: string) {
+        describe("JSON in single quotes", function() {
+            let line = instruction + " ['/bin/bash', 'echo']";
+            let content = "FROM busybox\n" + line;
+            let instructionLength = instruction.length;
+
+            it("default", function() {
+                let diagnostics = validate(content);
+                assert.equal(diagnostics.length, 1);
+                assertInstructionJSONInSingleQuotes(diagnostics[0], DiagnosticSeverity.Warning, 1, instructionLength + 1, 1, instructionLength + 22);
+
+                diagnostics = validate("FROM busybox\n" + instruction + " ['/bin/bash', 'echo',]");
+                assert.equal(diagnostics.length, 1);
+                assertInstructionJSONInSingleQuotes(diagnostics[0], DiagnosticSeverity.Warning, 1, instructionLength + 1, 1, instructionLength + 23);
+
+                diagnostics = validate("FROM busybox\n" + instruction + " [ '],',]");
+                assert.equal(diagnostics.length, 1);
+                assertInstructionJSONInSingleQuotes(diagnostics[0], DiagnosticSeverity.Warning, 1, instructionLength + 1, 1, instructionLength + 9);
+            });
+
+            it("ignore", function() {
+                let diagnostics = validate(content, { instructionJSONInSingleQuotes: ValidationSeverity.IGNORE });
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("warning", function() {
+                let diagnostics = validate(content, { instructionJSONInSingleQuotes: ValidationSeverity.WARNING });
+                assert.equal(diagnostics.length, 1);
+                assertInstructionJSONInSingleQuotes(diagnostics[0], DiagnosticSeverity.Warning, 1, instructionLength + 1, 1, instructionLength + 22);
+            });
+
+            it("error", function() {
+                let diagnostics = validate(content, { instructionJSONInSingleQuotes: ValidationSeverity.ERROR });
+                assert.equal(diagnostics.length, 1);
+                assertInstructionJSONInSingleQuotes(diagnostics[0], DiagnosticSeverity.Error, 1, instructionLength + 1, 1, instructionLength + 22);
+            });
+        });
+    }
+
     describe("ADD", function() {
         describe("arguments", function() {
             it("ok", function() {
@@ -1743,6 +1793,8 @@ describe("Docker Validator Tests", function() {
                 assertFlagDuplicate(diagnostics[1], "chown", 1, 16, 1, 21);
             });
         });
+
+        createSingleQuotedJSONTests("ADD");
     });
 
     describe("ARG", function() {
@@ -1798,6 +1850,50 @@ describe("Docker Validator Tests", function() {
             assert.equal(diagnostics.length, 1);
             assertInstructionRequiresOneArgument(diagnostics[0], 1, 12, 1, 14);
         });
+    });
+
+    describe("CMD", function() {
+        describe("arguments", function() {
+            it("ok", function() {
+                let diagnostics = validate("FROM alpine\nCMD [ t.txt");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD '");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ [");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD , [ ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '],', '[]'");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '''");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '\\a");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '\\\" \\ \t\na ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '\\\" \\ \t\r\na ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '\\\" \\ \t\n a ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ '\\\" \\ \t\r\n a ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ \\a");
+                assert.equal(diagnostics.length, 0);
+            });
+        });
+
+        createSingleQuotedJSONTests("CMD");
     });
 
     describe("COPY", function() {
@@ -2026,6 +2122,8 @@ describe("Docker Validator Tests", function() {
                 assertUnknownCopyFlag(diagnostics[0], "CHOWN", 2, 5, 2, 12);
             });
         });
+
+        createSingleQuotedJSONTests("COPY");
     });
 
     function createNameValuePairTests(instruction: string) {
@@ -2151,6 +2249,10 @@ describe("Docker Validator Tests", function() {
     }
 
     createNameValuePairTests("ENV");
+
+    describe("ENTRYPOINT", function() {
+        createSingleQuotedJSONTests("ENTRYPOINT");
+    });
 
     describe("EXPOSE", function() {
         describe("standard", function() {
@@ -3363,6 +3465,10 @@ describe("Docker Validator Tests", function() {
         });
     });
 
+    describe("RUN", function() {
+        createSingleQuotedJSONTests("RUN");
+    });
+
     describe("USER", function() {
         it("ok", function() {
             return testValidArgument("USER", "daemon");
@@ -3382,6 +3488,8 @@ describe("Docker Validator Tests", function() {
             let diagnostics = validateDockerfile("FROM node\nVOLUME /var/log \\\n /tmp");
             assert.equal(diagnostics.length, 0);
         });
+
+        createSingleQuotedJSONTests("VOLUME");
     });
 
     describe("WORKDIR", function() {

@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, Add, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -40,7 +40,8 @@ export class Validator {
         instructionCasing: ValidationSeverity.WARNING,
         instructionCmdMultiple: ValidationSeverity.WARNING,
         instructionEntrypointMultiple: ValidationSeverity.WARNING,
-        instructionHealthcheckMultiple: ValidationSeverity.WARNING
+        instructionHealthcheckMultiple: ValidationSeverity.WARNING,
+        instructionJSONInSingleQuotes: ValidationSeverity.WARNING
     }
 
     constructor(settings?: ValidatorSettings) {
@@ -294,7 +295,15 @@ export class Validator {
 
             switch (keyword) {
                 case "CMD":
-                    // don't validate CMD instructions
+                    this.checkJSONQuotes(instruction, problems);
+                    break;
+                case "ENTRYPOINT":
+                case "RUN":
+                case "VOLUME":
+                    this.checkArguments(instruction, problems, [-1], function (): any {
+                        return null;
+                    });
+                    this.checkJSONQuotes(instruction, problems);
                     break;
                 case "ARG":
                     this.checkArguments(instruction, problems, [-1], function (index: number) {
@@ -484,7 +493,7 @@ export class Validator {
                     this.checkArguments(instruction, problems, [-1], function (): any {
                         return null;
                     });
-                    this.checkJSON(instruction, problems);
+                    this.checkJSON(document, instruction as JSONInstruction, problems);
                     break;
                 case "STOPSIGNAL":
                     this.checkArguments(instruction, problems, [1], function (_index: number, argument: string) {
@@ -635,6 +644,7 @@ export class Validator {
                     }
                     this.checkFlagValue(addFlags, ["chown"], problems);
                     this.checkDuplicateFlags(addFlags, ["chown"], problems);
+                    this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
                     let copy = instruction as Copy;
@@ -718,6 +728,7 @@ export class Validator {
                     }
                     this.checkFlagValue(flags, ["chown", "from"], problems);
                     this.checkDuplicateFlags(flags, ["chown", "from"], problems);
+                    this.checkJSONQuotes(instruction, problems);
                     break;
                 default:
                     this.checkArguments(instruction, problems, [-1], function (): any {
@@ -962,7 +973,7 @@ export class Validator {
         }
     }
 
-    private checkJSON(instruction: Instruction, problems: Diagnostic[]) {
+    private checkJSON(document: TextDocument, instruction: JSONInstruction, problems: Diagnostic[]) {
         let argsContent = instruction.getArgumentsContent();
         if (argsContent === null) {
             return;
@@ -976,23 +987,52 @@ export class Validator {
             return;
         }
 
-        let last: string | null = "";
+        const closing = instruction.getClosingBracket();
+        if (closing) {
+            let content = document.getText();
+            content = content.substring(
+                document.offsetAt(instruction.getOpeningBracket().getRange().end),
+                document.offsetAt(closing.getRange().start)
+            );
+            content = content.trim();
+            if (content.charAt(content.length - 1) !== '"') {
+                problems.push(Validator.createShellJsonForm(argsRange));
+            }
+        } else {
+            problems.push(Validator.createShellJsonForm(argsRange));
+        }
+    }
+
+    private checkJSONQuotes(instruction: Instruction, problems: Diagnostic[]) {
+        let argsContent = instruction.getArgumentsContent();
+        if (argsContent === null) {
+            return;
+        }
+
+        let argsRange = instruction.getArgumentsRange();
+        let args = instruction.getArguments();
+        if ((args.length === 1 && args[0].getValue() === "[]") ||
+            (args.length === 2 && args[0].getValue() === '[' && args[1].getValue() === ']')) {
+            return;
+        }
+
+        let jsonLike = false;
+        let last: string = null;
         let quoted = false;
         argsCheck: for (let i = 0; i < argsContent.length; i++) {
             switch (argsContent.charAt(i)) {
                 case '[':
-                    if (last === "") {
+                    if (last === null) {
                         last = '[';
-                    } else if (!quoted) {
-                        break argsCheck;
+                        jsonLike = true;
                     }
                     break;
-                case '"':
+                case '\'':
                     if (last === '[' || last === ',') {
                         quoted = true;
-                        last = '"';
+                        last = '\'';
                         continue;
-                    } else if (last === '"') {
+                    } else if (last === '\'') {
                         if (quoted) {
                             // quoted string done
                             quoted = false;
@@ -1005,8 +1045,10 @@ export class Validator {
                     }
                     break;
                 case ',':
-                    if (!quoted) {
-                        if (last === '"') {
+                    if (!jsonLike) {
+                        break argsCheck;
+                    } else if (!quoted) {
+                        if (last === '\'') {
                             last = ','
                         } else {
                             break argsCheck;
@@ -1015,64 +1057,18 @@ export class Validator {
                     break;
                 case ']':
                     if (!quoted) {
-                        if (last === null) {
-                            last = ']';
-                            break argsCheck;
-                        } else if (last !== ',') {
+                        if (last === '\'' || last === ',') {
                             last = null;
-                            break argsCheck;
+                            const problem = Validator.createJSONInSingleQuotes(argsRange, this.settings.instructionJSONInSingleQuotes);
+                            if (problem) {
+                                problems.push(problem);
+                            }
                         }
+                        break argsCheck;
                     }
                     break;
                 case ' ':
                 case '\t':
-                    break;
-                case '\\':
-                    if (quoted) {
-                        switch (argsContent.charAt(i + 1)) {
-                            case '"':
-                            case '\\':
-                                i++;
-                                continue;
-                            case ' ':
-                            case '\t':
-                                for (let j = i + 2; j < argsContent.length; j++) {
-                                    switch (argsContent.charAt(j)) {
-                                        case '\r':
-                                            j++;
-                                        case '\n':
-                                            i = j;
-                                            continue argsCheck;
-                                        case ' ':
-                                        case '\t':
-                                            break;
-                                        default:
-                                            break argsCheck;
-                                    }
-                                }
-                                break;
-                            default:
-                                i++;
-                                continue;
-                        }
-                    } else {
-                        for (let j = i + 1; j < argsContent.length; j++) {
-                            switch (argsContent.charAt(j)) {
-                                case '\r':
-                                    if (argsContent.charAt(j + 1) === '\n') {
-                                        j++;
-                                    }
-                                case '\n':
-                                    i = j;
-                                    continue argsCheck;
-                                case ' ':
-                                case '\t':
-                                    break;
-                                default:
-                                    break argsCheck;
-                            }
-                        }
-                    }
                     break;
                 default:
                     if (!quoted) {
@@ -1080,10 +1076,6 @@ export class Validator {
                     }
                     break;
             }
-        }
-
-        if (last !== null) {
-            problems.push(Validator.createShellJsonForm(argsRange));
         }
     }
 
@@ -1133,6 +1125,7 @@ export class Validator {
         "instructionUnnecessaryArgument": "${0} takes no arguments",
         "instructionUnknown": "Unknown instruction: ${0}",
         "instructionCasing": "Instructions should be written in uppercase letters",
+        "instructionJSONInSingleQuotes": "Instruction written as a JSON array but is using single quotes instead of double quotes",
 
         "onbuildChainingDisallowed": "Chaining ONBUILD via `ONBUILD ONBUILD` isn't allowed",
         "onbuildTriggerDisallowed": "${0} isn't allowed as an ONBUILD trigger",
@@ -1307,6 +1300,10 @@ export class Validator {
 
     public static getDiagnosticMessage_InstructionCasing() {
         return Validator.dockerProblems["instructionCasing"];
+    }
+
+    public static getDiagnosticMessage_InstructionJSONInSingleQuotes() {
+        return Validator.dockerProblems["instructionJSONInSingleQuotes"];
     }
 
     public static getDiagnosticMessage_OnbuildChainingDisallowed() {
@@ -1511,6 +1508,15 @@ export class Validator {
 
     static createError(start: Position, end: Position, description: string, code?: ValidationCode): Diagnostic {
         return Validator.createDiagnostic(DiagnosticSeverity.Error, start, end, description, code);
+    }
+
+    private static createJSONInSingleQuotes(range: Range, severity: ValidationSeverity | undefined): Diagnostic | null {
+        if (severity === ValidationSeverity.ERROR) {
+            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
+        } else if (severity === ValidationSeverity.WARNING) {
+            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
+        }
+        return null;
     }
 
     private static createEmptyContinuationLine(start: Position, end: Position, severity: ValidationSeverity | undefined): Diagnostic | null {
