@@ -139,10 +139,10 @@ export class Validator {
             problems.push(Validator.createNoSourceImage(document.positionAt(0), document.positionAt(0)));
         }
 
-        let cmds = [];
-        let entrypoints = [];
-        let healthchecks = [];
-        let duplicates = [];
+        let cmds: Cmd[] = [];
+        let entrypoints: Entrypoint[] = [];
+        let healthchecks: Healthcheck[] = [];
+        let duplicates: (Cmd | Entrypoint | Healthcheck)[] = [];
         for (let instruction of instructions) {
             if (instruction instanceof Cmd) {
                 cmds.push(instruction);
@@ -187,7 +187,7 @@ export class Validator {
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }
-            } else if (duplicate instanceof Healthcheck) {
+            } else {
                 // more than one HEALTHCHECK found, warn the user
                 let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionHealthcheckMultiple, "HEALTHCHECK");
                 if (diagnostic) {
