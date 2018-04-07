@@ -27,10 +27,14 @@ All notable changes to this project will be documented in this file.
 - create a Docker image for running the CLI ([#10](https://github.com/rcjsuen/dockerfile-utils/issues/10))
 - create tags for the Docker image that corresponds to the Git commit's SHA hash ([#16](https://github.com/rcjsuen/dockerfile-utils/issues/16))
 - warn if COPY has more than two arguments and its last argument is not a directory ([#14](https://github.com/rcjsuen/dockerfile-utils/issues/14))
+  - `ValidationCode.INVALID_DESTINATION`
 - warn if ADD has more than two arguments and its last argument is not a directory ([#17](https://github.com/rcjsuen/dockerfile-utils/issues/17))
+  - `ValidationCode.INVALID_DESTINATION`
 - flag durations that include a hyphen as an error ([#18](https://github.com/rcjsuen/dockerfile-utils/issues/18))
 - warn if FROM's base image's digest is invalid ([#15](https://github.com/rcjsuen/dockerfile-utils/issues/15))
+  - `ValidationCode.INVALID_REFERENCE_FORMAT`
 - warn if FROM's base image's tag is invalid ([#20](https://github.com/rcjsuen/dockerfile-utils/issues/20))
+  - `ValidationCode.INVALID_REFERENCE_FORMAT`
 
 ### Fixed
 - warn if STOPSIGNAL uses invalid variables for its argument ([#11](https://github.com/rcjsuen/dockerfile-utils/issues/11))
@@ -39,6 +43,7 @@ All notable changes to this project will be documented in this file.
 ## [0.0.5] - 2018-01-18
 ### Added
 - warn if COPY's --from flag is invalid ([#9](https://github.com/rcjsuen/dockerfile-utils/issues/9))
+  - `ValidationCode.FLAG_INVALID_FROM_VALUE`
 
 ### Fixed
 - correct import error in the CLI linter ([#8](https://github.com/rcjsuen/dockerfile-utils/issues/8))
