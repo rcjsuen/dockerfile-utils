@@ -1873,6 +1873,12 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validate("FROM alpine\nCMD [ '''");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validate("FROM alpine\nCMD ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ ,,");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validate("FROM alpine\nCMD [ '\\a");
                 assert.equal(diagnostics.length, 0);
 
@@ -1886,6 +1892,9 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validate("FROM alpine\nCMD [ '\\\" \\ \t\r\n a ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validate("FROM alpine\nCMD [ 'asdfasdf' , 's  sdfsfd \\ ', \\\n  'sdfsdf'");
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validate("FROM alpine\nCMD [ \\a");
