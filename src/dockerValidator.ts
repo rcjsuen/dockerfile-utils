@@ -371,7 +371,9 @@ export class Validator {
                                         return null;
                                     }
                                     let tag = argument.substring(index + 1);
-                                    if (tag === "") {
+                                    if (tag.indexOf('$') !== -1) {
+                                        return null;
+                                    } else if (tag === "") {
                                         // no tag specified, just highlight the whole argument
                                         return Validator.createInvalidReferenceFormat(range);
                                     }
@@ -384,7 +386,9 @@ export class Validator {
                                 let endIndex = argument.indexOf(':');
                                 if (endIndex === -1) {
                                     let digest = argument.substring(index + 1);
-                                    if (digest === "") {
+                                    if (digest.indexOf('$') !== -1) {
+                                        return null;
+                                    } else if (digest === "") {
                                         // no digest specified, just highlight the whole argument
                                         return Validator.createInvalidReferenceFormat(range);
                                     }

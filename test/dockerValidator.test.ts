@@ -2503,6 +2503,27 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG image=node\nFROM $image");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG version\nFROM alpine:$version");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG version\nFROM alpine@$version");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG version=latest\nFROM alpine:$version");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG version=atest\nFROM alpine:l$version");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG atest=atest\nFROM alpine:l$atest");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG DIGEST=sha256:7df6db5aa61ae9480f52f0b3a06a140ab98d427f86d8d5de0bedab9b8df6b1c0\nFROM alpine@$DIGEST");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("invalid reference format (tag)", function() {
