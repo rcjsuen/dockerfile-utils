@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.0.9] - 2018-04-16
 ### Fixed
 - do not flag FROM instructions that use variables with an error ([#35](https://github.com/rcjsuen/dockerfile-utils/issues/35))
 
@@ -71,7 +71,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.8...HEAD
+[0.0.9]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.8...v0.0.8
 [0.0.8]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.5...v0.0.6
