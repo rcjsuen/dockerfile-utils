@@ -350,7 +350,7 @@ export class Validator {
 
                                 if (!found) {
                                     let range = property.getValueRange();
-                                    problems.push(Validator.createSyntaxMissingDoubleQuote(range.start, range.end, property.getRawValue()));
+                                    problems.push(Validator.createSyntaxMissingDoubleQuote(range.start, range.end, property.getUnescapedValue()));
                                 }
                             } else if (value.charAt(0) === '\'' && value.charAt(value.length - 1) !== '\'') {
                                 let range = property.getValueRange();

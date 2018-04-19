@@ -1802,6 +1802,15 @@ describe("Docker Validator Tests", function() {
             testValidArgument("ARG", "a=b");
             testValidArgument("ARG", "a=\"a b\"");
             testValidArgument("ARG", "a='a b'");
+
+            let diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-'bbb'}");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"}");
+            assert.equal(diagnostics.length, 0);
         });
 
         it("escape", function() {
@@ -2178,6 +2187,15 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# var2=value2");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb'}");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"}");
                 assert.equal(diagnostics.length, 0);
             });
 
