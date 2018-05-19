@@ -1806,10 +1806,16 @@ describe("Docker Validator Tests", function() {
             let diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-'bbb'}");
             assert.equal(diagnostics.length, 0);
 
+            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-'bbb ccc'}");
+            assert.equal(diagnostics.length, 0);
+
             diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"");
             assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"}");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb ccc\"}");
             assert.equal(diagnostics.length, 0);
         });
 
@@ -2192,10 +2198,16 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb'}");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb ccc'}");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"");
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"}");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb ccc\"}");
                 assert.equal(diagnostics.length, 0);
             });
 
