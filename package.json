@@ -27,8 +27,8 @@
   "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
   "dependencies": {
-    "dockerfile-ast": "0.0.6",
-    "vscode-languageserver-types": "3.5.0"
+    "dockerfile-ast": "0.0.7",
+    "vscode-languageserver-types": "3.6.0"
   },
   "devDependencies": {
     "@types/mocha": "^2.2.33",

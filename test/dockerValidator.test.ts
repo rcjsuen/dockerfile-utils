@@ -2534,6 +2534,42 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM privateregistry.com/image:tag");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image:tag");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM localhost/node:9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM localhost/node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node:9");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image:tag2");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image:tag2");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("ARG image=node\nFROM $image");
                 assert.equal(diagnostics.length, 0);
 

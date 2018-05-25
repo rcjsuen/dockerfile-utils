@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Cmd, Copy, Entrypoint, Env, From, Healthcheck, Label, Onbuild, ModifiableInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -90,7 +90,7 @@ export class Validator {
      */
     private checkArguments(instruction: Instruction, problems: Diagnostic[], expectedArgCount: number[],
         validate: Function, createIncompleteDiagnostic?: Function): void {
-        let args = instruction.getArguments();
+        let args = instruction instanceof PropertyInstruction ? instruction.getPropertyArguments() : instruction.getArguments();
         if (args.length === 0) {
             // all instructions are expected to have at least one argument
             let range = instruction.getInstructionRange();
@@ -318,7 +318,7 @@ export class Validator {
                     this.checkArguments(instruction, problems, [-1], function (): any {
                         return null;
                     });
-                    let properties = instruction instanceof Env ? (instruction as Env).getProperties() : (instruction as Label).getProperties();
+                    let properties = (instruction as PropertyInstruction).getProperties();
                     if (properties.length === 1 && properties[0].getValue() === null) {
                         let range = properties[0].getNameRange();
                         problems.push(Validator.createENVRequiresTwoArguments(range.start, range.end));
@@ -366,11 +366,11 @@ export class Validator {
                             let from = instruction as From;
                                 let index = argument.indexOf('@');
                                 if (index === -1) {
-                                    index = argument.indexOf(':');
-                                    if (index === -1) {
+                                    let tagRange = from.getImageTagRange();
+                                    if (tagRange === null) {
                                         return null;
                                     }
-                                    let tag = argument.substring(index + 1);
+                                    let tag = document.getText(tagRange);
                                     if (tag.indexOf('$') !== -1) {
                                         return null;
                                     } else if (tag === "") {
