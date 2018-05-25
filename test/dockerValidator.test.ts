@@ -2624,21 +2624,141 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 12);
 
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 31);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 36);
+
+                diagnostics = validateDockerfile("FROM localhost/node@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 20);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 25);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 30);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 5, 0, 35);
+
                 diagnostics = validateDockerfile("FROM alpine@sha25");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 17);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 31, 0, 36);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 36, 0, 41);
+
+                diagnostics = validateDockerfile("FROM localhost/node@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 20, 0, 25);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 25, 0, 30);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 30, 0, 35);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@sha25");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 35, 0, 40);
 
                 diagnostics = validateDockerfile("FROM alpine@sha25:x");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 19);
 
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 31, 0, 38);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 36, 0, 43);
+
+                diagnostics = validateDockerfile("FROM localhost/node@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 20, 0, 27);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 25, 0, 32);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 30, 0, 37);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@sha25:x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 35, 0, 42);
+
                 diagnostics = validateDockerfile("FROM alpine@x");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 13);
 
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 31, 0, 32);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 36, 0, 37);
+
+                diagnostics = validateDockerfile("FROM localhost/node@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 20, 0, 21);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 25, 0, 26);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 30, 0, 31);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@x");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 35, 0, 36);
+
                 diagnostics = validateDockerfile("FROM alpine@x:2341");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 12, 0, 18);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com/image@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 31, 0, 37);
+
+                diagnostics = validateDockerfile("FROM privateregistry.com:5000/image@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 36, 0, 42);
+
+                diagnostics = validateDockerfile("FROM localhost/node@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 20, 0, 26);
+
+                diagnostics = validateDockerfile("FROM localhost:1234/node@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 25, 0, 31);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123/user/image@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 30, 0, 36);
+
+                diagnostics = validateDockerfile("FROM 123.22.33.123:2345/user/image@x:2341");
+                assert.equal(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 35, 0, 41);
             });
         });
 

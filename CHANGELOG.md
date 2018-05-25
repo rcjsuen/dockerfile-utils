@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- flag FROM instructions that refer to an invalid image digest in a private registry with a port as an error ([#42](https://github.com/rcjsuen/dockerfile-utils/issues/42))
+
 ### Fixed
 - fix incorrect validaiton warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))
 - fix incorrect validation of tagged images caused by FROM referencing images in a private registry ([#39](https://github.com/rcjsuen/dockerfile-utils/issues/39))

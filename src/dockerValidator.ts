@@ -364,8 +364,8 @@ export class Validator {
                         switch (index) {
                             case 0:
                             let from = instruction as From;
-                                let index = argument.indexOf('@');
-                                if (index === -1) {
+                                let digestRange = from.getImageDigestRange();
+                                if (digestRange === null) {
                                     let tagRange = from.getImageTagRange();
                                     if (tagRange === null) {
                                         return null;
@@ -383,9 +383,10 @@ export class Validator {
                                     }
                                     return Validator.createInvalidReferenceFormat(from.getImageTagRange());
                                 }
-                                let endIndex = argument.indexOf(':');
-                                if (endIndex === -1) {
-                                    let digest = argument.substring(index + 1);
+                                let digest = document.getText(digestRange);
+                                console.log(digest);
+                                let algorithmIndex = digest.indexOf(':');
+                                if (algorithmIndex === -1) {
                                     if (digest.indexOf('$') !== -1) {
                                         return null;
                                     } else if (digest === "") {
@@ -395,11 +396,11 @@ export class Validator {
                                     return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
                                 }
                                 let algorithmRegexp = new RegExp(/[A-Fa-f0-9_+.-]+/);
-                                let algorithm = argument.substring(index + 1, endIndex);
+                                let algorithm = digest.substring(0, algorithmIndex);
                                 if (!algorithmRegexp.test(algorithm)) {
                                     return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
                                 }
-                                let hex = argument.substring(endIndex + 1);
+                                let hex = digest.substring(algorithmIndex + 1);
                                 let hexRegexp = new RegExp(/[A-Fa-f0-9]+/);
                                 if (hexRegexp.test(hex)) {
                                     return null;
