@@ -384,7 +384,6 @@ export class Validator {
                                     return Validator.createInvalidReferenceFormat(from.getImageTagRange());
                                 }
                                 let digest = document.getText(digestRange);
-                                console.log(digest);
                                 let algorithmIndex = digest.indexOf(':');
                                 if (algorithmIndex === -1) {
                                     if (digest.indexOf('$') !== -1) {
