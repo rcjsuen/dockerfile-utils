@@ -2590,6 +2590,12 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("ARG DIGEST=sha256:7df6db5aa61ae9480f52f0b3a06a140ab98d427f86d8d5de0bedab9b8df6b1c0\nFROM alpine@$DIGEST");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG image=scratch\nFROM ${image:-alpine}");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG image=latest\nFROM alpine:${latest:-latest}");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("invalid reference format (tag)", function() {

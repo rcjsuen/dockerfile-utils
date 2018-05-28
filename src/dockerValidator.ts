@@ -363,6 +363,11 @@ export class Validator {
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
+                                for (let variable of instruction.getVariables()) {
+                                    if (Validator.rangeContains(range, variable.getRange())) {
+                                        return null;
+                                    }
+                                }
                                 let from = instruction as From;
                                 let digestRange = from.getImageDigestRange();
                                 if (digestRange === null) {
@@ -371,9 +376,7 @@ export class Validator {
                                         return null;
                                     }
                                     let tag = document.getText(tagRange);
-                                    if (tag.indexOf('$') !== -1) {
-                                        return null;
-                                    } else if (tag === "") {
+                                    if (tag === "") {
                                         // no tag specified, just highlight the whole argument
                                         return Validator.createInvalidReferenceFormat(range);
                                     }
@@ -386,9 +389,7 @@ export class Validator {
                                 let digest = document.getText(digestRange);
                                 let algorithmIndex = digest.indexOf(':');
                                 if (algorithmIndex === -1) {
-                                    if (digest.indexOf('$') !== -1) {
-                                        return null;
-                                    } else if (digest === "") {
+                                    if (digest === "") {
                                         // no digest specified, just highlight the whole argument
                                         return Validator.createInvalidReferenceFormat(range);
                                     }
@@ -1583,5 +1584,24 @@ export class Validator {
             code: code,
             source: "dockerfile-utils"
         };
+    }
+
+    private static rangeContains(range: Range, range2: Range): boolean {
+        if (range.start.line === range2.start.line) {
+            if (range.end.line === range2.end.line) {
+                return range.start.character <= range2.start.character && range.end.character >= range2.end.character;
+            }
+        } else if (range.end.line === range2.end.line) {
+            if (range.start.line < range2.start.line) {
+                return range.end.character >= range2.end.character;
+            }
+            return false;
+        } else if (range.start.line < range2.start.line) {
+            if (range.end.line === range2.end.line) {
+                return range.end.character >= range2.end.character;
+            }
+            return range.end.line > range2.end.line;
+        }
+        return false;
     }
 }
