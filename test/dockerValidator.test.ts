@@ -573,6 +573,17 @@ function assertInvalidBuildStageName(diagnostic: Diagnostic, name: string, start
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertVariableModifierUnsupported(diagnostic: Diagnostic, variable: string, modifier: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.UNSUPPORTED_MODIFIER);
+    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier));
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function testValidArgument(instruction: string, argument: string) {
     let gaps = [ " ", "\t", " \\\n", " \\\r\n" ];
     for (let gap of gaps) {
@@ -1440,6 +1451,111 @@ describe("Docker Validator Tests", function() {
                     assertEmptyContinuationLine(diagnostics[0], DiagnosticSeverity.Error, 2, 0, 5, 0);
                 });
             });
+        });
+    });
+
+    describe("variables", function() {
+        function createVariablesTest(prefix: string, suffix?: string) {
+            const length = prefix.length;
+            if (suffix === undefined) {
+                suffix = "";
+            }
+
+            it("ok", function() {
+                let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "$bbb" + suffix); 
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb}" + suffix); 
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:+x}" + suffix); 
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:-x}" + suffix); 
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("unsupported modifier", function() {
+                let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:x}" + suffix);
+                assert.equal(diagnostics.length, 1);
+                assertVariableModifierUnsupported(diagnostics[0], "${bbb:x}", 'x', 2, length + 6, 2, length + 7);
+
+                diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:}" + suffix);
+                assert.equal(diagnostics.length, 1);
+                assertVariableModifierUnsupported(diagnostics[0], "${bbb:}", "", 2, length, 2, length + 7);
+            });
+        }
+
+        describe("ADD", function() {
+            createVariablesTest("ADD test.txt ");
+        });
+
+        describe("ARG", function() {
+            createVariablesTest("ARG aaa=");
+        });
+
+        describe("CMD", function() {
+            createVariablesTest("CMD ");
+        });
+
+        describe("COPY", function() {
+            createVariablesTest("COPY test.txt ");
+        });
+
+        describe("ENTRYPOINT", function() {
+            createVariablesTest("ENTRYPOINT ");
+        });
+
+        describe("ENV", function() {
+            createVariablesTest("ENV aaa=");
+        });
+
+        describe("EXPOSE", function() {
+            createVariablesTest("EXPOSE ");
+        });
+
+        describe("FROM", function() {
+            createVariablesTest("FROM localho");
+        });
+
+        describe("HEALTHCHECK", function() {
+            createVariablesTest("HEALTHCHECK CMD ");
+        });
+
+        describe("LABEL", function() {
+            createVariablesTest("LABEL aaa=");
+        });
+
+        describe("MAINTAINER", function() {
+            createVariablesTest("MAINTAINER ");
+        });
+
+        describe("ONBUILD", function() {
+            createVariablesTest("ONBUILD CMD ");
+        });
+
+        describe("RUN", function() {
+            createVariablesTest("RUN ");
+        });
+
+        describe("SHELL", function() {
+            createVariablesTest("SHELL [ \"", "\"] ");
+        });
+
+        describe("STOPSIGNAL", function() {
+            createVariablesTest("STOPSIGNAL ");
+        });
+
+        describe("USER", function() {
+            createVariablesTest("USER ");
+        });
+
+        describe("VOLUME", function() {
+            createVariablesTest("VOLUME ");
+        });
+
+        describe("WORKDIR", function() {
+            createVariablesTest("WORKDIR ");
         });
     });
 

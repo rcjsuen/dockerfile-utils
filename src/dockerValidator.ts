@@ -128,6 +128,19 @@ export class Validator {
         }
     }
 
+    private checkVariables(instruction: Instruction, problems: Diagnostic[]): void {
+        for (let variable of instruction.getVariables()) {
+            let modifier = variable.getModifier();
+            if (modifier !== null) {
+                if (modifier === "") {
+                    problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
+                } else if (modifier !== '+' && modifier !== '-') {
+                    problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
+                }
+            }
+        }
+    }
+
     validate(document: TextDocument): Diagnostic[] {
         this.document = document;
         let problems: Diagnostic[] = [];
@@ -231,6 +244,7 @@ export class Validator {
                 hasFrom = true;
             }
             this.validateInstruction(document, escapeChar, instruction, keyword, false, problems);
+            this.checkVariables(instruction, problems);
         }
 
         for (let instruction of dockerfile.getOnbuildTriggers()) {
@@ -1132,6 +1146,8 @@ export class Validator {
         "instructionCasing": "Instructions should be written in uppercase letters",
         "instructionJSONInSingleQuotes": "Instruction written as a JSON array but is using single quotes instead of double quotes",
 
+        "variableModifierUnsupported": "failed to process \"${0}\": unsupported modifier (${1}) in substitution",
+
         "onbuildChainingDisallowed": "Chaining ONBUILD via `ONBUILD ONBUILD` isn't allowed",
         "onbuildTriggerDisallowed": "${0} isn't allowed as an ONBUILD trigger",
 
@@ -1317,6 +1333,10 @@ export class Validator {
 
     public static getDiagnosticMessage_OnbuildTriggerDisallowed(trigger: string) {
         return Validator.formatMessage(Validator.dockerProblems["onbuildTriggerDisallowed"], trigger);
+    }
+
+    public static getDiagnosticMessage_VariableModifierUnsupported(variable: string, modifier: string) {
+        return Validator.formatMessage(Validator.dockerProblems["variableModifierUnsupported"], variable, modifier);
     }
 
     public static getDiagnosticMessage_ShellJsonForm() {
@@ -1505,6 +1525,10 @@ export class Validator {
 
     private static createSyntaxMissingNames(start: Position, end: Position, instruction: string): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_SyntaxMissingNames(instruction), ValidationCode.SYNTAX_MISSING_NAMES);
+    }
+
+    private static createVariableUnsupportedModifier(range: Range, variable: string, modifier: string): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier), ValidationCode.UNSUPPORTED_MODIFIER);
     }
 
     static createUnknownInstruction(start: Position, end: Position, instruction: string): Diagnostic {
