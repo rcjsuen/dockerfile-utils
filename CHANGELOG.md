@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - fix incorrect validaiton warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))
 - fix incorrect validation of tagged images caused by FROM referencing images in a private registry ([#39](https://github.com/rcjsuen/dockerfile-utils/issues/39))
 - allow variables to be used in a FROM's base image argument ([#43](https://github.com/rcjsuen/dockerfile-utils/issues/43))
+- handle ARG instructions with escaped newlines that lead to an EOF comment ([#44](https://github.com/rcjsuen/dockerfile-utils/issues/44))
 
 ## [0.0.9] - 2018-04-16
 ### Fixed

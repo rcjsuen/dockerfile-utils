@@ -1944,6 +1944,9 @@ describe("Docker Validator Tests", function() {
             diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"\\\"\\\"\"");
             assert.equal(diagnostics.length, 0);
 
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# var2=value2");
+            assert.equal(diagnostics.length, 0);
+
             diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb'}");
             assert.equal(diagnostics.length, 0);
 
@@ -2319,9 +2322,6 @@ describe("Docker Validator Tests", function() {
             assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# comment\n# comment\nvar2=value2");
-            assert.equal(diagnostics.length, 0);
-
-            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# var2=value2");
             assert.equal(diagnostics.length, 0);
         });
 
