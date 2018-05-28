@@ -1913,48 +1913,77 @@ describe("Docker Validator Tests", function() {
         createSingleQuotedJSONTests("ADD");
     });
 
-    describe("ARG", function() {
+    function createSingleNameValuePairTests(instruction: string) {
+        let instructionLength = instruction.length;
+
         it("ok", function() {
-            testValidArgument("ARG", "a=b");
-            testValidArgument("ARG", "a=\"a b\"");
-            testValidArgument("ARG", "a='a b'");
+            // valid as the variable is equal to the empty string in this case
+            testValidArgument(instruction, "a=");
+            testValidArgument(instruction, "a=b");
+            testValidArgument(instruction, "a=\"a b\"");
+            testValidArgument(instruction, "a='a b'");
 
-            let diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-'bbb'}");
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " a='\\'");
             assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-'bbb ccc'}");
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " a='\\\\'");
             assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"");
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var='a\\\nb'");
             assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb\"}");
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var='a\\ \nb'");
             assert.equal(diagnostics.length, 0);
 
-            diagnostics = validateDockerfile("FROM node\nARG AAA=${aaa:-\"bbb ccc\"}");
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\\nb\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\ \nb\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"\\\"\\\"\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb'}");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb ccc'}");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"}");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb ccc\"}");
             assert.equal(diagnostics.length, 0);
         });
 
         it("escape", function() {
-            testValidArgument("ARG", "a=a\\ x");
-            testValidArgument("ARG", "a=a\\");
-            testValidArgument("ARG", "a=a\\b");
-            testValidArgument("ARG", "a=a\\\\b");
-            testValidArgument("ARG", "a=\"a\\ x\"");
-            testValidArgument("ARG", "a='a\\ x'");
-            testValidArgument("ARG", "a=a\\\nx");
-            testValidArgument("ARG", "a=a\\ \nx");
-            testValidArgument("ARG", "a=a\\\rx");
-            testValidArgument("ARG", "a=a\\ \rx");
-            testValidArgument("ARG", "a=a\\\r\nx");
-            testValidArgument("ARG", "a=a\\ \r\nx");
-            testValidArgument("ARG", "a=\"a \\\nx\"");
-            testValidArgument("ARG", "a=\"a \\\rx\"");
-            testValidArgument("ARG", "a=\"a \\\r\nx\"");
-            testValidArgument("ARG", "a=\'a \\\nx'");
-            testValidArgument("ARG", "a=\'a \\\rx'");
-            testValidArgument("ARG", "a=\'a \\\r\nx'");
+            testValidArgument(instruction, "a=a\\ x");
+            testValidArgument(instruction, "a=a\\");
+            testValidArgument(instruction, "a=a\\b");
+            testValidArgument(instruction, "a=a\\\\b");
+            testValidArgument(instruction, "a=\"a\\ x\"");
+            testValidArgument(instruction, "a='a\\ x'");
+            testValidArgument(instruction, "a=a\\\nx");
+            testValidArgument(instruction, "a=a\\ \nx");
+            testValidArgument(instruction, "a=a\\\rx");
+            testValidArgument(instruction, "a=a\\ \rx");
+            testValidArgument(instruction, "a=a\\\r\nx");
+            testValidArgument(instruction, "a=a\\ \r\nx");
+            testValidArgument(instruction, "a=\"a \\\nx\"");
+            testValidArgument(instruction, "a=\"a \\\rx\"");
+            testValidArgument(instruction, "a=\"a \\\r\nx\"");
+            testValidArgument(instruction, "a=\'a \\\nx'");
+            testValidArgument(instruction, "a=\'a \\\rx'");
+            testValidArgument(instruction, "a=\'a \\\r\nx'");
         });
+    }
+
+    describe("ARG", function() {
+        createSingleNameValuePairTests("ARG");
 
         it("invalid", function() {
             let diagnostics = validateDockerfile("FROM busybox\nARG a=a b");
@@ -2266,144 +2295,110 @@ describe("Docker Validator Tests", function() {
         createSingleQuotedJSONTests("COPY");
     });
 
-    function createNameValuePairTests(instruction: string) {
+    function createMultipleNameValuePairTests(instruction: string) {
         let instructionLength = instruction.length;
 
-        describe(instruction, function() {
-            it("ok", function() {
-                // valid as the variable is equal to the empty string in this case
-                testValidArgument(instruction, "a=");
-                testValidArgument(instruction, "a=b");
+        it("ok", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " a b");
+            assert.equal(diagnostics.length, 0);
 
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " a b");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y \\\n# abc \na=b");
+            assert.equal(diagnostics.length, 0);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " a='\\'");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y \\\n# abc \r\na=b");
+            assert.equal(diagnostics.length, 0);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " a='\\\\'");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# comment\n# comment\nvar2=value2");
+            assert.equal(diagnostics.length, 0);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var='a\\\nb'");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# var2=value2");
+            assert.equal(diagnostics.length, 0);
+        });
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var='a\\ \nb'");
-                assert.equal(diagnostics.length, 0);
+        it("requires two", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " a");
+            assert.equal(diagnostics.length, 1);
+            assertENVRequiresTwoArguments(diagnostics[0], 1, instructionLength + 1, 1, instructionLength + 2);
+        });
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\\nb\"");
-                assert.equal(diagnostics.length, 0);
+        it("syntax missing equals", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " a=b c");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingEquals(diagnostics[0], "c", 1, instructionLength + 5, 1, instructionLength + 6);
+            
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " a=b c d=e");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingEquals(diagnostics[0], "c", 1, instructionLength + 5, 1, instructionLength + 6);
+        });
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\ \nb\"");
-                assert.equal(diagnostics.length, 0);
+        it("syntax missing single quote", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " var='value");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingSingleQuote(diagnostics[0], "'value", 1, instructionLength + 5, 1, instructionLength + 11);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"\\\"\\\"\"");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var='val\\\nue");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingSingleQuote(diagnostics[0], "'value", 1, instructionLength + 5, 2, 2);
+        });
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y \\\n# abc \na=b");
-                assert.equal(diagnostics.length, 0);
+        it("syntax missing double quote", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 1, instructionLength + 11);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y \\\n# abc \r\na=b");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value\\");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value\\", 1, instructionLength + 5, 1, instructionLength + 12);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# comment\n# comment\nvar2=value2");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value\\\"");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value\\\"", 1, instructionLength + 5, 1, instructionLength + 13);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# var2=value2");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\  ");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"a\\", 1, instructionLength + 5, 1, instructionLength + 8);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb'}");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\  b");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"a\\  b", 1, instructionLength + 5, 1, instructionLength + 11);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-'bbb ccc'}");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"val\\\nue");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 2, 2);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"");
-                assert.equal(diagnostics.length, 0);
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"val\\\r\nue");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 2, 2);
+        });
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb\"}");
-                assert.equal(diagnostics.length, 0);
+        it("missing name", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " =value");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 7);
 
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " AAA=${aaa:-\"bbb ccc\"}");
-                assert.equal(diagnostics.length, 0);
-            });
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " =");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 2);
 
-            it("requires two", function() {
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " a");
-                assert.equal(diagnostics.length, 1);
-                assertENVRequiresTwoArguments(diagnostics[0], 1, instructionLength + 1, 1, instructionLength + 2);
-            });
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y =z a=b");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 5, 1, instructionLength + 7);
 
-            it("syntax missing equals", function() {
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " a=b c");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingEquals(diagnostics[0], "c", 1, instructionLength + 5, 1, instructionLength + 6);
-                
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " a=b c d=e");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingEquals(diagnostics[0], "c", 1, instructionLength + 5, 1, instructionLength + 6);
-            });
-
-            it("syntax missing single quote", function() {
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " var='value");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingSingleQuote(diagnostics[0], "'value", 1, instructionLength + 5, 1, instructionLength + 11);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var='val\\\nue");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingSingleQuote(diagnostics[0], "'value", 1, instructionLength + 5, 2, 2);
-            });
-
-            it("syntax missing double quote", function() {
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 1, instructionLength + 11);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value\\");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value\\", 1, instructionLength + 5, 1, instructionLength + 12);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"value\\\"");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value\\\"", 1, instructionLength + 5, 1, instructionLength + 13);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\  ");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"a\\", 1, instructionLength + 5, 1, instructionLength + 8);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"a\\  b");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"a\\  b", 1, instructionLength + 5, 1, instructionLength + 11);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"val\\\nue");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 2, 2);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " var=\"val\\\r\nue");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingDoubleQuote(diagnostics[0], "\"value", 1, instructionLength + 5, 2, 2);
-            });
-
-            it("missing name", function() {
-                let diagnostics = validateDockerfile("FROM node\n" + instruction + " =value");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 7);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " =");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 2);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y =z a=b");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 5, 1, instructionLength + 7);
-
-                diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y = a=b");
-                assert.equal(diagnostics.length, 1);
-                assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 5, 1, instructionLength + 6);
-            });
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y = a=b");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 5, 1, instructionLength + 6);
         });
     }
 
-    createNameValuePairTests("ENV");
+    describe("ENV", function() {
+        describe("single", function() {
+            createSingleNameValuePairTests("ENV");
+        });
+
+        describe("multple", function() {
+            createMultipleNameValuePairTests("ENV");
+        });
+    });
 
     describe("ENTRYPOINT", function() {
         createSingleQuotedJSONTests("ENTRYPOINT");
@@ -3393,7 +3388,16 @@ describe("Docker Validator Tests", function() {
         });
     });
 
-    createNameValuePairTests("LABEL");
+
+    describe("LABEL", function() {
+        describe("single", function() {
+            createSingleNameValuePairTests("LABEL");
+        });
+
+        describe("multple", function() {
+            createMultipleNameValuePairTests("LABEL");
+        });
+    });
 
     function createMaintainerTests(trigger: boolean) {
         let onbuild = trigger ? "ONBUILD " : "";
