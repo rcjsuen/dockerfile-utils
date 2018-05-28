@@ -363,7 +363,7 @@ export class Validator {
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
-                            let from = instruction as From;
+                                let from = instruction as From;
                                 let digestRange = from.getImageDigestRange();
                                 if (digestRange === null) {
                                     let tagRange = from.getImageTagRange();
@@ -519,7 +519,7 @@ export class Validator {
                         if (variables.length === 0) {
                             if (value.indexOf('$') !== -1) {
                                 let range = stopsignalArgs[0].getRange();
-                                problems.push(Validator.createInvalidStopSignal(range. start, range.end, value));
+                                problems.push(Validator.createInvalidStopSignal(range.start, range.end, value));
                             }
                         } else {
                             for (let variable of variables) {
@@ -531,7 +531,7 @@ export class Validator {
                                 // an un-expanded variable is here
                                 if (value.includes(variableDefinition) && !variable.isDefined()) {
                                     let range = stopsignalArgs[0].getRange();
-                                    problems.push(Validator.createInvalidStopSignal(range. start, range.end, ""));
+                                    problems.push(Validator.createInvalidStopSignal(range.start, range.end, ""));
                                     break;
                                 }
                             }
