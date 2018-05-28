@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -326,6 +326,11 @@ export class Validator {
                         }
                         return null;
                     }, Validator.createARGRequiresOneArgument);
+                    let argProperty = (instruction as Arg).getProperty();
+                    if (argProperty && argProperty.getName() === "") {
+                        let range = argProperty.getRange();
+                        problems.push(Validator.createSyntaxMissingNames(range.start, range.end, keyword));
+                    }
                     break;
                 case "ENV":
                 case "LABEL":

@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - flag FROM instructions that refer to an invalid image digest in a private registry with a port as an error ([#42](https://github.com/rcjsuen/dockerfile-utils/issues/42))
 - flag variables that have an invalid modifier set ([#38](https://github.com/rcjsuen/dockerfile-utils/issues/38))
+- warn if ARG instruction does not define a name for the variable ([#45](https://github.com/rcjsuen/dockerfile-utils/issues/45))
 
 ### Fixed
 - fix incorrect validaiton warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))

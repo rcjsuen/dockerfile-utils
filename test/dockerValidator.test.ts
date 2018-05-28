@@ -1980,6 +1980,16 @@ describe("Docker Validator Tests", function() {
             testValidArgument(instruction, "a=\'a \\\rx'");
             testValidArgument(instruction, "a=\'a \\\r\nx'");
         });
+
+        it("missing name", function() {
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " =value");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 7);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " =");
+            assert.equal(diagnostics.length, 1);
+            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 2);
+        });
     }
 
     describe("ARG", function() {
@@ -2372,15 +2382,7 @@ describe("Docker Validator Tests", function() {
         });
 
         it("missing name", function() {
-            let diagnostics = validateDockerfile("FROM node\n" + instruction + " =value");
-            assert.equal(diagnostics.length, 1);
-            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 7);
-
-            diagnostics = validateDockerfile("FROM node\n" + instruction + " =");
-            assert.equal(diagnostics.length, 1);
-            assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 1, 1, instructionLength + 2);
-
-            diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y =z a=b");
+            let diagnostics = validateDockerfile("FROM node\n" + instruction + " x=y =z a=b");
             assert.equal(diagnostics.length, 1);
             assertSyntaxMissingNames(diagnostics[0], instruction, 1, instructionLength + 5, 1, instructionLength + 7);
 
