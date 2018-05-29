@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -138,6 +138,58 @@ export class Validator {
                     problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
                 }
             }
+        }
+    }
+
+    private checkProperty(document: TextDocument, escapeChar: string, keyword: string, property: Property, firstProperty: boolean, optionalValue: boolean, problems: Diagnostic[]): void {
+        let name = property.getName();
+        if (name === "") {
+            let range = property.getRange();
+            problems.push(Validator.createSyntaxMissingNames(range.start, range.end, keyword));
+        } else if (name.indexOf('=') !== -1) {
+            let nameRange = property.getNameRange();
+            let unescapedName = document.getText(nameRange);
+            let index = unescapedName.indexOf('=');
+            if (unescapedName.charAt(0) === '\'') {
+                problems.push(Validator.createSyntaxMissingSingleQuote(nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
+            } else if (unescapedName.charAt(0) === '"') {
+                problems.push(Validator.createSyntaxMissingDoubleQuote(nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
+            }
+            return;
+        }
+
+        let value = property.getValue();
+        if (value === null) {
+            if (!optionalValue) {
+                let range = property.getNameRange();
+                if (firstProperty) {
+                    problems.push(Validator.createENVRequiresTwoArguments(range.start, range.end));
+                } else {
+                    problems.push(Validator.createSyntaxMissingEquals(range.start, range.end, name));
+                }
+            }
+        } else if (value.charAt(0) === '"') {
+            let found = false;
+            for (let i = 1; i < value.length; i++) {
+                switch (value.charAt(i)) {
+                    case escapeChar:
+                        i++;
+                        break;
+                    case '"':
+                        if (i === value.length - 1) {
+                            found = true;
+                        }
+                        break;
+                }
+            }
+
+            if (!found) {
+                let range = property.getValueRange();
+                problems.push(Validator.createSyntaxMissingDoubleQuote(range.start, range.end, property.getUnescapedValue()));
+            }
+        } else if (value.charAt(0) === '\'' && value.charAt(value.length - 1) !== '\'') {
+            let range = property.getValueRange();
+            problems.push(Validator.createSyntaxMissingSingleQuote(range.start, range.end, value));
         }
     }
 
@@ -326,10 +378,10 @@ export class Validator {
                         }
                         return null;
                     }, Validator.createARGRequiresOneArgument);
-                    let argProperty = (instruction as Arg).getProperty();
-                    if (argProperty && argProperty.getName() === "") {
-                        let range = argProperty.getRange();
-                        problems.push(Validator.createSyntaxMissingNames(range.start, range.end, keyword));
+                    let arg = instruction as Arg;
+                    let argProperty = arg.getProperty();
+                    if (argProperty) {
+                        this.checkProperty(document, escapeChar, keyword, argProperty, true, true, problems);
                     }
                     break;
                 case "ENV":
@@ -338,43 +390,11 @@ export class Validator {
                         return null;
                     });
                     let properties = (instruction as PropertyInstruction).getProperties();
-                    if (properties.length === 1 && properties[0].getValue() === null) {
-                        let range = properties[0].getNameRange();
-                        problems.push(Validator.createENVRequiresTwoArguments(range.start, range.end));
+                    if (properties.length === 1) {
+                        this.checkProperty(document, escapeChar, keyword, properties[0], true, false, problems);
                     } else if (properties.length !== 0) {
                         for (let property of properties) {
-                            if (property.getName() === "") {
-                                let range = property.getRange();
-                                problems.push(Validator.createSyntaxMissingNames(range.start, range.end, keyword));
-                            }
-
-                            let value = property.getValue();
-                            if (value === null) {
-                                let range = property.getNameRange();
-                                problems.push(Validator.createSyntaxMissingEquals(range.start, range.end, property.getName()));
-                            } else if (value.charAt(0) === '"') {
-                                let found = false;
-                                for (let i = 1; i < value.length; i++) {
-                                    switch (value.charAt(i)) {
-                                        case escapeChar:
-                                            i++;
-                                            break;
-                                        case '"':
-                                            if (i === value.length - 1) {
-                                                found = true;
-                                            }
-                                            break;
-                                    }
-                                }
-
-                                if (!found) {
-                                    let range = property.getValueRange();
-                                    problems.push(Validator.createSyntaxMissingDoubleQuote(range.start, range.end, property.getUnescapedValue()));
-                                }
-                            } else if (value.charAt(0) === '\'' && value.charAt(value.length - 1) !== '\'') {
-                                let range = property.getValueRange();
-                                problems.push(Validator.createSyntaxMissingSingleQuote(range.start, range.end, value));
-                            }
+                            this.checkProperty(document, escapeChar, keyword, property, false, false, problems);
                         }
                     }
                     break;
