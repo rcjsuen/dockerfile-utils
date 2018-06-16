@@ -11,10 +11,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - [upgraded the dependency of Mocha](https://github.com/mochajs/mocha/issues/2791) from 3.x to 5.x
   - versions prior to 4.x of Mocha dependended on Growl 1.9.2 which contained a [security vulnerability](https://github.com/tj/node-growl/issues/60)
-  - as Mocha is a `devDependencies` module, there is no reason to believe that the `dockerfile-ast` module itself was affected by this vulnerability
+  - as Mocha is a `devDependencies` module, there is no reason to believe that the `dockerfile-utils` module itself was affected by this vulnerability
 
 ### Fixed
-- fix incorrect validaiton warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))
+- fix incorrect validation warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))
 - fix incorrect validation of tagged images caused by FROM referencing images in a private registry ([#39](https://github.com/rcjsuen/dockerfile-utils/issues/39))
 - allow variables to be used in a FROM's base image argument ([#43](https://github.com/rcjsuen/dockerfile-utils/issues/43))
 - handle ARG instructions with escaped newlines that lead to an EOF comment ([#44](https://github.com/rcjsuen/dockerfile-utils/issues/44))
