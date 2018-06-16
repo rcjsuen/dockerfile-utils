@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file.
 - warn if ARG instruction does not define a name for the variable ([#45](https://github.com/rcjsuen/dockerfile-utils/issues/45))
 - flag incorrectly quoted arguments for ARG, ENV, and LABEL ([#40](https://github.com/rcjsuen/dockerfile-utils/issues/40))
 
+### Changed
+- [upgraded the dependency of Mocha](https://github.com/mochajs/mocha/issues/2791) from 3.x to 5.x
+  - versions prior to 4.x of Mocha dependended on Growl 1.9.2 which contained a [security vulnerability](https://github.com/tj/node-growl/issues/60)
+  - as Mocha is a `devDependencies` module, there is no reason to believe that the `dockerfile-ast` module itself was affected by this vulnerability
+
 ### Fixed
 - fix incorrect validaiton warning in ARG, ENV, and LABEL instructions caused by quotes being used in variable replacements ([#36](https://github.com/rcjsuen/dockerfile-utils/issues/36))
 - fix incorrect validation of tagged images caused by FROM referencing images in a private registry ([#39](https://github.com/rcjsuen/dockerfile-utils/issues/39))
