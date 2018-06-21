@@ -2663,6 +2663,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM repository.mycompany:5000/tomcat:8.0");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM privateregistry.com/image:tag");
                 assert.equal(diagnostics.length, 0);
 
