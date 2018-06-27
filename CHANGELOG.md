@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.0.10] - 2018-06-27
 ### Added
 - flag FROM instructions that refer to an invalid image digest in a private registry with a port as an error ([#42](https://github.com/rcjsuen/dockerfile-utils/issues/42))
 - flag variables that have an invalid modifier set ([#38](https://github.com/rcjsuen/dockerfile-utils/issues/38))
@@ -89,7 +89,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.9...HEAD
+[0.0.10]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.9...v0.0.10
 [0.0.9]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.6...v0.0.7
