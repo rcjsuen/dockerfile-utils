@@ -2666,6 +2666,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM repository.mycompany:5000/tomcat:8.0");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("ROM my.private.repo.com:5000/some-image:latest");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM privateregistry.com/image:tag");
                 assert.equal(diagnostics.length, 0);
 
