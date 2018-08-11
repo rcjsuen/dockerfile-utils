@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- fix incorrect validation of ENV and LABEL instructions with many quoted properties on mulitple lines ([#50](https://github.com/rcjsuen/dockerfile-utils/issues/50))
+
 ## [0.0.10] - 2018-06-27
 ### Added
 - flag FROM instructions that refer to an invalid image digest in a private registry with a port as an error ([#42](https://github.com/rcjsuen/dockerfile-utils/issues/42))

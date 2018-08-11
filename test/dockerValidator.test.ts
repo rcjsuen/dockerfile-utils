@@ -1922,6 +1922,12 @@ describe("Docker Validator Tests", function() {
             testValidArgument(instruction, "a=b");
             testValidArgument(instruction, "a=\"a b\"");
             testValidArgument(instruction, "a='a b'");
+            testValidArgument(instruction, "'a'=b");
+            testValidArgument(instruction, "'a'=\"a b\"");
+            testValidArgument(instruction, "'a'='a b'");
+            testValidArgument(instruction, "\"a\"=b");
+            testValidArgument(instruction, "\"a\"=\"a b\"");
+            testValidArgument(instruction, "\"a\"='a b'");
 
             let diagnostics = validateDockerfile("FROM node\n" + instruction + " a='\\'");
             assert.equal(diagnostics.length, 0);
@@ -2378,6 +2384,24 @@ describe("Docker Validator Tests", function() {
             assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n# comment\n# comment\nvar2=value2");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value var2='value2' var3=\"value3\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " 'var'=value 'var2'='value2' 'var3'=\"value3\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " \"var\"=value \"var2\"='value2' \"var3\"=\"value3\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " var=value \\\n var2='value2' \\\n var3=\"value3\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " 'var'=value \\\n 'var2'='value2' \\\n 'var3'=\"value3\"");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " \"var\"=value \\\n \"var2\"='value2' \\\n \"var3\"=\"value3\"");
             assert.equal(diagnostics.length, 0);
         });
 
