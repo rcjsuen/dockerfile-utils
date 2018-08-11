@@ -782,7 +782,7 @@ export class Validator {
 
                     let content = instruction.getArgumentsContent();
                     if (content) {
-                        let regexp = new RegExp(/^[a-zA-Z]:(\\|\/).*$/);
+                        let regexp = new RegExp(/^(\$|([a-zA-Z](\$|:(\$|\\|\/)))).*$/);
                         if (!content.startsWith('/') && !regexp.test(content)) {
                             let problem = this.createWORKDIRNotAbsolute(instruction.getArgumentsRange());
                             if (problem) {

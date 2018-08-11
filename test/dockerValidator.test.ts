@@ -22,7 +22,8 @@ function validateDockerfile(content: string, settings?: ValidatorSettings) {
             instructionCasing: ValidationSeverity.WARNING,
             instructionCmdMultiple: ValidationSeverity.IGNORE,
             instructionEntrypointMultiple: ValidationSeverity.IGNORE,
-            instructionHealthcheckMultiple: ValidationSeverity.IGNORE
+            instructionHealthcheckMultiple: ValidationSeverity.IGNORE,
+            instructionWorkdirRelative: ValidationSeverity.WARNING,
         };
     }
     return validate(content, settings);
@@ -3927,6 +3928,21 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 0);
 
                     diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:\\Program Files\\Java");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR $variable");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR /$variable");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C$variable");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:$variable");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:\\$variable");
                     assert.equal(diagnostics.length, 0);
                 });
 
