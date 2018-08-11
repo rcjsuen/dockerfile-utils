@@ -41,7 +41,8 @@ export class Validator {
         instructionCmdMultiple: ValidationSeverity.WARNING,
         instructionEntrypointMultiple: ValidationSeverity.WARNING,
         instructionHealthcheckMultiple: ValidationSeverity.WARNING,
-        instructionJSONInSingleQuotes: ValidationSeverity.WARNING
+        instructionJSONInSingleQuotes: ValidationSeverity.WARNING,
+        instructionWorkdirRelative: ValidationSeverity.WARNING
     }
 
     constructor(settings?: ValidatorSettings) {
@@ -774,6 +775,22 @@ export class Validator {
                     this.checkDuplicateFlags(flags, ["chown", "from"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
+                case "WORKDIR":
+                    this.checkArguments(instruction, problems, [-1], function (): any {
+                        return null;
+                    });
+
+                    let content = instruction.getArgumentsContent();
+                    if (content) {
+                        let regexp = new RegExp(/^[a-zA-Z]:(\\|\/).*$/);
+                        if (!content.startsWith('/') && !regexp.test(content)) {
+                            let problem = this.createWORKDIRNotAbsolute(instruction.getArgumentsRange());
+                            if (problem) {
+                                problems.push(problem);
+                            }
+                        }
+                    }
+                    break;
                 default:
                     this.checkArguments(instruction, problems, [-1], function (): any {
                         return null;
@@ -1182,7 +1199,9 @@ export class Validator {
         "deprecatedMaintainer": "MAINTAINER has been deprecated",
 
         "healthcheckCmdArgumentMissing": "Missing command after HEALTHCHECK CMD",
-        "healthcheckTypeUnknown": "Unknown type\"${0}\" in HEALTHCHECK (try CMD)"
+        "healthcheckTypeUnknown": "Unknown type\"${0}\" in HEALTHCHECK (try CMD)",
+
+        "workdirPathNotAbsolute": "WORKDIR paths should be absolute"
     };
 
     private static formatMessage(text: string, ...variables: string[]): string {
@@ -1382,6 +1401,10 @@ export class Validator {
 
     public static getDiagnosticMessage_HealthcheckTypeUnknown(type: string) {
         return Validator.formatMessage(Validator.dockerProblems["healthcheckTypeUnknown"], type);
+    }
+
+    public static getDiagnosticMessage_WORKDIRPathNotAbsolute() {
+        return Validator.formatMessage(Validator.dockerProblems["workdirPathNotAbsolute"]);
     }
 
     static createInvalidEscapeDirective(start: Position, end: Position, value: string): Diagnostic {
@@ -1614,6 +1637,15 @@ export class Validator {
             return Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
         } else if (this.settings.deprecatedMaintainer === ValidationSeverity.WARNING) {
             return Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
+        }
+        return null;
+    }
+
+    private createWORKDIRNotAbsolute(range: Range): Diagnostic | null {
+        if (this.settings.instructionWorkdirRelative === ValidationSeverity.ERROR) {
+            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
+        } else if (this.settings.instructionWorkdirRelative === ValidationSeverity.WARNING) {
+            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
         }
         return null;
     }

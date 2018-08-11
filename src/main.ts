@@ -84,7 +84,13 @@ export enum ValidationCode {
      * JSON form except that it is not actually valid JSON because
      * single quotes are used instead of double quotes.
      */
-    JSON_IN_SINGLE_QUOTES
+    JSON_IN_SINGLE_QUOTES,
+
+    /**
+     * The error code used if a WORKDIR instrction does not point to
+     * an absolute path.
+     */
+    WORKDIR_IS_NOT_ABSOLUTE
 }
 
 /**
@@ -150,6 +156,12 @@ export interface ValidatorSettings {
     instructionHealthcheckMultiple?: ValidationSeverity;
 
     instructionJSONInSingleQuotes?: ValidationSeverity;
+
+    /**
+     * The setting for flagging WORKDIR instructions that do not use
+     * an absolute path.
+     */
+    instructionWorkdirRelative?: ValidationSeverity;
 }
 
 /**

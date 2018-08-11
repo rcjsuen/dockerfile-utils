@@ -28,6 +28,10 @@ function validateDockerfile(content: string, settings?: ValidatorSettings) {
     return validate(content, settings);
 }
 
+function convertValidationSeverity(severity: ValidationSeverity): DiagnosticSeverity {
+    return severity === ValidationSeverity.ERROR ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning;
+}
+
 function assertDiagnostics(diagnostics: Diagnostic[], codes: ValidationCode[], functions: Function[], args: any[][]) {
     assert.equal(diagnostics.length, codes.length);
     diagnosticCheck: for (let diagnostic of diagnostics) {
@@ -578,6 +582,17 @@ function assertVariableModifierUnsupported(diagnostic: Diagnostic, variable: str
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier));
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
+function assertWorkdirAbsolutePath(diagnostic: Diagnostic, severity: DiagnosticSeverity, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
+    assert.equal(diagnostic.severity, severity);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
     assert.equal(diagnostic.range.end.line, endLine);
@@ -3886,6 +3901,65 @@ describe("Docker Validator Tests", function() {
         it("ok", function() {
             testValidArgument("WORKDIR", "/orion");
         });
+
+        function createAbsolutePathTests(testName: string, severity?: ValidationSeverity) {
+            describe(testName, function() {
+                it("ok", function() {
+                    let diagnostics = validateDockerfile("FROM scratch\nWORKDIR /path/");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR /path/path2");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:/path");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:/Program Files");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:/Program Files/Java");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:\\path");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:\\Program Files");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:\\Program Files\\Java");
+                    assert.equal(diagnostics.length, 0);
+                });
+
+                function createInvalidTest(path: string) {
+                    let settings = severity === undefined ? undefined : { instructionWorkdirRelative: severity };
+                    let validator = new Validator(settings);
+                    let diagnostics = validator.validate(createDocument("FROM scratch\nWORKDIR " + path));
+                    if (severity === ValidationSeverity.IGNORE) {
+                        assert.equal(diagnostics.length, 0);
+                    } else {
+                        let diagnosticSeverity = convertValidationSeverity(severity);
+                        assert.equal(diagnostics.length, 1);
+                        assertWorkdirAbsolutePath(diagnostics[0], diagnosticSeverity, 1, 8, 1, 8 + path.length);
+                    }
+                }
+
+                it("invalid", function() {
+                    createInvalidTest("dev");
+                    createInvalidTest("path/");
+                    createInvalidTest("C");
+                    createInvalidTest("C:");
+                    createInvalidTest("C:WINDOWS");
+                    createInvalidTest("C:WINDOWS\\system32");
+                    createInvalidTest("ZZ:");
+                    createInvalidTest("ZZ:\\");
+                });
+            });
+        }
+
+        createAbsolutePathTests("default");
+        createAbsolutePathTests("ignore", ValidationSeverity.IGNORE);
+        createAbsolutePathTests("warning", ValidationSeverity.WARNING);
+        createAbsolutePathTests("error", ValidationSeverity.ERROR);
 
         it("escape", function() {
             testEscape("WORKDIR", "/or", "ion");

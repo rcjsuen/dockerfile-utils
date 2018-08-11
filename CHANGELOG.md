@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- optionally flag WORKDIR instructions that do not point to an absolute path ([#47](https://github.com/rcjsuen/dockerfile-utils/issues/47))
+  - `ValidationCode.WORKDIR_IS_NOT_ABSOLUTE`
+  - `ValidatorSettings.instructionWorkdirRelative`
+
 ### Fixed
 - fix incorrect validation of ENV and LABEL instructions with many quoted properties on mulitple lines ([#50](https://github.com/rcjsuen/dockerfile-utils/issues/50))
 
