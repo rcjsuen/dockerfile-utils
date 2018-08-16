@@ -592,7 +592,7 @@ export class Validator {
                             if (match) {
                                 if (match[7]) {
                                     const protocol = match[7].toLowerCase();
-                                    if (protocol !== "" && protocol !== "tcp" && protocol !== "udp") {
+                                    if (protocol !== "" && protocol !== "tcp" && protocol !== "udp" && protocol !== "sctp") {
                                         const range = exposeArgs[i].getRange();
                                         const rangeStart = this.document.offsetAt(range.start);
                                         const rawArg = this.document.getText().substring(

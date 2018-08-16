@@ -2472,6 +2472,8 @@ describe("Docker Validator Tests", function() {
                 testValidArgument("EXPOSE", "8080/TcP");
                 testValidArgument("EXPOSE", "8080/udp");
                 testValidArgument("EXPOSE", "8080/uDp");
+                testValidArgument("EXPOSE", "8080/sctp");
+                testValidArgument("EXPOSE", "8080/sCTp");
                 testValidArgument("EXPOSE", "8080:8080");
                 testValidArgument("EXPOSE", "8080:8080/tcp");
                 // unspecified protocol is assumed to be TCP
