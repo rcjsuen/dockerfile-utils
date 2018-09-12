@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- ignore variables when validating directories for ARGs and COPYs ([#54](https://github.com/rcjsuen/dockerfile-utils/issues/54))
+
 ## [0.0.11] - 2018-08-19
 ### Added
 - optionally flag WORKDIR instructions that do not point to an absolute path ([#47](https://github.com/rcjsuen/dockerfile-utils/issues/47))
@@ -99,6 +103,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.11...HEAD
 [0.0.11]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.10...v0.0.11
 [0.0.10]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.9...v0.0.10
 [0.0.9]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.8...v0.0.9

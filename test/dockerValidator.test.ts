@@ -1759,6 +1759,12 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine\nADD Dockerfile Dockerfile2 /root/");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM alpine\nADD Dockerfile Dockerfile2 $root");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD Dockerfile Dockerfile2 ${root}");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD Dockerfile Dockerfile2 C:\\tmp\\");
                 assert.equal(diagnostics.length, 0);
 
@@ -1787,6 +1793,24 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("FROM alpine\nADD [\"Dockerfile\",\"Dockerfile2\",\"/root/\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [\"Dockerfile\",\"Dockerfile2\",\"$root\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [\"Dockerfile\",\"Dockerfile2\",\"${root}\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [\"Dockerfile\", \"Dockerfile2\",\"$root\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [\"Dockerfile\", \"Dockerfile2\",\"${root}\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"Dockerfile2\", \"$root\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"Dockerfile\", \"Dockerfile2\", \"${root}\" ]");
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nADD [\"Dockerfile\",\"Dockerfile2\",\"C:\\tmp\\\\\"]");
@@ -2165,6 +2189,12 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine\nCOPY Dockerfile Dockerfile2 /root/");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM alpine\nCOPY Dockerfile Dockerfile2 $root");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY Dockerfile Dockerfile2 ${root}");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY Dockerfile Dockerfile2 C:\\tmp\\");
                 assert.equal(diagnostics.length, 0);
 
@@ -2187,6 +2217,24 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"/root/\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [\"Dockerfile\",\"Dockerfile2\",\"$root\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [\"Dockerfile\",\"Dockerfile2\",\"${root}\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [\"Dockerfile\", \"Dockerfile2\",\"$root\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [\"Dockerfile\", \"Dockerfile2\",\"${root}\"]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"$root\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"${root}\" ]");
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY [ \"Dockerfile\", \"Dockerfile2\", \"C:\\tmp\\\\\" ]");

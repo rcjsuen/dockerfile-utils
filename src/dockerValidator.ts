@@ -623,59 +623,6 @@ export class Validator {
                     break;
                 case "ADD":
                     const add = instruction as Add;
-                    const addArgs = instruction.getArguments();
-                    if (addArgs.length === 1) {
-                        if (add.getClosingBracket()) {
-                            const jsonStrings = add.getJSONStrings();
-                            if (jsonStrings.length === 0) {
-                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
-                            } else if (jsonStrings.length === 1) {
-                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
-                            } else if (jsonStrings.length > 2) {
-                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                const lastChar = addDestination.charAt(addDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        } else {
-                            problems.push(Validator.createADDRequiresAtLeastTwoArguments(addArgs[0].getRange()));
-                        }
-                    } else if (addArgs.length === 0) {
-                        problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
-                    } else if (addArgs.length === 2) {
-                        if (add.getClosingBracket()) {
-                            const jsonStrings = add.getJSONStrings();
-                            if (jsonStrings.length === 0) {
-                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
-                            } else if (jsonStrings.length === 1) {
-                                problems.push(Validator.createADDRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
-                            } else if (jsonStrings.length > 2) {
-                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                const lastChar = addDestination.charAt(addDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        }
-                    } else {
-                        if (add.getClosingBracket()) {
-                            const jsonStrings = add.getJSONStrings();
-                            if (jsonStrings.length > 2) {
-                                const addDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                const lastChar = addDestination.charAt(addDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createADDDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        } else {
-                            const addDestination = addArgs[addArgs.length - 1].getValue();
-                            const lastChar = addDestination.charAt(addDestination.length - 1);
-                            if (lastChar !== '\\' && lastChar !== '/') {
-                                problems.push(Validator.createADDDestinationNotDirectory(addArgs[addArgs.length - 1].getRange()));
-                            }
-                        }
-                    }
                     const addFlags = add.getFlags();
                     for (let flag of addFlags) {
                         const name = flag.getName();
@@ -686,6 +633,10 @@ export class Validator {
                             let range = flag.getNameRange();
                             problems.push(Validator.createUnknownAddFlag(flagRange.start, range.end, name));
                         }
+                    }
+                    const addDestinationDiagnostic = this.checkDestinationIsDirectory(add, Validator.createADDRequiresAtLeastTwoArguments, Validator.createADDDestinationNotDirectory);
+                    if (addDestinationDiagnostic !== null) {
+                        problems.push(addDestinationDiagnostic);
                     }
                     this.checkFlagValue(addFlags, ["chown"], problems);
                     this.checkDuplicateFlags(addFlags, ["chown"], problems);
@@ -719,57 +670,9 @@ export class Validator {
                             }
                         }
                     }
-                    if (copyArgs.length === 1) {
-                        if (copy.getClosingBracket()) {
-                            const jsonStrings = copy.getJSONStrings();
-                            if (jsonStrings.length === 0) {
-                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
-                            } else if (jsonStrings.length === 1) {
-                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
-                            } else if (jsonStrings.length > 2) {
-                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        } else {
-                            problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(copyArgs[0].getRange()));
-                        }
-                    } else if (copyArgs.length === 0) {
-                        problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getInstructionRange()));
-                    } else if (copyArgs.length === 2) {
-                        if (copy.getClosingBracket()) {
-                            const jsonStrings = copy.getJSONStrings();
-                            if (jsonStrings.length === 0) {
-                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(instruction.getArgumentsRange()));
-                            } else if (jsonStrings.length === 1) {
-                                problems.push(Validator.createCOPYRequiresAtLeastTwoArguments(jsonStrings[0].getJSONRange()));
-                            } else if (jsonStrings.length > 2) {
-                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        }
-                    } else {
-                        if (copy.getClosingBracket()) {
-                            let jsonStrings = copy.getJSONStrings();
-                            if (jsonStrings.length > 2) {
-                                let copyDestination = jsonStrings[jsonStrings.length - 1].getValue();
-                                let lastChar = copyDestination.charAt(copyDestination.length - 2);
-                                if (lastChar !== '\\' && lastChar !== '/') {
-                                    problems.push(Validator.createCOPYDestinationNotDirectory(jsonStrings[jsonStrings.length - 1].getJSONRange()));
-                                }
-                            }
-                        } else {
-                            let copyDestination = copyArgs[copyArgs.length - 1].getValue();
-                            let lastChar = copyDestination.charAt(copyDestination.length - 1);
-                            if (lastChar !== '\\' && lastChar !== '/') {
-                                problems.push(Validator.createCOPYDestinationNotDirectory(copyArgs[copyArgs.length - 1].getRange()));
-                            }
-                        }
+                    const copyDestinationDiagnostic = this.checkDestinationIsDirectory(copy, Validator.createCOPYRequiresAtLeastTwoArguments, Validator.createCOPYDestinationNotDirectory);
+                    if (copyDestinationDiagnostic !== null) {
+                        problems.push(copyDestinationDiagnostic);
                     }
                     this.checkFlagValue(flags, ["chown", "from"], problems);
                     this.checkDuplicateFlags(flags, ["chown", "from"], problems);
@@ -798,6 +701,61 @@ export class Validator {
                     break;
             }
         }
+    }
+
+    private checkDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
+        if (instruction.getClosingBracket()) {
+            return this.checkJsonDestinationIsDirectory(instruction, requiresTwoArgumentsFunction, notDirectoryFunction);
+        }
+
+        const args = instruction.getArguments();
+        if (args.length === 1) {
+            return requiresTwoArgumentsFunction(args[0].getRange());
+        } else if (args.length === 0) {
+            return requiresTwoArgumentsFunction(instruction.getInstructionRange());
+        } else if (args.length > 2) {
+            const lastArg = args[args.length - 1];
+            const variables = instruction.getVariables();
+            if (variables.length !== 0) {
+                const lastJsonStringOffset = this.document.offsetAt(lastArg.getRange().end);
+                const lastVarOffset = this.document.offsetAt(variables[variables.length - 1].getRange().end);
+                if (lastJsonStringOffset === lastVarOffset || lastJsonStringOffset -1 === lastVarOffset) {
+                    return null;
+                }
+            }
+            const destination = lastArg.getValue();
+            const lastChar = destination.charAt(destination.length - 1);
+            if (lastChar !== '\\' && lastChar !== '/') {
+                return notDirectoryFunction(lastArg.getRange());
+            }
+        }
+        return null;
+    }
+
+    private checkJsonDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
+        const jsonStrings = instruction.getJSONStrings();
+        if (jsonStrings.length === 0) {
+            return requiresTwoArgumentsFunction(instruction.getArgumentsRange());
+        } else if (jsonStrings.length === 1) {
+            return requiresTwoArgumentsFunction(jsonStrings[0].getJSONRange());
+        } else if (jsonStrings.length > 2) {
+            const lastJsonString = jsonStrings[jsonStrings.length - 1];
+            const variables = instruction.getVariables();
+            if (variables.length !== 0) {
+                const lastVar = variables[variables.length - 1];
+                const lastJsonStringOffset = this.document.offsetAt(lastJsonString.getRange().end);
+                const lastVarOffset = this.document.offsetAt(lastVar.getRange().end);
+                if (lastJsonStringOffset === lastVarOffset || lastJsonStringOffset -1 === lastVarOffset) {
+                    return null;
+                }
+            }
+            const destination = lastJsonString.getValue();
+            const lastChar = destination.charAt(destination.length - 2);
+            if (lastChar !== '\\' && lastChar !== '/') {
+                return notDirectoryFunction(jsonStrings[jsonStrings.length - 1].getJSONRange());
+            }
+        }
+        return null;
     }
 
     private checkFlagValue(flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
