@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- allow Bash syntax for variable modifiers in RUNs ([#56](https://github.com/rcjsuen/dockerfile-utils/issues/56))
+
 ## [0.0.12] - 2018-12-20
 ### Fixed
 - ignore variables when validating directories for ARGs and COPYs ([#54](https://github.com/rcjsuen/dockerfile-utils/issues/54))
@@ -103,6 +107,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.12...HEAD
 [0.0.12]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.11...v0.0.12
 [0.0.11]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.10...v0.0.11
 [0.0.10]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.9...v0.0.10

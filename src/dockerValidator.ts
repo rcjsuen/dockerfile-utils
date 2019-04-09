@@ -5,7 +5,7 @@
 import {
     TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
 } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -133,7 +133,10 @@ export class Validator {
         for (let variable of instruction.getVariables()) {
             let modifier = variable.getModifier();
             if (modifier !== null) {
-                if (modifier === "") {
+                if (modifier === '?' && instruction.getKeyword() === Keyword.RUN) {
+                    // allow shell expansions to go through for RUN instructions
+                    continue;
+                } else if (modifier === "") {
                     problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
                 } else if (modifier !== '+' && modifier !== '-') {
                     problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
