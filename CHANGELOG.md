@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - allow Bash syntax for variable modifiers in RUNs ([#56](https://github.com/rcjsuen/dockerfile-utils/issues/56))
 
+### Fixed
+- allow quoted ARG variables in EXPOSE ([#58](https://github.com/rcjsuen/dockerfile-utils/issues/58))
+
 ## [0.0.12] - 2018-12-20
 ### Fixed
 - ignore variables when validating directories for ARGs and COPYs ([#54](https://github.com/rcjsuen/dockerfile-utils/issues/54))

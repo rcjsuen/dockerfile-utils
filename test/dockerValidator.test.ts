@@ -2729,6 +2729,9 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM node\nARG PORT\nEXPOSE $PORT-8010");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM node\nARG ARG_VAR=1234\nEXPOSE \"$ARG_VAR\"");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("invalid containerPort", function() {

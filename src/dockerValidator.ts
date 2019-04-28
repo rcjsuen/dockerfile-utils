@@ -590,7 +590,10 @@ export class Validator {
                     } else {
                         const regex = /^([0-9])+(-[0-9]+)?(:([0-9])+(-[0-9]*)?)?(\/(\w*))?(\/\w*)*$/;
                         argCheck: for (let i = 0; i < exposeArgs.length; i++) {
-                            const value = exposeArgs[i].getValue()
+                            let value = exposeArgs[i].getValue()
+                            if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+                                value = value.substring(1, value.length - 2);
+                            }
                             const match = regex.exec(value);
                             if (match) {
                                 if (match[7]) {
