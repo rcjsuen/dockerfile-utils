@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - allow Bash syntax for variable modifiers in RUNs ([#56](https://github.com/rcjsuen/dockerfile-utils/issues/56))
+- warn if FROM has a variable for an image and it references nothing ([#59](https://github.com/rcjsuen/dockerfile-utils/issues/59))
 
 ### Fixed
 - allow quoted ARG variables in EXPOSE ([#58](https://github.com/rcjsuen/dockerfile-utils/issues/58))
