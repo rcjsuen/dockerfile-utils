@@ -90,7 +90,13 @@ export enum ValidationCode {
      * The error code used if a WORKDIR instrction does not point to
      * an absolute path.
      */
-    WORKDIR_IS_NOT_ABSOLUTE
+    WORKDIR_IS_NOT_ABSOLUTE,
+
+    /**
+     * The error code used if a FROM instruction uses a variable to
+     * reference its base image but the variable does not exist.
+     */
+    BASE_NAME_EMPTY
 }
 
 /**

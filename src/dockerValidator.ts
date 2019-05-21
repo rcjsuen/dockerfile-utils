@@ -406,10 +406,18 @@ export class Validator {
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
-                                for (let variable of instruction.getVariables()) {
-                                    if (Validator.rangeContains(range, variable.getRange())) {
-                                        return null;
+                                let variables = instruction.getVariables();
+                                if (variables.length > 0) {
+                                    let variableRange = variables[0].getRange();
+                                    if (variableRange.start.line === range.start.line
+                                            && variableRange.start.character === range.start.character
+                                            && variableRange.end.line === range.end.line
+                                            && variableRange.end.character === range.end.character) {
+                                        if (!variables[0].isDefined()) {
+                                            return Validator.createBaseNameEmpty(variableRange, variables[0].toString());
+                                        }
                                     }
+                                    return null;
                                 }
                                 let from = instruction as From;
                                 let digestRange = from.getImageDigestRange();
@@ -573,7 +581,7 @@ export class Validator {
                                     this.document.offsetAt(variableRange.end)
                                 );
                                 // an un-expanded variable is here
-                                if (value.includes(variableDefinition) && !variable.isDefined()) {
+                                if (value.includes(variableDefinition) && !variable.isBuildVariable() && !variable.isDefined()) {
                                     let range = stopsignalArgs[0].getRange();
                                     problems.push(Validator.createInvalidStopSignal(range.start, range.end, ""));
                                     break;
@@ -1112,6 +1120,8 @@ export class Validator {
     }
 
     private static dockerProblems = {
+        "baseNameEmpty": "base name (${0}) should not be blank",
+
         "directiveCasing": "Parser directives should be written in lowercase letters",
         "directiveEscapeInvalid": "invalid ESCAPE '${0}'. Must be ` or \\",
 
@@ -1240,6 +1250,10 @@ export class Validator {
 
     public static getDiagnosticMessage_FlagUnknownUnit(unit: string, duration: string) {
         return Validator.formatMessage(Validator.dockerProblems["flagUnknownUnit"], unit, duration);
+    }
+
+    public static getDiagnosticMessage_BaseNameEmpty(name: string) {
+        return Validator.formatMessage(Validator.dockerProblems["baseNameEmpty"], name);
     }
 
     public static getDiagnosticMessage_InvalidAs() {
@@ -1432,6 +1446,10 @@ export class Validator {
 
     private static createFlagUnknownUnit(range: Range, unit: string, duration: string): Diagnostic {
         return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagUnknownUnit(unit, duration), ValidationCode.FLAG_UNKNOWN_UNIT);
+    }
+
+    private static createBaseNameEmpty(range: Range, name: string): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_BaseNameEmpty(name), ValidationCode.BASE_NAME_EMPTY);
     }
 
     static createInvalidAs(start: Position, end: Position): Diagnostic {
@@ -1636,24 +1654,5 @@ export class Validator {
             code: code,
             source: "dockerfile-utils"
         };
-    }
-
-    private static rangeContains(range: Range, range2: Range): boolean {
-        if (range.start.line === range2.start.line) {
-            if (range.end.line === range2.end.line) {
-                return range.start.character <= range2.start.character && range.end.character >= range2.end.character;
-            }
-        } else if (range.end.line === range2.end.line) {
-            if (range.start.line < range2.start.line) {
-                return range.end.character >= range2.end.character;
-            }
-            return false;
-        } else if (range.start.line < range2.start.line) {
-            if (range.end.line === range2.end.line) {
-                return range.end.character >= range2.end.character;
-            }
-            return range.end.line > range2.end.line;
-        }
-        return false;
     }
 }

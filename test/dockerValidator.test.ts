@@ -182,6 +182,17 @@ function assertUnknownHealthcheckFlag(diagnostic: Diagnostic, flag: string, star
     assertUnknownFlag(diagnostic, flag, startLine, startCharacter, endLine, endCharacter);
 }
 
+function assertBaseNameEmpty(diagnostic: Diagnostic, name: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.BASE_NAME_EMPTY);
+    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
+    assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_BaseNameEmpty(name));
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function assertInvalidAs(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.INVALID_AS);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
@@ -3007,6 +3018,12 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 35, 0, 41);
             });
+
+            it("empty base name", function() {
+                let diagnostics = validateDockerfile("FROM $image");
+                assert.equal(diagnostics.length, 1);
+                assertBaseNameEmpty(diagnostics[0], "$image", 0, 5, 0, 11);
+            });
         });
 
         describe("build stage", function() {
@@ -3065,6 +3082,12 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node AS a_lpi-n.e,99");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidBuildStageName(diagnostics[0], "a_lpi-n.e,99", 0, 13, 0, 25);
+            });
+
+            it("empty base name", function() {
+                let diagnostics = validateDockerfile("FROM $image AS stage");
+                assert.equal(diagnostics.length, 1);
+                assertBaseNameEmpty(diagnostics[0], "$image", 0, 5, 0, 11);
             });
         });
 
