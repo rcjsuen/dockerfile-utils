@@ -583,23 +583,24 @@ export class Validator {
                     }
                     break;
                 case "EXPOSE":
-                    let exposeArgs = instruction.getExpandedArguments();
-                    if (exposeArgs.length === 0) {
+                    let exposeArgs = instruction.getArguments();
+                    let exposeExpandedArgs = instruction.getExpandedArguments();
+                    if (exposeExpandedArgs.length === 0) {
                         let range = instruction.getInstructionRange();
                         problems.push(Validator.createMissingArgument(range.start, range.end));
                     } else {
                         const regex = /^([0-9])+(-[0-9]+)?(:([0-9])+(-[0-9]*)?)?(\/(\w*))?(\/\w*)*$/;
-                        argCheck: for (let i = 0; i < exposeArgs.length; i++) {
-                            let value = exposeArgs[i].getValue()
+                        argCheck: for (let i = 0; i < exposeExpandedArgs.length; i++) {
+                            let value = exposeExpandedArgs[i].getValue()
                             if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
-                                value = value.substring(1, value.length - 2);
+                                value = value.substring(1, value.length - 1);
                             }
                             const match = regex.exec(value);
                             if (match) {
                                 if (match[7]) {
                                     const protocol = match[7].toLowerCase();
                                     if (protocol !== "" && protocol !== "tcp" && protocol !== "udp" && protocol !== "sctp") {
-                                        const range = exposeArgs[i].getRange();
+                                        const range = exposeExpandedArgs[i].getRange();
                                         const rangeStart = this.document.offsetAt(range.start);
                                         const rawArg = this.document.getText().substring(
                                             rangeStart, this.document.offsetAt(range.end)
@@ -610,19 +611,26 @@ export class Validator {
                                     }
                                 }
                             } else {
-                                let variables = instruction.getVariables();
-                                for (let variable of variables) {
-                                    let variableRange = variable.getRange();
-                                    let variableDefinition = this.document.getText().substring(
-                                        this.document.offsetAt(variableRange.start),
-                                        this.document.offsetAt(variableRange.end)
-                                    );
-                                    // an un-expanded variable is here
-                                    if (value.includes(variableDefinition)) {
-                                        continue argCheck;
+                                // see if we're referencing a variable here
+                                if (value.charAt(0) === '$') {
+                                    let variables = instruction.getVariables();
+                                    for (let variable of variables) {
+                                        let variableRange = variable.getRange();
+                                        let variableDefinition = this.document.getText().substring(
+                                            this.document.offsetAt(variableRange.start),
+                                            this.document.offsetAt(variableRange.end)
+                                        );
+                                        let rawValue = exposeArgs[i].getValue();
+                                        if (rawValue.charAt(0) === '"' && rawValue.charAt(rawValue.length - 1) === '"') {
+                                            rawValue = rawValue.substring(1, rawValue.length - 1);
+                                        }
+                                        // an un-expanded variable is here
+                                        if (value === variableDefinition || rawValue === variableDefinition) {
+                                            continue argCheck;
+                                        }
                                     }
                                 }
-                                problems.push(Validator.createInvalidPort(exposeArgs[i].getRange(), value));
+                                problems.push(Validator.createInvalidPort(exposeExpandedArgs[i].getRange(), value));
                             }
                         }
                     }
