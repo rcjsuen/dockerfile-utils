@@ -658,7 +658,6 @@ export class Validator {
                     break;
                 case "COPY":
                     let copy = instruction as Copy;
-                    let copyArgs = instruction.getArguments();
                     let flags = copy.getFlags();
                     if (flags.length > 0) {
                         for (let flag of flags) {
