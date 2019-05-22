@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - allow quoted ARG variables in EXPOSE ([#58](https://github.com/rcjsuen/dockerfile-utils/issues/58))
 - allow ENV variables that reference ARG variables in EXPOSE ([#57](https://github.com/rcjsuen/dockerfile-utils/issues/57))
+- do not validate variable substitutions if found in RUN ([#60](https://github.com/rcjsuen/dockerfile-utils/issues/60))
 
 ## [0.0.12] - 2018-12-20
 ### Fixed

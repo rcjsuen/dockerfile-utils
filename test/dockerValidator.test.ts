@@ -1504,12 +1504,20 @@ describe("Docker Validator Tests", function() {
 
             it("unsupported modifier", function() {
                 let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:x}" + suffix);
-                assert.equal(diagnostics.length, 1);
-                assertVariableModifierUnsupported(diagnostics[0], "${bbb:x}", 'x', 2, length + 6, 2, length + 7);
+                if (prefix === "RUN ") {
+                    assert.equal(diagnostics.length, 0);
+                } else {
+                    assert.equal(diagnostics.length, 1);
+                    assertVariableModifierUnsupported(diagnostics[0], "${bbb:x}", 'x', 2, length + 6, 2, length + 7);
+                }
 
                 diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:}" + suffix);
-                assert.equal(diagnostics.length, 1);
-                assertVariableModifierUnsupported(diagnostics[0], "${bbb:}", "", 2, length, 2, length + 7);
+                if (prefix === "RUN ") {
+                    assert.equal(diagnostics.length, 0);
+                } else {
+                    assert.equal(diagnostics.length, 1);
+                    assertVariableModifierUnsupported(diagnostics[0], "${bbb:}", "", 2, length, 2, length + 7);
+                }
             });
 
             it("question mark modifier", function() {
@@ -1519,6 +1527,16 @@ describe("Docker Validator Tests", function() {
                 } else {
                     assert.equal(diagnostics.length, 1);
                     assertVariableModifierUnsupported(diagnostics[0], "${bbb:?}", '?', 2, length + 6, 2, length + 7);
+                }
+            });
+
+            it("no modifier", function() {
+                let diagnostics = validateDockerfile("FROM mcr.microsoft.com/windows/servercore:ltsc2019\nENV Env=123\n" + prefix + "${Env:TEMP}" + suffix);
+                if (prefix === "RUN ") {
+                    assert.equal(diagnostics.length, 0);
+                } else {
+                    assert.equal(diagnostics.length, 1);
+                    assertVariableModifierUnsupported(diagnostics[0], "${Env:TEMP}", 'T', 2, length + 6, 2, length + 7);
                 }
             });
         }

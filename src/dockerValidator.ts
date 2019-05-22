@@ -133,7 +133,7 @@ export class Validator {
         for (let variable of instruction.getVariables()) {
             let modifier = variable.getModifier();
             if (modifier !== null) {
-                if (modifier === '?' && instruction.getKeyword() === Keyword.RUN) {
+                if (instruction.getKeyword() === Keyword.RUN) {
                     // allow shell expansions to go through for RUN instructions
                     continue;
                 } else if (modifier === "") {
