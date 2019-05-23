@@ -2753,6 +2753,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node\nENV PORT=8001\nARG PORT=8000\nEXPOSE $PORT");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM node\nEXPOSE $PORT");
+                assert.equal(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM node\nARG PORT\nEXPOSE $PORT");
                 assert.equal(diagnostics.length, 0);
 
@@ -2841,6 +2844,9 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("ARG image=node\nFROM $image");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("ARG REPO=mcr.microsoft.com/dotnet/framework/runtime\nFROM $REPO:4.8-windowsservercore-ltsc2016");
                 assert.equal(diagnostics.length, 0);
 
                 diagnostics = validateDockerfile("ARG version\nFROM alpine:$version");

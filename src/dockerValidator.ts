@@ -621,22 +621,7 @@ export class Validator {
                             } else {
                                 // see if we're referencing a variable here
                                 if (value.charAt(0) === '$') {
-                                    let variables = instruction.getVariables();
-                                    for (let variable of variables) {
-                                        let variableRange = variable.getRange();
-                                        let variableDefinition = this.document.getText().substring(
-                                            this.document.offsetAt(variableRange.start),
-                                            this.document.offsetAt(variableRange.end)
-                                        );
-                                        let rawValue = exposeArgs[i].getValue();
-                                        if (rawValue.charAt(0) === '"' && rawValue.charAt(rawValue.length - 1) === '"') {
-                                            rawValue = rawValue.substring(1, rawValue.length - 1);
-                                        }
-                                        // an un-expanded variable is here
-                                        if (value === variableDefinition || rawValue === variableDefinition) {
-                                            continue argCheck;
-                                        }
-                                    }
+                                    continue argCheck;
                                 }
                                 problems.push(Validator.createInvalidPort(exposeExpandedArgs[i].getRange(), value));
                             }
