@@ -150,7 +150,8 @@ function format(content, options) {
         let end = document.offsetAt(edits[i].range.end);
         content = content.substring(0, start) + edits[i].newText + content.substring(end);
     }
-    console.log(content);
+    // don't use console.log to prevent newline from being appended
+    process.stdout.write(content);
 }
 
 function validate(content, json) {
