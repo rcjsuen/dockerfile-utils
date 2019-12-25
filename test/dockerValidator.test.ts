@@ -4022,10 +4022,28 @@ describe("Docker Validator Tests", function() {
                     let diagnostics = validateDockerfile("FROM scratch\nWORKDIR /path/");
                     assert.equal(diagnostics.length, 0);
 
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR '/path/'");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR \"/path/\"");
+                    assert.equal(diagnostics.length, 0);
+
                     diagnostics = validateDockerfile("FROM scratch\nWORKDIR /path/path2");
                     assert.equal(diagnostics.length, 0);
 
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR '/path/path2'");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR \"/path/path2\"");
+                    assert.equal(diagnostics.length, 0);
+
                     diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:/path");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR 'C:/path'");
+                    assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM scratch\nWORKDIR \"C:/path\"");
                     assert.equal(diagnostics.length, 0);
 
                     diagnostics = validateDockerfile("FROM scratch\nWORKDIR C:/Program Files");

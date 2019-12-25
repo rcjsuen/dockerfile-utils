@@ -691,6 +691,12 @@ export class Validator {
 
                     let content = instruction.getArgumentsContent();
                     if (content) {
+                        // strip out any surrounding quotes
+                        const first = content.substring(0, 1);
+                        const last = content.substring(content.length - 1);
+                        if ((first === '\'' && last === '\'') || (first === '"' && last === '"')) {
+                            content = content.substring(1, content.length - 1);
+                        }
                         let regexp = new RegExp(/^(\$|([a-zA-Z](\$|:(\$|\\|\/)))).*$/);
                         if (!content.startsWith('/') && !regexp.test(content)) {
                             let problem = this.createWORKDIRNotAbsolute(instruction.getArgumentsRange());

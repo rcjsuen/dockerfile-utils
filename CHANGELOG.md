@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Fixed
 - do not append newline when printing out the output of `dockerfile-utils format` to the console ([#63](https://github.com/rcjsuen/dockerfile-utils/issues/63))
+- allow paths to be quoted in WORKDIRs ([#67](https://github.com/rcjsuen/dockerfile-utils/issues/67))
 
 ## [0.0.13] - 2019-05-22
 ### Added
