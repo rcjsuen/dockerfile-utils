@@ -144,6 +144,12 @@ describe("Dockerfile formatter", function() {
         });
 
         describe("newline escaped tabbing", function() {
+            it("correctly formatted", function() {
+                let document = createDocument("EXPOSE 8081\\\n\t8082");
+                let edits = formatDocument(document);
+                assert.equal(edits.length, 0);
+            });
+
             it("single newline", function() {
                 let document = createDocument("EXPOSE 8081\\\n8082");
                 let edits = formatDocument(document);

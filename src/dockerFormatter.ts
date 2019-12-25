@@ -150,9 +150,17 @@ export class DockerFormatter {
                         // process the next line
                         continue lineCheck;
                     default:
-                        // non-whitespace encountered
-                        if (i !== startOffset || indentedLines[line]) {
-                            let edit = this.createFormattingEdit(document, startOffset, i, indentedLines[line], indentation);
+                        // found a line that should be indented
+                        if (indentedLines[line]) {
+                            const originalIndentation = document.getText().substring(startOffset, i);
+                            // change the indentation if it's not what we expect
+                            if (originalIndentation !== indentation) {
+                                const edit = this.createFormattingEdit(document, startOffset, i, indentedLines[line], indentation);
+                                edits.push(edit);
+                            }
+                        } else if (i !== startOffset) {
+                            // non-whitespace character encountered, realign
+                            const edit = this.createFormattingEdit(document, startOffset, i, indentedLines[line], indentation);
                             edits.push(edit);
                         }
                         // process the next line
