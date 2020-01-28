@@ -403,6 +403,15 @@ export class Validator {
                     }
                     break;
                 case "FROM":
+                    const fromFlags = (instruction as ModifiableInstruction).getFlags();
+                    for (const flag of fromFlags) {
+                        const flagName = flag.getName();
+                        if (flagName !== "platform") {
+                            const range = flag.getRange();
+                            problems.push(Validator.createUnknownFromFlag(range.start, flagName === "" ? range.end : flag.getNameRange().end, flag.getName()));
+                        }
+                    }
+                    this.checkFlagValue(fromFlags, [ "platform"], problems);
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
@@ -1429,6 +1438,10 @@ export class Validator {
 
     static createUnknownCopyFlag(start: Position, end: Position, flag: string): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_COPY_FLAG);
+    }
+
+    static createUnknownFromFlag(start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_FROM_FLAG);
     }
 
     static createUnknownHealthcheckFlag(start: Position, end: Position, flag: string): Diagnostic {

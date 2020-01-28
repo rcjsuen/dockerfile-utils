@@ -177,6 +177,11 @@ function assertFlagUnknownUnit(diagnostic: Diagnostic, unit: string, duration: s
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertUnknownFromFlag(diagnostic: Diagnostic, flag: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.UNKNOWN_FROM_FLAG);
+    assertUnknownFlag(diagnostic, flag, startLine, startCharacter, endLine, endCharacter);
+}
+
 function assertUnknownHealthcheckFlag(diagnostic: Diagnostic, flag: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.UNKNOWN_HEALTHCHECK_FLAG);
     assertUnknownFlag(diagnostic, flag, startLine, startCharacter, endLine, endCharacter);
@@ -3112,6 +3117,32 @@ describe("Docker Validator Tests", function() {
                 let diagnostics = validateDockerfile("FROM $image AS stage");
                 assert.equal(diagnostics.length, 1);
                 assertBaseNameEmpty(diagnostics[0], "$image", 0, 5, 0, 11);
+            });
+        });
+
+        describe("source image", function() {
+            it("ok", function() {
+                let diagnostics = validateDockerfile("FROM --platform=linux node");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM --platform= node");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("unknown flag", function() {
+                let diagnostics = validateDockerfile("FROM --platfor=linux alpine");
+                assert.equal(diagnostics.length, 1);
+                assertUnknownFromFlag(diagnostics[0], "platfor", 0, 5, 0, 14);
+
+                diagnostics = validateDockerfile("FROM --PLATFORM=linux alpine");
+                assert.equal(diagnostics.length, 1);
+                assertUnknownFromFlag(diagnostics[0], "PLATFORM", 0, 5, 0, 15);
+            });
+
+            it("flag missing value", function() {
+                let diagnostics = validateDockerfile("FROM --platform alpine");
+                assert.equal(diagnostics.length, 1);
+                assertFlagMissingValue(diagnostics[0], "platform", 0, 7, 0, 15);
             });
         });
 

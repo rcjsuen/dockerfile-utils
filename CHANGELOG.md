@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- add validation of FROM's `--platform` flag introduced in Docker CE 18.04 ([#68](https://github.com/rcjsuen/dockerfile-utils/issues/68))
+  - `ValidationCode.UNKNOWN_FROM_FLAG`
+
 ### Fixed
 - do not append newline when printing out the output of `dockerfile-utils format` to the console ([#63](https://github.com/rcjsuen/dockerfile-utils/issues/63))
 - allow paths to be quoted in WORKDIRs ([#67](https://github.com/rcjsuen/dockerfile-utils/issues/67))
