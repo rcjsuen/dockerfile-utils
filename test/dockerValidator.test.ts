@@ -3134,9 +3134,15 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 1);
                 assertUnknownFromFlag(diagnostics[0], "platfor", 0, 5, 0, 14);
 
+                // case sensitive
                 diagnostics = validateDockerfile("FROM --PLATFORM=linux alpine");
                 assert.equal(diagnostics.length, 1);
                 assertUnknownFromFlag(diagnostics[0], "PLATFORM", 0, 5, 0, 15);
+
+                // empty name
+                diagnostics = validateDockerfile("FROM -- alpine");
+                assert.equal(diagnostics.length, 1);
+                assertUnknownFromFlag(diagnostics[0], "", 0, 5, 0, 7);
             });
 
             it("flag missing value", function() {
