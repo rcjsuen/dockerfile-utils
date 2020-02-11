@@ -3728,6 +3728,12 @@ describe("Docker Validator Tests", function() {
 
             diagnostics = validateDockerfile("FROM busybox\r\nRUN ls && \\\r\n");
             assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\r\nRUN ls && \\\na");
+            assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM busybox\r\nRUN ls && \\\r\na");
+            assert.equal(diagnostics.length, 0);
         });
 
         it("whitespace newline escape", function() {
