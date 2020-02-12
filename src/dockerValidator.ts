@@ -51,26 +51,38 @@ export class Validator {
         }
     }
 
-    parseDirective(dockerfile: Dockerfile, problems: Diagnostic[]) {
-        let directive = dockerfile.getDirective();
-        if (directive === null) {
-            return;
+    private checkDirectives(dockerfile: Dockerfile, problems: Diagnostic[]) {
+        const duplicatedEscapes = [];
+        for (const directive of dockerfile.getDirectives()) {
+            if (directive.getDirective() === Directive.escape) {
+                duplicatedEscapes.push(directive);
+            }
         }
 
-        let directiveName = directive.getDirective();
-        let value = directive.getValue();
-        if (directiveName === Directive.escape) {
-            if (value !== '\\' && value !== '`' && value !== "") {
-                // if the directive's value is invalid or isn't the empty string, flag it
-                let range = directive.getValueRange();
-                problems.push(Validator.createInvalidEscapeDirective(range.start, range.end, value));
+        if (duplicatedEscapes.length > 1) {
+            // multiple escape parser directives have been found
+            for (const directive of duplicatedEscapes) {
+                problems.push(Validator.createDuplicatedEscapeDirective(directive.getNameRange().start, directive.getValueRange().end));
             }
+            return
+        }
 
-            if (directive.getName() !== Directive.escape) {
-                let range = directive.getNameRange();
-                let diagnostic = this.createLowercaseDirective(range.start, range.end);
-                if (diagnostic) {
-                    problems.push(diagnostic);
+        for (const directive of dockerfile.getDirectives()) {
+            const directiveName = directive.getDirective();
+            if (directiveName === Directive.escape) {
+                const value = directive.getValue();
+                if (value !== '\\' && value !== '`' && value !== "") {
+                    // if the directive's value is invalid or isn't the empty string, flag it
+                    const range = directive.getValueRange();
+                    problems.push(Validator.createInvalidEscapeDirective(range.start, range.end, value));
+                }
+    
+                if (directive.getName() !== Directive.escape) {
+                    const range = directive.getNameRange();
+                    const diagnostic = this.createLowercaseDirective(range.start, range.end);
+                    if (diagnostic) {
+                        problems.push(diagnostic);
+                    }
                 }
             }
         }
@@ -201,7 +213,7 @@ export class Validator {
         this.document = document;
         let problems: Diagnostic[] = [];
         let dockerfile = DockerfileParser.parse(document.getText());
-        this.parseDirective(dockerfile, problems);
+        this.checkDirectives(dockerfile, problems);
         let instructions = dockerfile.getInstructions();
         if (instructions.length === 0 || dockerfile.getARGs().length === instructions.length) {
             // no instructions in this file, or only ARGs
@@ -1123,6 +1135,7 @@ export class Validator {
         "baseNameEmpty": "base name (${0}) should not be blank",
 
         "directiveCasing": "Parser directives should be written in lowercase letters",
+        "directiveEscapeDuplicated": "only one escape parser directive can be used",
         "directiveEscapeInvalid": "invalid ESCAPE '${0}'. Must be ` or \\",
 
         "noSourceImage": "No source image provided with `FROM`",
@@ -1194,6 +1207,10 @@ export class Validator {
 
     public static getDiagnosticMessage_DirectiveCasing() {
         return Validator.dockerProblems["directiveCasing"];
+    }
+
+    public static getDiagnosticMessage_DirectiveEscapeDuplicated() {
+        return Validator.dockerProblems["directiveEscapeDuplicated"];
     }
 
     public static getDiagnosticMessage_DirectiveEscapeInvalid(value: string) {
@@ -1390,6 +1407,10 @@ export class Validator {
 
     public static getDiagnosticMessage_WORKDIRPathNotAbsolute() {
         return Validator.formatMessage(Validator.dockerProblems["workdirPathNotAbsolute"]);
+    }
+
+    private static createDuplicatedEscapeDirective(start: Position, end: Position): Diagnostic {
+        return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated(), ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE);
     }
 
     static createInvalidEscapeDirective(start: Position, end: Position, value: string): Diagnostic {

@@ -97,7 +97,13 @@ export enum ValidationCode {
      * The error code used if a FROM instruction uses a variable to
      * reference its base image but the variable does not exist.
      */
-    BASE_NAME_EMPTY
+    BASE_NAME_EMPTY,
+
+    /**
+     * The error code used if more than one escape parser directive is
+     * defined.
+     */
+    DUPLICATED_ESCAPE_DIRECTIVE
 }
 
 /**
