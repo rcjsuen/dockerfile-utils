@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Fixed
 - multiline instructions with empty newlines will no longer throw an error during validation ([#71](https://github.com/rcjsuen/dockerfile-utils/issues/71))
+- instruction keywords that span multiple lines will no longer be raised as an error ([#72](https://github.com/rcjsuen/dockerfile-utils/issues/72))
 
 ## [0.0.14] - 2020-02-11
 ### Added

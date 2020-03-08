@@ -1113,7 +1113,7 @@ describe("Docker Validator Tests", function() {
             }
 
             function testEscapedInstructionLoop(instruction: string, args: string) {
-                let newlines = [ "\\\n", "\\\r\n", "\\ \n", "\\ \r\n", "\\\t\n", "\\\t\r\n" ];
+                let newlines = ["\\\n", "\\\r\n", "\\ \n", "\\ \r\n", "\\\t\n", "\\\t\r\n", "\\\n\n", "\\\r\n\r\n"];
                 for (let newline of newlines) {
                     testEscapedInstruction(instruction.substring(0, 1), newline, instruction.substring(1), args);
                 }
