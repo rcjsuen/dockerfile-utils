@@ -2313,6 +2313,9 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY [\"Dockerfile\",\"Dockerfile2\",\"C:\\tmp\\\\\" ]");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY 1.txt 2.txt \\\n 3.txt #4.txt /dir/");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("requires at least two", function() {
