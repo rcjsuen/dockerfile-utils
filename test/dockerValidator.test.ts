@@ -3098,6 +3098,12 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM alpine \\\r\n# comment\r\n\r\n# comment\r\nAS build");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine \\\n# comment\\\nAS build");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine \\\r\n# comment\\\r\nAS build");
+                assert.equal(diagnostics.length, 0);
             });
 
             it("invalid as", function() {
