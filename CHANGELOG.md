@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.0.15] - 2020-03-08
 ### Fixed
 - multiline instructions with empty newlines will no longer throw an error during validation ([#71](https://github.com/rcjsuen/dockerfile-utils/issues/71))
 - instruction keywords that span multiple lines will no longer be raised as an error ([#72](https://github.com/rcjsuen/dockerfile-utils/issues/72))
@@ -133,7 +133,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.14...HEAD
+[0.0.15]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.13...v0.0.14
 [0.0.13]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.11...v0.0.12
