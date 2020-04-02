@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.16] - 2020-04-02
 ### Added
-- RUN instructions with only flags and no arguments will now be raised as an error
+- RUN instructions with only flags and no arguments will now be raised as an error ([#76](https://github.com/rcjsuen/dockerfile-utils/issues/76))
 
 ## [0.0.15] - 2020-03-08
 ### Fixed
