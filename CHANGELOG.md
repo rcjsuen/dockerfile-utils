@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- RUN instructions with only flags and no arguments will now be raised as an error
+
 ## [0.0.15] - 2020-03-08
 ### Fixed
 - multiline instructions with empty newlines will no longer throw an error during validation ([#71](https://github.com/rcjsuen/dockerfile-utils/issues/71))

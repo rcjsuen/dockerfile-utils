@@ -3813,6 +3813,18 @@ describe("Docker Validator Tests", function() {
             diagnostics = validateDockerfile("FROM busybox\r\nRUN ls && \\\r\n \t# comment");
             assert.equal(diagnostics.length, 0);
         });
+
+        it("flags only with no argument", function () {
+            let diagnostics = validateDockerfile("FROM alpine\nRUN --x=y");
+            assert.equal(diagnostics.length, 1);
+            assertInstructionMissingArgument(diagnostics[0], 1, 0, 1, 3);
+
+            diagnostics = validateDockerfile("FROM alpine\nRUN --x=y --abc=def");
+            assert.equal(diagnostics.length, 1);
+            assertInstructionMissingArgument(diagnostics[0], 1, 0, 1, 3);
+        });
+
+        createSingleQuotedJSONTests("RUN");
     });
 
     describe("SHELL", function() {
@@ -4067,10 +4079,6 @@ describe("Docker Validator Tests", function() {
                 assertInvalidStopSignal(diagnostics[0], "${a", 1, 11, 1, 14);
             });
         });
-    });
-
-    describe("RUN", function() {
-        createSingleQuotedJSONTests("RUN");
     });
 
     describe("USER", function() {
