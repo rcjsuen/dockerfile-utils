@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- correct ranges of linting errors if the error is on a multiline argument that is preceded by the escape character ([#77](https://github.com/rcjsuen/dockerfile-utils/issues/77))
+
 ## [0.0.16] - 2020-04-02
 ### Added
 - RUN instructions with only flags and no arguments will now be raised as an error ([#76](https://github.com/rcjsuen/dockerfile-utils/issues/76))
@@ -137,6 +141,7 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.16...HEAD
 [0.0.16]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.13...v0.0.14
