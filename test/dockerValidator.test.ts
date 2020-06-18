@@ -1038,7 +1038,8 @@ describe("Docker Validator Tests", function() {
             });
 
             it("ARG", function() {
-                return testMissingArgumentLoop("ARG");
+                testMissingArgumentLoop("ARG");
+                testMissingArgument("ARG", " \\\n# comment", "", "");
             });
 
             it("CMD", function() {
@@ -1054,7 +1055,8 @@ describe("Docker Validator Tests", function() {
             });
 
             it("ENV", function() {
-                return testMissingArgumentLoop("ENV");
+                testMissingArgumentLoop("ENV");
+                testMissingArgument("ENV", " \\\n# comment", "", "");
             });
 
             it("EXPOSE", function() {
