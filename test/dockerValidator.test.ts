@@ -2371,6 +2371,14 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 1);
                 assertCOPYDestinationNotDirectory(diagnostics[0], 2, 9, 4, 2);
 
+                diagnostics = validateDockerfile("FROM alpine\nCOPY a b \\\n\\ \n/dir");
+                assert.equal(diagnostics.length, 1);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 3, 0, 3, 4);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM alpine\nCOPY a b `\n` \n/dir");
+                assert.equal(diagnostics.length, 1);
+                assertCOPYDestinationNotDirectory(diagnostics[0], 4, 0, 4, 4);
+
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY Dockerfile Dockerfile2 C:\\tmp");
                 assert.equal(diagnostics.length, 1);
                 assertCOPYDestinationNotDirectory(diagnostics[0], 2, 28, 2, 34);

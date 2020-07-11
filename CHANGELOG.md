@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - correct ranges of linting errors if the error is on a multiline argument that is preceded by the escape character ([#77](https://github.com/rcjsuen/dockerfile-utils/issues/77))
+- fix linting error caused by whitespace followed after the escape character ([#79](https://github.com/rcjsuen/dockerfile-utils/issues/79))
 
 ## [0.0.16] - 2020-04-02
 ### Added
