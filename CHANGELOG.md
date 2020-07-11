@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- images on Docker Hub are not being updated ([#81](https://github.com/rcjsuen/dockerfile-utils/issues/81))
+
 ## [0.1.0] - 2020-07-11
 ### Added
 - ARG and ENV instructions that span multiple lines with just a comment are now flagged as an error ([#78](https://github.com/rcjsuen/dockerfile-utils/issues/78))
