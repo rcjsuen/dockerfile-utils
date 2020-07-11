@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import {
-    TextDocument, Range, Position, Diagnostic, DiagnosticSeverity
+    Diagnostic, DiagnosticSeverity, DiagnosticTag, Position, Range, TextDocument
 } from 'vscode-languageserver-types';
 import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
@@ -1648,9 +1648,13 @@ export class Validator {
 
     createMaintainerDeprecated(start: Position, end: Position): Diagnostic | null {
         if (this.settings.deprecatedMaintainer === ValidationSeverity.ERROR) {
-            return Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
+            const diagnostic = Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
+            diagnostic.tags = [DiagnosticTag.Deprecated];
+            return diagnostic;
         } else if (this.settings.deprecatedMaintainer === ValidationSeverity.WARNING) {
-            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
+            const diagnostic = Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
+            diagnostic.tags = [DiagnosticTag.Deprecated];
+            return diagnostic;
         }
         return null;
     }

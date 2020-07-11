@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
 
-import { TextDocument, Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
+import { Diagnostic, DiagnosticSeverity, DiagnosticTag, TextDocument } from 'vscode-languageserver-types';
 import { Validator } from '../src/dockerValidator';
 import { ValidationCode, ValidatorSettings, ValidationSeverity, validate } from '../src/main';
 
@@ -532,6 +532,8 @@ function assertDeprecatedMaintainer(diagnostic: Diagnostic, severity: Diagnostic
     assert.equal(diagnostic.code, ValidationCode.DEPRECATED_MAINTAINER);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.equal(diagnostic.tags.length, 1);
+    assert.equal(diagnostic.tags[0], DiagnosticTag.Deprecated);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DeprecatedMaintainer());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);

@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - ARG and ENV instructions that span multiple lines with just a comment are now flagged as an error ([#78](https://github.com/rcjsuen/dockerfile-utils/issues/78))
+- use DiagnosticTag to indicate if a Diagnostic is informing the user about a deprecation or not([#80](https://github.com/rcjsuen/dockerfile-utils/issues/80))
 
 ### Fixed
 - correct ranges of linting errors if the error is on a multiline argument that is preceded by the escape character ([#77](https://github.com/rcjsuen/dockerfile-utils/issues/77))
