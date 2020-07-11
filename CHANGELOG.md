@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.1.0] - 2020-07-11
 ### Added
 - ARG and ENV instructions that span multiple lines with just a comment are now flagged as an error ([#78](https://github.com/rcjsuen/dockerfile-utils/issues/78))
 - use DiagnosticTag to indicate if a Diagnostic is informing the user about a deprecation or not([#80](https://github.com/rcjsuen/dockerfile-utils/issues/80))
@@ -146,7 +146,8 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.16...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.16...v0.1.0
 [0.0.16]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.14...v0.0.15
 [0.0.14]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.13...v0.0.14
