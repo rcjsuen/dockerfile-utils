@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- instructions with only an escape character as its argument should be flagged as not having any arguments ([#83](https://github.com/rcjsuen/dockerfile-utils/issues/83))
+
 ### Fixed
 - images on Docker Hub are not being updated ([#81](https://github.com/rcjsuen/dockerfile-utils/issues/81))
 

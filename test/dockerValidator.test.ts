@@ -1033,6 +1033,7 @@ describe("Docker Validator Tests", function() {
                     testMissingArgument(instruction, "\t", newline, "", safe, assertFunction);
                     testMissingArgument(instruction, "\t", newline, "\t", safe, assertFunction);
                 }
+                testMissingArgument(instruction, " ", "\\", "", safe, assertFunction);
             }
 
             it("ADD", function() {
