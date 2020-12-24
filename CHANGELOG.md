@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.1.1] - 2020-12-24
 ### Added
 - instructions with only an escape character as its argument should be flagged as not having any arguments ([#83](https://github.com/rcjsuen/dockerfile-utils/issues/83))
 
@@ -153,7 +153,8 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.16...v0.1.0
 [0.0.16]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.15...v0.0.16
 [0.0.15]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.14...v0.0.15
