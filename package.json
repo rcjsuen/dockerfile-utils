@@ -27,7 +27,7 @@
   "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
   "dependencies": {
-    "dockerfile-ast": "0.0.30",
+    "dockerfile-ast": "0.1.0",
     "vscode-languageserver-types": "^3.16.0"
   },
   "devDependencies": {
