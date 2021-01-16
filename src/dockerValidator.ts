@@ -666,8 +666,8 @@ export class Validator {
                     if (addDestinationDiagnostic !== null) {
                         problems.push(addDestinationDiagnostic);
                     }
-                    this.checkFlagValue(addFlags, ["chown"], problems);
-                    this.checkDuplicateFlags(addFlags, ["chown"], problems);
+                    this.checkFlagValue(addFlags, ["chmod", "chown"], problems);
+                    this.checkDuplicateFlags(addFlags, ["chmod", "chown"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":

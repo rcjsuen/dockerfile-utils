@@ -1964,14 +1964,44 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("flags", function() {
-            it("chmod ok", function() {
-                let diagnostics = validateDockerfile("FROM node\nADD --chmod=644 . .");
-                assert.equal(diagnostics.length, 0);
+            describe("chmod", () => {
+                it("ok", () => {
+                    let diagnostics = validateDockerfile("FROM node\nADD --chmod=644 . .");
+                    assert.equal(diagnostics.length, 0);
+                });
+
+                it("flag no value", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nADD --chmod . .");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "chmod", 1, 6, 1, 11);
+                });
+
+                it("duplicate flag", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nADD --chmod=644 --chmod=755 . .");
+                    assert.equal(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], "chmod", 1, 6, 1, 11);
+                    assertFlagDuplicate(diagnostics[1], "chmod", 1, 18, 1, 23);
+                });
             });
 
-            it("chown ok", function() {
-                let diagnostics = validateDockerfile("FROM node\nADD --chown=node:node . .");
-                assert.equal(diagnostics.length, 0);
+            describe("chown", () => {
+                it("ok", () => {
+                    let diagnostics = validateDockerfile("FROM node\nADD --chown=node:node . .");
+                    assert.equal(diagnostics.length, 0);
+                });
+
+                it("flag no value", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nADD --chown . .");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "chown", 1, 6, 1, 11);
+                });
+
+                it("duplicate flag", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nADD --chown=x --chown=y . .");
+                    assert.equal(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], "chown", 1, 6, 1, 11);
+                    assertFlagDuplicate(diagnostics[1], "chown", 1, 16, 1, 21);
+                });
             });
 
             it("unknown flag", function() {
@@ -2006,19 +2036,6 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine\nADD --CHOWN=bb . .");
                 assert.equal(diagnostics.length, 1);
                 assertUnknownAddFlag(diagnostics[0], "CHOWN", 1, 4, 1, 11);
-            });
-
-            it("flag no value", function() {
-                let diagnostics = validateDockerfile("FROM alpine\nADD --chown . .");
-                assert.equal(diagnostics.length, 1);
-                assertFlagMissingValue(diagnostics[0], "chown", 1, 6, 1, 11);
-            });
-
-            it("duplicate flag", function() {
-                let diagnostics = validateDockerfile("FROM alpine\nADD --chown=x --chown=y . .");
-                assert.equal(diagnostics.length, 2);
-                assertFlagDuplicate(diagnostics[0], "chown", 1, 6, 1, 11);
-                assertFlagDuplicate(diagnostics[1], "chown", 1, 16, 1, 21);
             });
         });
 
