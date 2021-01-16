@@ -2422,6 +2422,26 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("flags", function() {
+            describe("chmod", function() {
+                it("ok", function() {
+                    let diagnostics = validateDockerfile("FROM node\nCOPY --chmod=644 . .");
+                    assert.equal(diagnostics.length, 0);
+                });
+
+                it("no value", function() {
+                    let diagnostics = validateDockerfile("FROM alpine\nCOPY --chmod . .");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "chmod", 1, 7, 1, 12);
+                });
+
+                it("duplicate flag", function() {
+                    let diagnostics = validateDockerfile("FROM alpine\nCOPY --chmod=644 --chmod=755 . .");
+                    assert.equal(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], "chmod", 1, 7, 1, 12);
+                    assertFlagDuplicate(diagnostics[1], "chmod", 1, 19, 1, 24);
+                });
+            });
+
             describe("chown", function() {
                 it("ok", function() {
                     let diagnostics = validateDockerfile("FROM node\nCOPY --chown=node:node . .");

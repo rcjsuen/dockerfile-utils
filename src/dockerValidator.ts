@@ -679,7 +679,7 @@ export class Validator {
                             const flagRange = flag.getRange();
                             if (name === "") {
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, flagRange.end, name));
-                            } else if (name !== "from" && name !== "chown") {
+                            } else if (name !== "chmod" && name !== "chown" && name !== "from") {
                                 let range = flag.getNameRange();
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, range.end, name));
                             }
@@ -701,8 +701,8 @@ export class Validator {
                     if (copyDestinationDiagnostic !== null) {
                         problems.push(copyDestinationDiagnostic);
                     }
-                    this.checkFlagValue(flags, ["chown", "from"], problems);
-                    this.checkDuplicateFlags(flags, ["chown", "from"], problems);
+                    this.checkFlagValue(flags, ["chmod", "chown", "from"], problems);
+                    this.checkDuplicateFlags(flags, ["chmod", "chown", "from"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "WORKDIR":

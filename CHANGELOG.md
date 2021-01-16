@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - support the `--chmod` flag for ADD instructions ([#85](https://github.com/rcjsuen/dockerfile-utils/issues/85))
+- support the `--chmod` flag for COPY instructions ([#86](https://github.com/rcjsuen/dockerfile-utils/issues/86))
 
 ## [0.1.1] - 2020-12-24
 ### Added
