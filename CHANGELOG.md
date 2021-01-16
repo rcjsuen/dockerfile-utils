@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support the `--chmod` flag for ADD instructions ([#85](https://github.com/rcjsuen/dockerfile-utils/issues/85))
+
 ## [0.1.1] - 2020-12-24
 ### Added
 - instructions with only an escape character as its argument should be flagged as not having any arguments ([#83](https://github.com/rcjsuen/dockerfile-utils/issues/83))

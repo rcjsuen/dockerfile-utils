@@ -41,7 +41,7 @@ if (args.length === 0 || args[0] === "-h" || args[0] === "--help") {
 
 function printVersion() {
     const package = require("../package.json");
-    console.log("dockerfile-utils version " + package.version + " (supports Docker CE 18.04)");
+    console.log("dockerfile-utils version " + package.version + " (supports Docker CE 20.10)");
 }
 
 function printHelp() {

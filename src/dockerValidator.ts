@@ -657,7 +657,7 @@ export class Validator {
                         const flagRange = flag.getRange();
                         if (name === "") {
                             problems.push(Validator.createUnknownAddFlag(flagRange.start, flagRange.end, name));
-                        } else if (name !== "chown") {
+                        } else if (name !== "chmod" && name !== "chown") {
                             let range = flag.getNameRange();
                             problems.push(Validator.createUnknownAddFlag(flagRange.start, range.end, name));
                         }

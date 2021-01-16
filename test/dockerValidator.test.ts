@@ -1964,7 +1964,12 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("flags", function() {
-            it("ok", function() {
+            it("chmod ok", function() {
+                let diagnostics = validateDockerfile("FROM node\nADD --chmod=644 . .");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("chown ok", function() {
                 let diagnostics = validateDockerfile("FROM node\nADD --chown=node:node . .");
                 assert.equal(diagnostics.length, 0);
             });
