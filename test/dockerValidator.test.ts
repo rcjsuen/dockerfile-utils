@@ -1198,7 +1198,7 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("multiples", function() {
-            function createMutiplesTest(instruction: string, args: string, settingsName: string) {
+            function createMultiplesTest(instruction: string, args: string, settingsName: string) {
                 let line = instruction + " " + args;
                 let content = "FROM busybox\n" + line + "\n" + line;
                 let contentMultiStage = "FROM busybox\n" + line + "\n" + line + "\nFROM alpine\n" + line + "\n" + line;
@@ -1262,20 +1262,20 @@ describe("Docker Validator Tests", function() {
             };
 
             describe("CMD", function() {
-                createMutiplesTest("CMD", "ls", "instructionCmdMultiple");
+                createMultiplesTest("CMD", "ls", "instructionCmdMultiple");
             });
 
             describe("ENTRYPOINT", function() {
-                createMutiplesTest("ENTRYPOINT", "ls", "instructionEntrypointMultiple");
+                createMultiplesTest("ENTRYPOINT", "ls", "instructionEntrypointMultiple");
             });
 
             describe("HEALTHCHECK", function() {
                 describe("CMD", function() {
-                    createMutiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
+                    createMultiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
                 });
 
                 describe("NONE", function() {
-                    createMutiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
+                    createMultiplesTest("HEALTHCHECK", "CMD ls", "instructionHealthcheckMultiple");
                 });
             });
         });
