@@ -2629,7 +2629,7 @@ describe("Docker Validator Tests", function() {
             createSingleNameValuePairTests("ENV");
         });
 
-        describe("multple", function() {
+        describe("multiple", function() {
             createMultipleNameValuePairTests("ENV");
         });
     });
@@ -3710,7 +3710,7 @@ describe("Docker Validator Tests", function() {
             createSingleNameValuePairTests("LABEL");
         });
 
-        describe("multple", function() {
+        describe("multiple", function() {
             createMultipleNameValuePairTests("LABEL");
         });
     });
