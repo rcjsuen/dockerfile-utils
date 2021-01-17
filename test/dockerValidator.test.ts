@@ -3624,7 +3624,7 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 0);
                 });
 
-                it("argments specified", function() {
+                it("arguments specified", function() {
                     // single argument
                     let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK NONE --interval=10s");
                     assert.equal(diagnostics.length, 1);
