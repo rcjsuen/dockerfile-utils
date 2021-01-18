@@ -51,6 +51,7 @@ function assertNoSourceImage(diagnostic: Diagnostic, startLine: number, startCha
     assert.equal(diagnostic.code, ValidationCode.NO_SOURCE_IMAGE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_NoSourceImage());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -62,6 +63,7 @@ function assertEmptyContinuationLine(diagnostic: Diagnostic, severity: Diagnosti
     assert.equal(diagnostic.code, ValidationCode.EMPTY_CONTINUATION_LINE);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_EmptyContinuationLine());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -73,6 +75,7 @@ function assertFlagAtLeastOne(diagnostic: Diagnostic, flagName: string, flagValu
     assert.equal(diagnostic.code, ValidationCode.FLAG_AT_LEAST_ONE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagAtLeastOne(flagName, flagValue));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -84,6 +87,7 @@ function assertFlagDuplicate(diagnostic: Diagnostic, flag: string, startLine: nu
     assert.equal(diagnostic.code, ValidationCode.FLAG_DUPLICATE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagDuplicate(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -95,6 +99,7 @@ function assertFlagInvalidDuration(diagnostic: Diagnostic, flag: string, startLi
     assert.equal(diagnostic.code, ValidationCode.FLAG_INVALID_DURATION);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagInvalidDuration(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -106,6 +111,7 @@ function assertFlagLessThan1ms(diagnostic: Diagnostic, flag: string, startLine: 
     assert.equal(diagnostic.code, ValidationCode.FLAG_LESS_THAN_1MS);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagLessThan1ms(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -117,6 +123,7 @@ function assertFlagMissingDuration(diagnostic: Diagnostic, duration: string, sta
     assert.equal(diagnostic.code, ValidationCode.FLAG_MISSING_DURATION);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagMissingDuration(duration));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -128,6 +135,7 @@ function assertFlagInvalidFrom(diagnostic: Diagnostic, flag: string, startLine: 
     assert.equal(diagnostic.code, ValidationCode.FLAG_INVALID_FROM_VALUE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -139,6 +147,7 @@ function assertFlagMissingValue(diagnostic: Diagnostic, flag: string, startLine:
     assert.equal(diagnostic.code, ValidationCode.FLAG_MISSING_VALUE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagMissingValue(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -149,6 +158,7 @@ function assertFlagMissingValue(diagnostic: Diagnostic, flag: string, startLine:
 function assertUnknownFlag(diagnostic: Diagnostic, flag: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagUnknown(flag));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -170,6 +180,7 @@ function assertFlagUnknownUnit(diagnostic: Diagnostic, unit: string, duration: s
     assert.equal(diagnostic.code, ValidationCode.FLAG_UNKNOWN_UNIT);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagUnknownUnit(unit, duration));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -191,6 +202,7 @@ function assertBaseNameEmpty(diagnostic: Diagnostic, name: string, startLine: nu
     assert.equal(diagnostic.code, ValidationCode.BASE_NAME_EMPTY);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_BaseNameEmpty(name));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -202,6 +214,7 @@ function assertInvalidAs(diagnostic: Diagnostic, startLine: number, startCharact
     assert.equal(diagnostic.code, ValidationCode.INVALID_AS);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidAs());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -213,6 +226,7 @@ function assertInvalidPort(diagnostic: Diagnostic, port: string, startLine: numb
     assert.equal(diagnostic.code, ValidationCode.INVALID_PORT);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidPort(port));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -224,6 +238,7 @@ function assertInvalidProto(diagnostic: Diagnostic, protocol: string, startLine:
     assert.equal(diagnostic.code, ValidationCode.INVALID_PROTO);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidProto(protocol));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -235,6 +250,7 @@ function assertInvalidReferenceFormat(diagnostic: Diagnostic, startLine: number,
     assert.equal(diagnostic.code, ValidationCode.INVALID_REFERENCE_FORMAT);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidReferenceFormat());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -246,6 +262,7 @@ function assertInvalidStopSignal(diagnostic: Diagnostic, signal: string, startLi
     assert.equal(diagnostic.code, ValidationCode.INVALID_SIGNAL);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidSignal(signal));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -257,6 +274,7 @@ function assertInvalidSyntax(diagnostic: Diagnostic, syntax: string, startLine: 
     assert.equal(diagnostic.code, ValidationCode.INVALID_SYNTAX);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidSyntax(syntax));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -268,6 +286,7 @@ function assertDirectiveCasing(diagnostic: Diagnostic, severity: DiagnosticSever
     assert.equal(diagnostic.code, ValidationCode.CASING_DIRECTIVE);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DirectiveCasing());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -279,6 +298,7 @@ function assertInstructionCasing(diagnostic: Diagnostic, severity: DiagnosticSev
     assert.equal(diagnostic.code, ValidationCode.CASING_INSTRUCTION);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionCasing());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -290,6 +310,7 @@ function assertInstructionExtraArgument(diagnostic: Diagnostic, startLine: numbe
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_EXTRA);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionExtraArgument());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -301,6 +322,7 @@ function assertInstructionMissingArgument(diagnostic: Diagnostic, startLine: num
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_MISSING);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionMissingArgument());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -312,6 +334,7 @@ function assertInstructionMultiple(diagnostic: Diagnostic, severity: DiagnosticS
     assert.equal(diagnostic.code, ValidationCode.MULTIPLE_INSTRUCTIONS);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionMultiple(instruction));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -323,6 +346,7 @@ function assertInstructionRequiresOneArgument(diagnostic: Diagnostic, startLine:
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_ONE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ARGRequiresOneArgument());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -334,6 +358,7 @@ function assertHealthcheckCmdArgumentMissing(diagnostic: Diagnostic, startLine: 
     assert.equal(diagnostic.code, ValidationCode.HEALTHCHECK_CMD_ARGUMENT_MISSING);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_HealthcheckCmdArgumentMissing());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -345,6 +370,7 @@ function assertHealthcheckTypeUnknown(diagnostic: Diagnostic, type: string, star
     assert.equal(diagnostic.code, ValidationCode.UNKNOWN_TYPE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_HealthcheckTypeUnknown(type));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -356,6 +382,7 @@ function assertADDDestinationNotDirectory(diagnostic: Diagnostic, startLine: num
     assert.equal(diagnostic.code, ValidationCode.INVALID_DESTINATION);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ADDDestinationNotDirectory());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -367,6 +394,7 @@ function assertADDRequiresAtLeastTwoArguments(diagnostic: Diagnostic, startLine:
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ADDRequiresAtLeastTwoArguments());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -378,6 +406,7 @@ function assertCOPYDestinationNotDirectory(diagnostic: Diagnostic, startLine: nu
     assert.equal(diagnostic.code, ValidationCode.INVALID_DESTINATION);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_COPYDestinationNotDirectory());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -389,6 +418,7 @@ function assertCOPYRequiresAtLeastTwoArguments(diagnostic: Diagnostic, startLine
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_COPYRequiresAtLeastTwoArguments());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -400,6 +430,7 @@ function assertENVRequiresTwoArguments(diagnostic: Diagnostic, startLine: number
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_TWO);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ENVRequiresTwoArguments());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -411,6 +442,7 @@ function assertHEALTHCHECKRequiresAtLeastOneArgument(diagnostic: Diagnostic, sta
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_ONE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_HEALTHCHECKRequiresAtLeastOneArgument());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -422,6 +454,7 @@ function assertInstructionRequiresOneOrThreeArguments(diagnostic: Diagnostic, st
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_ONE_OR_THREE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionRequiresOneOrThreeArguments());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -433,6 +466,7 @@ function assertInstructionUnnecessaryArgument(diagnostic: Diagnostic, startLine:
     assert.equal(diagnostic.code, ValidationCode.ARGUMENT_UNNECESSARY);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_HealthcheckNoneUnnecessaryArgument());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -444,6 +478,7 @@ function assertInstructionUnknown(diagnostic: Diagnostic, instruction: string, s
     assert.equal(diagnostic.code, ValidationCode.UNKNOWN_INSTRUCTION);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionUnknown(instruction));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -455,6 +490,7 @@ function assertInstructionJSONInSingleQuotes(diagnostic: Diagnostic, severity: D
     assert.equal(diagnostic.code, ValidationCode.JSON_IN_SINGLE_QUOTES);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -466,6 +502,7 @@ function assertOnbuildChainingDisallowed(diagnostic: Diagnostic, startLine: numb
     assert.equal(diagnostic.code, ValidationCode.ONBUILD_CHAINING_DISALLOWED);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_OnbuildChainingDisallowed());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -477,6 +514,7 @@ function assertShellJsonForm(diagnostic: Diagnostic, startLine: number, startCha
     assert.equal(diagnostic.code, ValidationCode.SHELL_JSON_FORM);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ShellJsonForm());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -488,6 +526,7 @@ function assertShellRequiresOne(diagnostic: Diagnostic, startLine: number, start
     assert.equal(diagnostic.code, ValidationCode.SHELL_REQUIRES_ONE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ShellRequiresOne());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -499,6 +538,7 @@ function assertOnbuildTriggerDisallowed(diagnostic: Diagnostic, trigger: string,
     assert.equal(diagnostic.code, ValidationCode.ONBUILD_TRIGGER_DISALLOWED);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_OnbuildTriggerDisallowed(trigger));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -510,6 +550,7 @@ function assertDirectiveEscapeDuplicated(diagnostic: Diagnostic, startLine: numb
     assert.equal(diagnostic.code, ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -521,6 +562,7 @@ function assertDirectiveEscapeInvalid(diagnostic: Diagnostic, value: string, sta
     assert.equal(diagnostic.code, ValidationCode.INVALID_ESCAPE_DIRECTIVE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DirectiveEscapeInvalid(value));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -545,6 +587,7 @@ function assertSyntaxMissingEquals(diagnostic: Diagnostic, argument: string, sta
     assert.equal(diagnostic.code, ValidationCode.SYNTAX_MISSING_EQUALS);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_SyntaxMissingEquals(argument));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -556,6 +599,7 @@ function assertSyntaxMissingNames(diagnostic: Diagnostic, instrument: string, st
     assert.equal(diagnostic.code, ValidationCode.SYNTAX_MISSING_NAMES);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_SyntaxMissingNames(instrument));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -567,6 +611,7 @@ function assertSyntaxMissingSingleQuote(diagnostic: Diagnostic, key: string, sta
     assert.equal(diagnostic.code, ValidationCode.SYNTAX_MISSING_SINGLE_QUOTE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_SyntaxMissingSingleQuote(key));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -578,6 +623,7 @@ function assertSyntaxMissingDoubleQuote(diagnostic: Diagnostic, key: string, sta
     assert.equal(diagnostic.code, ValidationCode.SYNTAX_MISSING_DOUBLE_QUOTE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_SyntaxMissingDoubleQuote(key));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -589,6 +635,7 @@ function assertDuplicateBuildStageName(diagnostic: Diagnostic, name: string, sta
     assert.equal(diagnostic.code, ValidationCode.DUPLICATE_BUILD_STAGE_NAME);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DuplicateBuildStageName(name));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -600,6 +647,7 @@ function assertInvalidBuildStageName(diagnostic: Diagnostic, name: string, start
     assert.equal(diagnostic.code, ValidationCode.INVALID_BUILD_STAGE_NAME);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InvalidBuildStageName(name));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -611,6 +659,7 @@ function assertVariableModifierUnsupported(diagnostic: Diagnostic, variable: str
     assert.equal(diagnostic.code, ValidationCode.UNSUPPORTED_MODIFIER);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -622,6 +671,7 @@ function assertWorkdirAbsolutePath(diagnostic: Diagnostic, severity: DiagnosticS
     assert.equal(diagnostic.code, ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
