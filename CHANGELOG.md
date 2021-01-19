@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.0] - 2021-01-19
 ### Added
 - support the `--chmod` flag for ADD instructions ([#85](https://github.com/rcjsuen/dockerfile-utils/issues/85))
 - support the `--chmod` flag for COPY instructions ([#86](https://github.com/rcjsuen/dockerfile-utils/issues/86))
@@ -158,7 +158,8 @@ All notable changes to this project will be documented in this file.
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.16...v0.1.0
 [0.0.16]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.0.15...v0.0.16
