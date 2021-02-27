@@ -1575,7 +1575,7 @@ describe("Docker Validator Tests", function() {
 
             it("unsupported modifier", function() {
                 let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:x}" + suffix);
-                if (prefix === "RUN ") {
+                if (prefix === "CMD " || prefix === "ENTRYPOINT " || prefix === "RUN ") {
                     assert.equal(diagnostics.length, 0);
                 } else {
                     assert.equal(diagnostics.length, 1);
@@ -1583,7 +1583,7 @@ describe("Docker Validator Tests", function() {
                 }
 
                 diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:}" + suffix);
-                if (prefix === "RUN ") {
+                if (prefix === "CMD " || prefix === "ENTRYPOINT " || prefix === "RUN ") {
                     assert.equal(diagnostics.length, 0);
                 } else {
                     assert.equal(diagnostics.length, 1);
@@ -1593,7 +1593,7 @@ describe("Docker Validator Tests", function() {
 
             it("question mark modifier", function() {
                 let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:?}" + suffix);
-                if (prefix === "RUN ") {
+                if (prefix === "CMD " || prefix === "ENTRYPOINT " || prefix === "RUN ") {
                     assert.equal(diagnostics.length, 0);
                 } else {
                     assert.equal(diagnostics.length, 1);
@@ -1603,7 +1603,7 @@ describe("Docker Validator Tests", function() {
 
             it("no modifier", function() {
                 let diagnostics = validateDockerfile("FROM mcr.microsoft.com/windows/servercore:ltsc2019\nENV Env=123\n" + prefix + "${Env:TEMP}" + suffix);
-                if (prefix === "RUN ") {
+                if (prefix === "CMD " || prefix === "ENTRYPOINT " || prefix === "RUN ") {
                     assert.equal(diagnostics.length, 0);
                 } else {
                     assert.equal(diagnostics.length, 1);

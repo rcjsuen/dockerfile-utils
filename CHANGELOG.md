@@ -18,6 +18,9 @@ export interface FormatterSettings extends FormattingOptions {
 ### Changed
 - altered the signature of the `format(string, FormattingOptions)` function to `format(string, FormatterSettings)`, this is a non-breaking change as `FormatterSettings` extends `FormattingOptions` ([#62](https://github.com/rcjsuen/dockerfile-utils/issues/62))
 
+### Fixed
+- do not validate variable substitutions if found in CMD and ENTRYPOINT ([#60](https://github.com/rcjsuen/dockerfile-utils/issues/60))
+
 ## [0.2.0] - 2021-01-19
 ### Added
 - support the `--chmod` flag for ADD instructions ([#85](https://github.com/rcjsuen/dockerfile-utils/issues/85))

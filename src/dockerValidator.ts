@@ -145,13 +145,19 @@ export class Validator {
         for (let variable of instruction.getVariables()) {
             let modifier = variable.getModifier();
             if (modifier !== null) {
-                if (instruction.getKeyword() === Keyword.RUN) {
-                    // allow shell expansions to go through for RUN instructions
-                    continue;
-                } else if (modifier === "") {
-                    problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
-                } else if (modifier !== '+' && modifier !== '-') {
-                    problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
+                switch (instruction.getKeyword()) {
+                    case Keyword.CMD:
+                    case Keyword.ENTRYPOINT:
+                    case Keyword.RUN:
+                        // allow shell expansions to go through for RUN instructions
+                        break;
+                    default:
+                        if (modifier === "") {
+                            problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
+                        } else if (modifier !== '+' && modifier !== '-') {
+                            problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
+                        }
+                        break;
                 }
             }
         }
