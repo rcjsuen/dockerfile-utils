@@ -5,13 +5,14 @@
 'use strict';
 
 import {
-    TextDocument, TextEdit, Position, Range, FormattingOptions,
+    TextDocument, TextEdit, Position, Range
 } from 'vscode-languageserver-types';
 import { DockerfileParser } from 'dockerfile-ast';
+import { FormatterSettings } from './main';
 
 export class DockerFormatter {
 
-    private getIndentation(formattingOptions?: FormattingOptions): string {
+    private getIndentation(formattingOptions?: FormatterSettings): string {
         let indentation = "\t";
         if (formattingOptions && formattingOptions.insertSpaces) {
             indentation = "";
@@ -45,7 +46,7 @@ export class DockerFormatter {
         }
     }
 
-    public formatOnType(document: TextDocument, position: Position, ch: string, options: FormattingOptions): TextEdit[] {
+    public formatOnType(document: TextDocument, position: Position, ch: string, options: FormatterSettings): TextEdit[] {
         const dockerfile = DockerfileParser.parse(document.getText());
         // check that the inserted character is the escape character
         if (dockerfile.getEscapeCharacter() === ch) {
@@ -77,15 +78,17 @@ export class DockerFormatter {
                 }
             }
 
-            const lines = [position.line + 1];
+            const line = position.line + 1;
             const indentedLines: boolean[] = [];
-            indentedLines[lines[0]] = true;
-            return this.formatLines(document, document.getText(), lines, indentedLines, options);
+            const skippedLines: boolean[] = [];
+            indentedLines[line] = true;
+            skippedLines[line] = true;
+            return this.formatLines(document, document.getText(), [line], indentedLines, skippedLines, options);
         }
         return [];
     }
 
-    public formatRange(document: TextDocument, range: Range, options?: FormattingOptions): TextEdit[] {
+    public formatRange(document: TextDocument, range: Range, options?: FormatterSettings): TextEdit[] {
         const lines: number[] = [];
         for (let i = range.start.line; i <= range.end.line; i++) {
             lines.push(i);
@@ -93,7 +96,7 @@ export class DockerFormatter {
         return this.format(document, lines, options);
     }
 
-    public formatDocument(document: TextDocument, options?: FormattingOptions): TextEdit[] {
+    public formatDocument(document: TextDocument, options?: FormatterSettings): TextEdit[] {
         const lines: number[] = [];
         for (let i = 0; i < document.lineCount; i++) {
             lines.push(i);
@@ -110,40 +113,51 @@ export class DockerFormatter {
      * @param options the formatting options to use to perform the format
      * @return the text edits to apply to format the lines of the document
      */
-    private format(document: TextDocument, lines: number[], options?: FormattingOptions): TextEdit[] {
+    private format(document: TextDocument, lines: number[], options?: FormatterSettings): TextEdit[] {
         let content = document.getText();
         let dockerfile = DockerfileParser.parse(content);
         const indentedLines: boolean[] = [];
+        const skippedLines: boolean[] = [];
         for (let i = 0; i < document.lineCount; i++) {
             indentedLines[i] = false;
+            skippedLines[i] = false;
         }
         for (let instruction of dockerfile.getInstructions()) {
             let range = instruction.getRange();
+            if (range.start.line !== range.end.line) {
+                for (let i = range.start.line + 1; i <= range.end.line; i++) {
+                    skippedLines[i] = true;
+                }
+            }
             indentedLines[range.start.line] = false;
             for (let i = range.start.line + 1; i <= range.end.line; i++) {
                 indentedLines[i] = true;
             }
         }
-        return this.formatLines(document, content, lines, indentedLines, options);
+        return this.formatLines(document, content, lines, indentedLines, skippedLines, options);
     }
 
-    private formatLines(document: TextDocument, content: string, lines: number[], indentedLines: boolean[], options?: FormattingOptions): TextEdit[] {
+    private formatLines(document: TextDocument, content: string, lines: number[], indentedLines: boolean[], skippedLines: boolean[], options?: FormatterSettings): TextEdit[] {
         const indentation = this.getIndentation(options);
         const edits: TextEdit[] = [];
-        lineCheck: for (let line of lines) {
-            let startOffset = document.offsetAt(Position.create(line, 0));
-            for (let i = startOffset; i < content.length; i++) {
-                switch (content.charAt(i)) {
+        lineCheck: for (let i = 0; i < lines.length; i++) {
+            if (options && options.ignoreMultilineInstructions && skippedLines[lines[i]]) {
+                continue;
+            }
+
+            let startOffset = document.offsetAt(Position.create(lines[i], 0));
+            for (let j = startOffset; j < content.length; j++) {
+                switch (content.charAt(j)) {
                     case ' ':
                     case '\t':
                         break;
                     case '\r':
                     case '\n':
-                        if (i !== startOffset) {
+                        if (j !== startOffset) {
                             // only whitespace on this line, trim it
                             let edit = TextEdit.del({
                                 start: document.positionAt(startOffset),
-                                end: document.positionAt(i)
+                                end: document.positionAt(j)
                             });
                             edits.push(edit);
                         }
@@ -151,16 +165,16 @@ export class DockerFormatter {
                         continue lineCheck;
                     default:
                         // found a line that should be indented
-                        if (indentedLines[line]) {
-                            const originalIndentation = document.getText().substring(startOffset, i);
+                        if (indentedLines[lines[i]]) {
+                            const originalIndentation = document.getText().substring(startOffset, j);
                             // change the indentation if it's not what we expect
                             if (originalIndentation !== indentation) {
-                                const edit = this.createFormattingEdit(document, startOffset, i, indentedLines[line], indentation);
+                                const edit = this.createFormattingEdit(document, startOffset, j, indentedLines[lines[i]], indentation);
                                 edits.push(edit);
                             }
-                        } else if (i !== startOffset) {
+                        } else if (j !== startOffset) {
                             // non-whitespace character encountered, realign
-                            const edit = this.createFormattingEdit(document, startOffset, i, indentedLines[line], indentation);
+                            const edit = this.createFormattingEdit(document, startOffset, j, indentedLines[lines[i]], indentation);
                             edits.push(edit);
                         }
                         // process the next line

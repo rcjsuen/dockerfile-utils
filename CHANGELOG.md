@@ -1,6 +1,23 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- a new `FormatterSettings` interface for defining `ignoreMultilineInstructions` to ignore instructions that span multiple lines ([#62](https://github.com/rcjsuen/dockerfile-utils/issues/62))
+```
+export interface FormatterSettings extends FormattingOptions {
+
+    /**
+     * Flag to indicate that instructions that span multiple lines
+     * should be ignored.
+     */
+    ignoreMultilineInstructions?: boolean;
+}
+```
+
+### Changed
+- altered the signature of the `format(string, FormattingOptions)` function to `format(string, FormatterSettings)`, this is a non-breaking change as `FormatterSettings` extends `FormattingOptions` ([#62](https://github.com/rcjsuen/dockerfile-utils/issues/62))
+
 ## [0.2.0] - 2021-01-19
 ### Added
 - support the `--chmod` flag for ADD instructions ([#85](https://github.com/rcjsuen/dockerfile-utils/issues/85))

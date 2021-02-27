@@ -9,6 +9,18 @@ import { DockerFormatter } from './dockerFormatter';
 import { Validator } from './dockerValidator';
 
 /**
+ * Settings for configuring the behaviour of the formatter.
+ */
+export interface FormatterSettings extends FormattingOptions {
+
+    /**
+     * Flag to indicate that instructions that span multiple lines
+     * should be ignored.
+     */
+    ignoreMultilineInstructions?: boolean;
+}
+
+/**
  * Error codes that correspond to a given validation error. These
  * values are exposed for the purpose of allowing clients to identify
  * what kind of validation error has occurred and to then prompt
@@ -181,7 +193,7 @@ export interface ValidatorSettings {
  * Analyzes the Dockerfile contained within the given string and
  * provides an array of TextEdits back for formatting the document.
  */
-export function format(content: string, options: FormattingOptions): TextEdit[] {
+export function format(content: string, options: FormatterSettings): TextEdit[] {
     const document = TextDocument.create("", "", 0, content);
     let formatter = new DockerFormatter();
     return formatter.formatDocument(document, options);

@@ -5,9 +5,9 @@
 import * as assert from "assert";
 
 import {
-    TextEdit, TextDocument, Position, Range, FormattingOptions
+    TextEdit, TextDocument, Position, Range
 } from 'vscode-languageserver-types';
-import { format } from '../src/main';
+import { format, FormatterSettings } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
 
 let formatter = new DockerFormatter();
@@ -16,7 +16,7 @@ function createDocument(content: string): any {
     return TextDocument.create("uri://host/Dockerfile.sample", "dockerfile", 1, content);
 }
 
-function formatDocument(document: TextDocument, options?: FormattingOptions): TextEdit[] {
+function formatDocument(document: TextDocument, options?: FormatterSettings): TextEdit[] {
     if (!options) {
         options = {
             insertSpaces: false,
@@ -26,7 +26,7 @@ function formatDocument(document: TextDocument, options?: FormattingOptions): Te
     return format(document.getText(), options);
 }
 
-function formatRange(document: TextDocument, range: Range, options?: FormattingOptions): TextEdit[] {
+function formatRange(document: TextDocument, range: Range, options?: FormatterSettings): TextEdit[] {
     if (!options) {
         options = {
             insertSpaces: false,
@@ -36,7 +36,7 @@ function formatRange(document: TextDocument, range: Range, options?: FormattingO
     return formatter.formatRange(document, range, options);
 }
 
-function formatOnType(document: TextDocument, position: Position, ch: string, options?: FormattingOptions): TextEdit[] {
+function formatOnType(document: TextDocument, position: Position, ch: string, options?: FormatterSettings): TextEdit[] {
     if (!options) {
         options = {
             insertSpaces: false,
@@ -245,6 +245,42 @@ describe("Dockerfile formatter", function() {
                 let document = createDocument("EXPOSE 80\\81");
                 let edits = formatDocument(document);
                 assert.equal(edits.length, 0);
+            });
+        });
+
+        describe("ignore multiline", () => {
+            it("standard multiline with \\ ignores second line", () => {
+                const document = createDocument("RUN ls \\\nls");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 0);
+            });
+
+            it("standard multiline with \\ ignores second line with backtick parser directive", () => {
+                const document = createDocument("#escape=`\nRUN ls `\nls");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 0);
+            });
+
+            it("multiline with \\ formats first line", () => {
+                const document = createDocument("  RUN ls \\\nls");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 1);
+                assert.equal(edits[0].newText, "");
+                assert.equal(edits[0].range.start.line, 0);
+                assert.equal(edits[0].range.start.character, 0);
+                assert.equal(edits[0].range.end.line, 0);
+                assert.equal(edits[0].range.end.character, 2);
+            });
+
+            it("multiline with \\ formats first line with backtick parser directive", () => {
+                const document = createDocument("#escape=`\n  RUN ls \\\nls");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 1);
+                assert.equal(edits[0].newText, "");
+                assert.equal(edits[0].range.start.line, 1);
+                assert.equal(edits[0].range.start.character, 0);
+                assert.equal(edits[0].range.end.line, 1);
+                assert.equal(edits[0].range.end.character, 2);
             });
         });
     });
@@ -468,6 +504,42 @@ describe("Dockerfile formatter", function() {
                 assert.equal(edits[0].range.start.character, 0);
                 assert.equal(edits[0].range.end.line, 1);
                 assert.equal(edits[0].range.end.character, 0);
+            });
+
+            describe("ignore multiline", () => {
+                it("standard multiline with \\ ignores second line", () => {
+                    const document = createDocument("RUN ls \\\nls");
+                    const edits = formatRange(document, Range.create(0, 4, 1, 1), { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                    assert.equal(edits.length, 0);
+                });
+    
+                it("standard multiline with \\ ignores second line with backtick parser directive", () => {
+                    const document = createDocument("#escape=`\nRUN ls `\nls");
+                    const edits = formatRange(document, Range.create(1, 4, 2, 1), { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                    assert.equal(edits.length, 0);
+                });
+    
+                it("multiline with \\ formats first line", () => {
+                    const document = createDocument("  RUN ls \\\nls");
+                    const edits = formatRange(document, Range.create(0, 0, 1, 1), { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                    assert.equal(edits.length, 1);
+                    assert.equal(edits[0].newText, "");
+                    assert.equal(edits[0].range.start.line, 0);
+                    assert.equal(edits[0].range.start.character, 0);
+                    assert.equal(edits[0].range.end.line, 0);
+                    assert.equal(edits[0].range.end.character, 2);
+                });
+    
+                it("multiline with \\ formats first line with backtick parser directive", () => {
+                    const document = createDocument("#escape=`\n  RUN ls \\\nls");
+                    const edits = formatRange(document, Range.create(1, 0, 2, 1), { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                    assert.equal(edits.length, 1);
+                    assert.equal(edits[0].newText, "");
+                    assert.equal(edits[0].range.start.line, 1);
+                    assert.equal(edits[0].range.start.character, 0);
+                    assert.equal(edits[0].range.end.line, 1);
+                    assert.equal(edits[0].range.end.character, 2);
+                });
             });
         });
 
@@ -865,6 +937,12 @@ describe("Dockerfile formatter", function() {
                 let edits = formatOnType(document, Position.create(0, 8), '\\');
                 assert.equal(edits.length, 0);
             });
+
+            it("ignore multiline", () => {
+                const document = createDocument("RUN ls \nls");
+                const edits = formatOnType(document, Position.create(0, 7), '\\', { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 0);
+            });
         });
 
         describe("backtick", function() {
@@ -883,6 +961,12 @@ describe("Dockerfile formatter", function() {
                 assert.equal(edits[0].range.start.character, 0);
                 assert.equal(edits[0].range.end.line, 2);
                 assert.equal(edits[0].range.end.character, 0);
+            });
+
+            it("ignore multiline", () => {
+                const document = createDocument("#escape=`\nRUN ls \nls");
+                const edits = formatOnType(document, Position.create(1, 7), '`', { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 0);
             });
         });
     });
