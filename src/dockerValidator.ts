@@ -154,7 +154,7 @@ export class Validator {
                     default:
                         if (modifier === "") {
                             problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
-                        } else if (modifier !== '+' && modifier !== '-') {
+                        } else if (modifier !== '+' && modifier !== '-' && modifier !== '?') {
                             problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
                         }
                         break;

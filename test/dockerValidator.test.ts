@@ -1593,12 +1593,7 @@ describe("Docker Validator Tests", function() {
 
             it("question mark modifier", function() {
                 let diagnostics = validateDockerfile("FROM scratch\nENV bbb=123\n" + prefix + "${bbb:?}" + suffix);
-                if (prefix === "CMD " || prefix === "ENTRYPOINT " || prefix === "RUN ") {
-                    assert.equal(diagnostics.length, 0);
-                } else {
-                    assert.equal(diagnostics.length, 1);
-                    assertVariableModifierUnsupported(diagnostics[0], "${bbb:?}", '?', 2, length + 6, 2, length + 7);
-                }
+                assert.equal(diagnostics.length, 0);
             });
 
             it("no modifier", function() {

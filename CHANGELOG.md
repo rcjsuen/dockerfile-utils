@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- do not flag `?` as an invalid modifier in variable substitutions ([#91](https://github.com/rcjsuen/dockerfile-utils/issues/91))
+
 ## [0.3.0] - 2021-02-28
 ### Added
 - a new `FormatterSettings` interface for defining `ignoreMultilineInstructions` to ignore instructions that span multiple lines ([#62](https://github.com/rcjsuen/dockerfile-utils/issues/62))
