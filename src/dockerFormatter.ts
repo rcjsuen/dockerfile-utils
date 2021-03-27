@@ -88,7 +88,7 @@ export class DockerFormatter {
         return [];
     }
 
-    public formatRange(document: TextDocument, range: Range, options?: FormatterSettings): TextEdit[] {
+    public formatRange(document: TextDocument, range: Range, options: FormatterSettings): TextEdit[] {
         const lines: number[] = [];
         for (let i = range.start.line; i <= range.end.line; i++) {
             lines.push(i);

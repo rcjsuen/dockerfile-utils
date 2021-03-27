@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { TextDocument, Diagnostic, TextEdit, FormattingOptions } from 'vscode-languageserver-types';
+import { TextDocument, Position, Range, Diagnostic, TextEdit, FormattingOptions } from 'vscode-languageserver-types';
 import { DockerFormatter } from './dockerFormatter';
 import { Validator } from './dockerValidator';
 
@@ -197,6 +197,12 @@ export function format(content: string, options: FormatterSettings): TextEdit[] 
     const document = TextDocument.create("", "", 0, content);
     let formatter = new DockerFormatter();
     return formatter.formatDocument(document, options);
+}
+
+export function formatRange(content: string, range: Range, settings: FormatterSettings): TextEdit[] {
+    const document = TextDocument.create("", "", 0, content);
+    const formatter = new DockerFormatter();
+    return formatter.formatRange(document, range, settings);
 }
 
 /**

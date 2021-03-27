@@ -7,7 +7,7 @@ import * as assert from "assert";
 import {
     TextEdit, TextDocument, Position, Range
 } from 'vscode-languageserver-types';
-import { format, FormatterSettings } from '../src/main';
+import { format, formatRange as apiFormatRange, FormatterSettings } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
 
 let formatter = new DockerFormatter();
@@ -33,7 +33,7 @@ function formatRange(document: TextDocument, range: Range, options?: FormatterSe
             tabSize: 4
         };
     }
-    return formatter.formatRange(document, range, options);
+    return apiFormatRange(document.getText(), range, options);
 }
 
 function formatOnType(document: TextDocument, position: Position, ch: string, options?: FormatterSettings): TextEdit[] {
