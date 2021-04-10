@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - a new `formatRange(string, Range, FormatterSettings)` function that returns `TextEdit[]` for formatting a range in the Dockerfile instead of the whole file ([#90](https://github.com/rcjsuen/dockerfile-utils/issues/90))
+- allow multiple arguments to be defined for ARG instructions to support Docker Engine 20.10 ([#92](https://github.com/rcjsuen/dockerfile-utils/issues/92))
 
 ### Fixed
 - do not flag `?` as an invalid modifier in variable substitutions ([#91](https://github.com/rcjsuen/dockerfile-utils/issues/91))

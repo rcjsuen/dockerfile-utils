@@ -2234,30 +2234,24 @@ describe("Docker Validator Tests", function() {
     describe("ARG", function() {
         createSingleNameValuePairTests("ARG");
 
-        it("invalid", function() {
+        it("accepts more than one argument (new in Docker Engine 20.10)", function() {
             let diagnostics = validateDockerfile("FROM busybox\nARG a=a b");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 1, 8, 1, 9);
+            assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM busybox\nARG a=a\\  b");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 1, 10, 1, 11);
+            assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM busybox\nARG a=a\\\\ b");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 1, 10, 1, 11);
+            assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM busybox\nARG a=a\\\n b");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 2, 1, 2, 2);
+            assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM busybox\nARG a=a\\\r\n b");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 2, 1, 2, 2);
+            assert.equal(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM busybox\nARG a=a\\ \\b \\c");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionRequiresOneArgument(diagnostics[0], 1, 12, 1, 14);
+            assert.equal(diagnostics.length, 0);
         });
     });
 

@@ -394,12 +394,7 @@ export class Validator {
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "ARG":
-                    this.checkArguments(instruction, problems, [-1], function (index: number) {
-                        if (index > 0) {
-                            return Validator.createARGRequiresOneArgument;
-                        }
-                        return null;
-                    }, Validator.createARGRequiresOneArgument);
+                    this.checkArguments(instruction, problems, [-1], () => null);
                     let arg = instruction as Arg;
                     let argProperty = arg.getProperty();
                     if (argProperty) {
@@ -1517,10 +1512,6 @@ export class Validator {
 
     private static createHealthcheckNoneUnnecessaryArgument(start: Position, end: Position): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_HealthcheckNoneUnnecessaryArgument(), ValidationCode.ARGUMENT_UNNECESSARY);
-    }
-
-    static createARGRequiresOneArgument(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_ARGRequiresOneArgument(), ValidationCode.ARGUMENT_REQUIRES_ONE);
     }
 
     private static createADDDestinationNotDirectory(range: Range): Diagnostic {
