@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- ignore *.tgz files when packaging and publishing to npm ([#94](https://github.com/rcjsuen/dockerfile-utils/issues/94))
+
 ## [0.4.0] - 2021-04-10
 ### Added
 - a new `formatRange(string, Range, FormatterSettings)` function that returns `TextEdit[]` for formatting a range in the Dockerfile instead of the whole file ([#90](https://github.com/rcjsuen/dockerfile-utils/issues/90))
