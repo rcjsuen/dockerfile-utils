@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.4.0] - 2021-04-10
 ### Added
 - a new `formatRange(string, Range, FormatterSettings)` function that returns `TextEdit[]` for formatting a range in the Dockerfile instead of the whole file ([#90](https://github.com/rcjsuen/dockerfile-utils/issues/90))
 - allow multiple arguments to be defined for ARG instructions to support Docker Engine 20.10 ([#92](https://github.com/rcjsuen/dockerfile-utils/issues/92))
@@ -187,7 +187,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.0...v0.1.1
