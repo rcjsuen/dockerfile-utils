@@ -7,7 +7,7 @@ import * as assert from "assert";
 import {
     TextEdit, TextDocument, Position, Range
 } from 'vscode-languageserver-types';
-import { format, formatRange as apiFormatRange, FormatterSettings } from '../src/main';
+import { format, formatRange as apiFormatRange, formatOnType as apiFormatOnType, FormatterSettings } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
 
 let formatter = new DockerFormatter();
@@ -43,7 +43,7 @@ function formatOnType(document: TextDocument, position: Position, ch: string, op
             tabSize: 4
         };
     }
-    return formatter.formatOnType(document, position, ch, options);
+    return apiFormatOnType(document.getText(), position, ch, options);
 }
 
 describe("Dockerfile formatter", function() {

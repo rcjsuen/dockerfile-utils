@@ -205,6 +205,12 @@ export function formatRange(content: string, range: Range, settings: FormatterSe
     return formatter.formatRange(document, range, settings);
 }
 
+export function formatOnType(content: string, position: Position, character: string, settings: FormatterSettings): TextEdit[] {
+    const document = TextDocument.create("", "", 0, content);
+    const formatter = new DockerFormatter();
+    return formatter.formatOnType(document, position, character, settings);
+}
+
 /**
  * Validates the Dockerfile that is contained in the given string.
  */
