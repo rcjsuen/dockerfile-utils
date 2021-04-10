@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.4.1] - 2021-04-10
 ### Added
 - ignore *.tgz files when packaging and publishing to npm ([#94](https://github.com/rcjsuen/dockerfile-utils/issues/94))
 
@@ -191,7 +191,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.1.1...v0.2.0
