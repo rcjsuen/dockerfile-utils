@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.4.2] - 2021-04-11
 ### Fixed
 - prevent false positive by improving the parsing of an escape character and newline that immediately follows a label definition ([#95](https://github.com/rcjsuen/dockerfile-utils/issues/95))
 
@@ -195,7 +195,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.1...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.2...HEAD
+[0.4.2]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.2
 [0.4.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.2.0...v0.3.0
