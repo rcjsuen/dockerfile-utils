@@ -1154,7 +1154,7 @@ export class Validator {
         "invalidDestination": "When using ${0} with more than one source file, the destination must be a directory and end with a / or a \\",
 
         "syntaxMissingEquals": "Syntax error - can't find = in \"${0}\". Must be of the form: name=value",
-        "syntaxMissingNames": "${0} names can not be blank",
+        "syntaxMissingNames": "${0} names cannot be blank",
         "syntaxMissingSingleQuote": "failed to process \"${0}\": unexpected end of statement while looking for matching single-quote",
         "syntaxMissingDoubleQuote": "failed to process \"${0}\": unexpected end of statement while looking for matching double-quote",
 

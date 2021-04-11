@@ -101,7 +101,7 @@ export interface FormatterSettings extends FormattingOptions {
 - add support for SCTP in EXPOSE instruction ([#52](https://github.com/rcjsuen/dockerfile-utils/issues/52))
 
 ### Fixed
-- fix incorrect validation of ENV and LABEL instructions with many quoted properties on mulitple lines ([#50](https://github.com/rcjsuen/dockerfile-utils/issues/50))
+- fix incorrect validation of ENV and LABEL instructions with many quoted properties on multiple lines ([#50](https://github.com/rcjsuen/dockerfile-utils/issues/50))
 
 ## [0.0.10] - 2018-06-27
 ### Added

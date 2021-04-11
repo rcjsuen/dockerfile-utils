@@ -100,7 +100,7 @@ export enum ValidationCode {
     JSON_IN_SINGLE_QUOTES,
 
     /**
-     * The error code used if a WORKDIR instrction does not point to
+     * The error code used if a WORKDIR instruction does not point to
      * an absolute path.
      */
     WORKDIR_IS_NOT_ABSOLUTE,
