@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- prevent false positive by improving the parsing of an escape character and newline that immediately follows a label definition ([#95](https://github.com/rcjsuen/dockerfile-utils/issues/95))
+
 ## [0.4.1] - 2021-04-10
 ### Added
 - ignore *.tgz files when packaging and publishing to npm ([#94](https://github.com/rcjsuen/dockerfile-utils/issues/94))

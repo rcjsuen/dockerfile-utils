@@ -2634,6 +2634,9 @@ describe("Docker Validator Tests", function() {
 
             diagnostics = validateDockerfile("FROM node\n" + instruction + " \"var\"=value \\\n \"var2\"='value2' \\\n \"var3\"=\"value3\"");
             assert.equal(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM node\n" + instruction + " a=b\\\n \"c\"=\"d\"");
+            assert.equal(diagnostics.length, 0);
         });
 
         it("requires two", function() {
