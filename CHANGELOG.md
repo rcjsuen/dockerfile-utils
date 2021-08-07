@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.5.0] - 2021-08-07
 ### Added
 - parse experimental heredoc syntax in RUN instructions ([#97](https://github.com/rcjsuen/dockerfile-utils/issues/97))
 
@@ -199,7 +199,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.2
 [0.4.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.3.0...v0.4.0
