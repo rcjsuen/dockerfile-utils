@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
 
-import { Diagnostic, DiagnosticSeverity, DiagnosticTag, TextDocument } from 'vscode-languageserver-types';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver-types';
 import { Validator } from '../src/dockerValidator';
 import { ValidationCode, ValidatorSettings, ValidationSeverity, validate } from '../src/main';
 

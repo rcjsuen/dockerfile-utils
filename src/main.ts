@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 'use strict';
 
-import { TextDocument, Position, Range, Diagnostic, TextEdit, FormattingOptions } from 'vscode-languageserver-types';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import { Position, Range, Diagnostic, TextEdit, FormattingOptions } from 'vscode-languageserver-types';
 import { DockerFormatter } from './dockerFormatter';
 import { Validator } from './dockerValidator';
 
