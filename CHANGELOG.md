@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- parse experimental heredoc syntax in RUN instructions ([#97](https://github.com/rcjsuen/dockerfile-utils/issues/97))
+
 ## [0.4.2] - 2021-04-11
 ### Fixed
 - prevent false positive by improving the parsing of an escape character and newline that immediately follows a label definition ([#95](https://github.com/rcjsuen/dockerfile-utils/issues/95))
