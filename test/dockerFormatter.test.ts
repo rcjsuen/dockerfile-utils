@@ -9,8 +9,6 @@ import { TextEdit, Position, Range } from 'vscode-languageserver-types';
 import { format, formatRange as apiFormatRange, formatOnType as apiFormatOnType, FormatterSettings } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
 
-let formatter = new DockerFormatter();
-
 function createDocument(content: string): any {
     return TextDocument.create("uri://host/Dockerfile.sample", "dockerfile", 1, content);
 }
