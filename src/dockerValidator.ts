@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag, Position, Range } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword, Argument } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -736,6 +736,32 @@ export class Validator {
         }
     }
 
+    private hasHeredocs(args: Argument[]): boolean {
+        for (const arg of args) {
+            if (arg.getValue().startsWith("<<")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private getDestinationArgument(args: Argument[]): Argument {
+        if (this.hasHeredocs(args)) {
+            const initialLine = args[0].getRange().start.line;
+            let candidate: Argument | null = null;
+            for (let i = 1; i < args.length; i++) {
+                if (args[i].getRange().start.line === initialLine) {
+                    candidate = args[i];
+                } else {
+                    // stop searching once we're on another line
+                    return candidate;
+                }
+            }
+            return null;
+        }
+        return args[args.length - 1];
+    }
+
     private checkDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
         if (instruction.getClosingBracket()) {
             return this.checkJsonDestinationIsDirectory(instruction, requiresTwoArgumentsFunction, notDirectoryFunction);
@@ -747,7 +773,12 @@ export class Validator {
         } else if (args.length === 0) {
             return requiresTwoArgumentsFunction(instruction.getInstructionRange());
         } else if (args.length > 2) {
-            const lastArg = args[args.length - 1];
+            const lastArg = this.getDestinationArgument(args);
+            if (lastArg === null) {
+                return requiresTwoArgumentsFunction(instruction.getInstructionRange());
+            } else if (this.hasHeredocs(args)) {
+                return null;
+            }
             const variables = instruction.getVariables();
             if (variables.length !== 0) {
                 const lastJsonStringOffset = this.document.offsetAt(lastArg.getRange().end);

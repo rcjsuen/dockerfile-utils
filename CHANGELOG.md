@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support heredoc syntax in ADD and COPY instructions ([#98](https://github.com/rcjsuen/dockerfile-utils/issues/98))
+
 ## [0.5.0] - 2021-08-07
 ### Added
 - parse experimental heredoc syntax in RUN instructions ([#97](https://github.com/rcjsuen/dockerfile-utils/issues/97))

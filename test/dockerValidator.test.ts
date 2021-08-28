@@ -1249,6 +1249,32 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("heredoc", () => {
+            function testHeredocDestinationFolder(prefix: string, isAdd: boolean, offset: number, length: number) {
+                it(prefix, () => {
+                    let content = `FROM node\n${prefix} a.txt <<file b.txt <<file2 /destination/\nabc\nfile\ndef\nfile2\n`;
+                    let diagnostics = validateDockerfile(content);
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    content = `FROM node\n${prefix} <<eot /app/out.txt\n  hello\neot`;
+                    diagnostics = validateDockerfile(content);
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    content = `FROM node\n${prefix} <<eot\n  hello\neot`;
+                    diagnostics = validateDockerfile(content);
+                    assert.strictEqual(diagnostics.length, 1);
+                    if (isAdd) {
+                        assertADDRequiresAtLeastTwoArguments(diagnostics[0], 1, offset, 1, offset + length);
+                    } else {
+                        assertCOPYRequiresAtLeastTwoArguments(diagnostics[0], 1, offset, 1, offset + length);
+                    }
+                });
+            }
+
+            testHeredocDestinationFolder("ADD", true, 0, 3);
+            testHeredocDestinationFolder("COPY", false, 0, 4);
+            testHeredocDestinationFolder("ONBUILD ADD", true, 8, 3);
+            testHeredocDestinationFolder("ONBUILD COPY", false, 8, 4);
+
             function testHeredocRUN(prefix: string) {
                 it(`${prefix}RUN`, () => {
                     let content = `FROM node\n${prefix}RUN <<eot\n  echo\neot`;
