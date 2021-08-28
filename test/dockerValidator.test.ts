@@ -1249,23 +1249,24 @@ describe("Docker Validator Tests", function() {
         });
 
         describe("heredoc", () => {
-            function testHeredoc(instruction: string, argument: string) {
-                it(instruction, () => {
-                    let content = `FROM node\n${instruction} <<eot\n  ${argument}\neot`;
+            function testHeredocRUN(prefix: string) {
+                it(`${prefix}RUN`, () => {
+                    let content = `FROM node\n${prefix}RUN <<eot\n  echo\neot`;
                     let diagnostics = validateDockerfile(content);
                     assert.equal(diagnostics.length, 0);
-    
-                    content = `FROM node\n${instruction} <<-eot\n  ${argument}\neot`;
+
+                    content = `FROM node\n${prefix}RUN <<-eot\n  echo\neot`;
                     diagnostics = validateDockerfile(content);
                     assert.equal(diagnostics.length, 0);
 
-                    content = `FROM node\n${instruction} <<-'eot'\n  ${argument}\neot`;
+                    content = `FROM node\n${prefix}RUN <<-'eot'\n  echo\neot`;
                     diagnostics = validateDockerfile(content);
                     assert.equal(diagnostics.length, 0);
                 });
             }
 
-            testHeredoc("RUN", "echo");
+            testHeredocRUN("");
+            testHeredocRUN("ONBUILD ");
         });
 
         describe("multiples", function() {
