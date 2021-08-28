@@ -1258,6 +1258,10 @@ describe("Docker Validator Tests", function() {
                     content = `FROM node\n${instruction} <<-eot\n  ${argument}\neot`;
                     diagnostics = validateDockerfile(content);
                     assert.equal(diagnostics.length, 0);
+
+                    content = `FROM node\n${instruction} <<-'eot'\n  ${argument}\neot`;
+                    diagnostics = validateDockerfile(content);
+                    assert.equal(diagnostics.length, 0);
                 });
             }
 
