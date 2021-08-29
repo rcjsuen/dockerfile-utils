@@ -343,18 +343,6 @@ function assertInstructionMultiple(diagnostic: Diagnostic, severity: DiagnosticS
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
-function assertInstructionRequiresOneArgument(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
-    assert.equal(diagnostic.code, ValidationCode.ARGUMENT_REQUIRES_ONE);
-    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
-    assert.equal(diagnostic.source, source);
-    assert.strictEqual(diagnostic.tags, undefined);
-    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_ARGRequiresOneArgument());
-    assert.equal(diagnostic.range.start.line, startLine);
-    assert.equal(diagnostic.range.start.character, startCharacter);
-    assert.equal(diagnostic.range.end.line, endLine);
-    assert.equal(diagnostic.range.end.character, endCharacter);
-}
-
 function assertHealthcheckCmdArgumentMissing(diagnostic: Diagnostic, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.HEALTHCHECK_CMD_ARGUMENT_MISSING);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
