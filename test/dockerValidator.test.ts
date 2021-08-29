@@ -551,7 +551,8 @@ function assertDirectiveEscapeDuplicated(diagnostic: Diagnostic, startLine: numb
     assert.equal(diagnostic.code, ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
-    assert.strictEqual(diagnostic.tags, undefined);
+    assert.strictEqual(diagnostic.tags.length, 1);
+    assert.strictEqual(diagnostic.tags[0], DiagnosticTag.Unnecessary);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated());
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);

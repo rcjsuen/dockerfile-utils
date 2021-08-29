@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- flag duplicated escape parser directive declarations as being unnecessary ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
+
 ## [0.6.0] - 2021-08-28 
 ### Added
 - support heredoc syntax in ADD and COPY instructions ([#98](https://github.com/rcjsuen/dockerfile-utils/issues/98))

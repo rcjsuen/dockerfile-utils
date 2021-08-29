@@ -1441,7 +1441,7 @@ export class Validator {
     }
 
     private static createDuplicatedEscapeDirective(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated(), ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE);
+        return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated(), ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE, [DiagnosticTag.Unnecessary]);
     }
 
     static createInvalidEscapeDirective(start: Position, end: Position, value: string): Diagnostic {
@@ -1624,8 +1624,8 @@ export class Validator {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionUnknown(instruction), ValidationCode.UNKNOWN_INSTRUCTION);
     }
 
-    static createError(start: Position, end: Position, description: string, code?: ValidationCode): Diagnostic {
-        return Validator.createDiagnostic(DiagnosticSeverity.Error, start, end, description, code);
+    static createError(start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+        return Validator.createDiagnostic(DiagnosticSeverity.Error, start, end, description, code, tags);
     }
 
     private static createJSONInSingleQuotes(range: Range, severity: ValidationSeverity | undefined): Diagnostic | null {
@@ -1675,13 +1675,9 @@ export class Validator {
 
     createMaintainerDeprecated(start: Position, end: Position): Diagnostic | null {
         if (this.settings.deprecatedMaintainer === ValidationSeverity.ERROR) {
-            const diagnostic = Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
-            diagnostic.tags = [DiagnosticTag.Deprecated];
-            return diagnostic;
+            return Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
         } else if (this.settings.deprecatedMaintainer === ValidationSeverity.WARNING) {
-            const diagnostic = Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER);
-            diagnostic.tags = [DiagnosticTag.Deprecated];
-            return diagnostic;
+            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
         }
         return null;
     }
@@ -1695,11 +1691,11 @@ export class Validator {
         return null;
     }
 
-    static createWarning(start: Position, end: Position, description: string, code?: ValidationCode): Diagnostic {
-        return Validator.createDiagnostic(DiagnosticSeverity.Warning, start, end, description, code);
+    static createWarning(start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+        return Validator.createDiagnostic(DiagnosticSeverity.Warning, start, end, description, code, tags);
     }
 
-    static createDiagnostic(severity: DiagnosticSeverity, start: Position, end: Position, description: string, code?: ValidationCode): Diagnostic {
+    static createDiagnostic(severity: DiagnosticSeverity, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
         return {
             range: {
                 start: start,
@@ -1708,6 +1704,7 @@ export class Validator {
             message: description,
             severity: severity,
             code: code,
+            tags: tags,
             source: "dockerfile-utils"
         };
     }
