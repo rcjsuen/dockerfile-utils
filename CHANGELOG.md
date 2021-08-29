@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.7.0] - 2021-08-29
 ### Added
 - flag duplicated escape parser directive declarations as being unnecessary ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
 - flag duplicated CMD, ENTRYPOINT, and HEALTHCHECK instructions as being unnecessary diagnostics ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
@@ -208,7 +208,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.4.0...v0.4.2
