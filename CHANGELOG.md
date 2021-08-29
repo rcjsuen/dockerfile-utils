@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - flag duplicated escape parser directive declarations as being unnecessary ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
+- flag duplicated CMD, ENTRYPOINT, and HEALTHCHECK instructions as being unnecessary diagnostics ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
 
 ## [0.6.0] - 2021-08-28 
 ### Added

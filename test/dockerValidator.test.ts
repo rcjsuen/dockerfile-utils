@@ -335,7 +335,8 @@ function assertInstructionMultiple(diagnostic: Diagnostic, severity: DiagnosticS
     assert.equal(diagnostic.code, ValidationCode.MULTIPLE_INSTRUCTIONS);
     assert.equal(diagnostic.severity, severity);
     assert.equal(diagnostic.source, source);
-    assert.strictEqual(diagnostic.tags, undefined);
+    assert.strictEqual(diagnostic.tags.length, 1);
+    assert.strictEqual(diagnostic.tags[0], DiagnosticTag.Unnecessary);
     assert.equal(diagnostic.message, Validator.getDiagnosticMessage_InstructionMultiple(instruction));
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);

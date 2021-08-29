@@ -1648,9 +1648,9 @@ export class Validator {
 
     private createMultipleInstructions(range: Range, severity: ValidationSeverity | undefined, instruction: string): Diagnostic | null {
         if (severity === ValidationSeverity.ERROR) {
-            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS);
+            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
         } else if (severity === ValidationSeverity.WARNING) {
-            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS);
+            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
         }
         return null;
     }
