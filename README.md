@@ -1,6 +1,6 @@
 # Dockerfile Utilities
 
-[![Build Status](https://travis-ci.org/rcjsuen/dockerfile-utils.svg?branch=master)](https://travis-ci.org/rcjsuen/dockerfile-utils) [![Coverage Status](https://coveralls.io/repos/github/rcjsuen/dockerfile-utils/badge.svg?branch=master)](https://coveralls.io/github/rcjsuen/dockerfile-utils?branch=master) [![Build Dependencies](https://david-dm.org/rcjsuen/dockerfile-utils.svg)](https://david-dm.org/rcjsuen/dockerfile-utils) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Node.js Builds](https://github.com/rcjsuen/dockerfile-ast/workflows/Node.js%20Builds/badge.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/rcjsuen/dockerfile-utils/badge.svg?branch=master)](https://coveralls.io/github/rcjsuen/dockerfile-utils?branch=master) [![Build Dependencies](https://david-dm.org/rcjsuen/dockerfile-utils.svg)](https://david-dm.org/rcjsuen/dockerfile-utils) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is a collection of utilities for working with Dockerfiles powered by Node.js written in TypeScript.
 To [install and run](#installation-instructions) these utilities, you will need to have [Node.js](https://nodejs.org/en/download/) or [Docker](https://www.docker.com/get-docker) installed on your computer.
