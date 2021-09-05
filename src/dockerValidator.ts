@@ -1344,10 +1344,6 @@ export class Validator {
         return Validator.formatMessage(Validator.dockerProblems["instructionRequiresAtLeastTwoArguments"], "ADD");
     }
 
-    public static getDiagnosticMessage_ARGRequiresOneArgument() {
-        return Validator.formatMessage(Validator.dockerProblems["instructionRequiresOneArgument"], "ARG");
-    }
-
     public static getDiagnosticMessage_COPYDestinationNotDirectory() {
         return Validator.formatMessage(Validator.dockerProblems["invalidDestination"], "COPY");
     }
