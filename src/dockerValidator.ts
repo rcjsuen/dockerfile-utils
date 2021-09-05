@@ -754,10 +754,10 @@ export class Validator {
                     candidate = args[i];
                 } else {
                     // stop searching once we're on another line
-                    return candidate;
+                    break;
                 }
             }
-            return null;
+            return candidate;
         }
         return args[args.length - 1];
     }
