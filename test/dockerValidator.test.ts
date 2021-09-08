@@ -1445,6 +1445,10 @@ describe("Docker Validator Tests", function() {
                     [ ValidationCode.UNKNOWN_INSTRUCTION, ValidationCode.NO_SOURCE_IMAGE ],
                     [ assertInstructionUnknown, assertNoSourceImage ],
                     [ [ "\\FROM", 0, 0, 0, 5 ], [ 0, 0, 0, 5 ] ]);
+
+                diagnostics = validateDockerfile("FROM alpine\nRU\\N\nRUN echo");
+                assert.equal(diagnostics.length, 1);
+                assertInstructionUnknown(diagnostics[0], "RU\\N", 1, 0, 1, 4);
             });
 
             /**

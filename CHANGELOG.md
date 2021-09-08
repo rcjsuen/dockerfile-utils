@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- fix incorrect merging of error ranges if escape character embedded in the keyword ([#99](https://github.com/rcjsuen/dockerfile-utils/issues/99))
+
 ## [0.7.0] - 2021-08-29
 ### Added
 - flag duplicated escape parser directive declarations as being unnecessary ([#82](https://github.com/rcjsuen/dockerfile-utils/issues/82))
