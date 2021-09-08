@@ -1182,7 +1182,7 @@ export class Validator {
 
         "instructionExtraArgument": "Instruction has an extra argument",
         "instructionMissingArgument": "Instruction has no arguments",
-        "instructionMultiple": "There can only be one ${0} instruction in a Dockerfile",
+        "instructionMultiple": "There can only be one ${0} instruction in a Dockerfile or build stage. Only the last one will have an effect.",
         "instructionRequiresOneArgument": "${0} requires exactly one argument",
         "instructionRequiresAtLeastOneArgument": "${0} requires at least one argument",
         "instructionRequiresAtLeastTwoArguments": "${0} requires at least two arguments",
