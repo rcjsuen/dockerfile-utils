@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Changed
 - duplicated escape parser directive errors will now only flag the duplicates ([#100](https://github.com/rcjsuen/dockerfile-utils/issues/100))
+- duplicated CMD, ENTRYPOINT, and HEALTHCHECK instructions will no longer flag the last one found as it is the valid one ([#101](https://github.com/rcjsuen/dockerfile-utils/issues/101))
 
 ### Fixed
 - fix incorrect merging of error ranges if escape character embedded in the keyword ([#99](https://github.com/rcjsuen/dockerfile-utils/issues/99))

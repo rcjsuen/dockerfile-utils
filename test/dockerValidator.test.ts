@@ -1301,51 +1301,46 @@ describe("Docker Validator Tests", function() {
                 it("default", function() {
                     let validator = new Validator();
                     let diagnostics = validator.validate(createDocument(content));
-                    assert.equal(diagnostics.length, 2);
+                    assert.strictEqual(diagnostics.length, 1);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
-                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
 
                     diagnostics = validator.validate(createDocument(contentMultiStage));
-                    assert.equal(diagnostics.length, 4);
+                    assert.strictEqual(diagnostics.length, 2);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
-                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
-                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
-                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Warning, instruction, 5, 0, 5, instructionLength);
+                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
                 });
 
                 it("ignore", function() {
                     let settings: any = {};
                     settings[settingsName] = ValidationSeverity.IGNORE;
                     let diagnostics = validateDockerfile(content, settings);
-                    assert.equal(diagnostics.length, 0);
+                    assert.strictEqual(diagnostics.length, 0);
                 });
 
                 it("warning", function() {
                     let settings: any = {};
                     settings[settingsName] = ValidationSeverity.WARNING;
                     let diagnostics = validateDockerfile(content, settings);
-                    assert.equal(diagnostics.length, 2);
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
 
                     diagnostics = validateDockerfile(contentMultiStage, settings);
-                    assert.equal(diagnostics.length, 4);
+                    assert.strictEqual(diagnostics.length, 2);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Warning, instruction, 1, 0, 1, instructionLength);
-                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 2, 0, 2, instructionLength);
-                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
-                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Warning, instruction, 5, 0, 5, instructionLength);
+                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Warning, instruction, 4, 0, 4, instructionLength);
                 });
 
                 it("error", function() {
                     let settings: any = {};
                     settings[settingsName] = ValidationSeverity.ERROR;
                     let diagnostics = validateDockerfile(content, settings);
-                    assert.equal(diagnostics.length, 2);
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Error, instruction, 1, 0, 1, instructionLength);
 
                     diagnostics = validateDockerfile(contentMultiStage, settings);
-                    assert.equal(diagnostics.length, 4);
+                    assert.strictEqual(diagnostics.length, 2);
                     assertInstructionMultiple(diagnostics[0], DiagnosticSeverity.Error, instruction, 1, 0, 1, instructionLength);
-                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Error, instruction, 2, 0, 2, instructionLength);
-                    assertInstructionMultiple(diagnostics[2], DiagnosticSeverity.Error, instruction, 4, 0, 4, instructionLength);
-                    assertInstructionMultiple(diagnostics[3], DiagnosticSeverity.Error, instruction, 5, 0, 5, instructionLength);
+                    assertInstructionMultiple(diagnostics[1], DiagnosticSeverity.Error, instruction, 4, 0, 4, instructionLength);
                 });
             };
 

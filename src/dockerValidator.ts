@@ -228,7 +228,6 @@ export class Validator {
         let cmds: Cmd[] = [];
         let entrypoints: Entrypoint[] = [];
         let healthchecks: Healthcheck[] = [];
-        let duplicates: (Cmd | Entrypoint | Healthcheck)[] = [];
         for (let instruction of instructions) {
             if (instruction instanceof Cmd) {
                 cmds.push(instruction);
@@ -237,50 +236,18 @@ export class Validator {
             } else if (instruction instanceof Healthcheck) {
                 healthchecks.push(instruction);
             } else if (instruction instanceof From) {
-                if (cmds.length > 1) {
-                    duplicates = duplicates.concat(cmds);
-                }
-                if (entrypoints.length > 1) {
-                    duplicates = duplicates.concat(entrypoints);
-                }
-                if (healthchecks.length > 1) {
-                    duplicates = duplicates.concat(healthchecks);
-                }
+                this.createDuplicatesDiagnostics(problems, this.settings.instructionCmdMultiple, "CMD", cmds);
+                this.createDuplicatesDiagnostics(problems, this.settings.instructionEntrypointMultiple, "ENTRYPOINT", entrypoints);
+                this.createDuplicatesDiagnostics(problems, this.settings.instructionHealthcheckMultiple, "HEALTHCHECK", healthchecks);
+
                 cmds = [];
                 entrypoints = [];
                 healthchecks = [];
             }
         }
-        if (cmds.length > 1) {
-            duplicates = duplicates.concat(cmds);
-        }
-        if (entrypoints.length > 1) {
-            duplicates = duplicates.concat(entrypoints);
-        }
-        if (healthchecks.length > 1) {
-            duplicates = duplicates.concat(healthchecks);
-        }
-        for (let duplicate of duplicates) {
-            if (duplicate instanceof Cmd) {
-                // more than one CMD found, warn the user
-                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionCmdMultiple, "CMD");
-                if (diagnostic) {
-                    problems.push(diagnostic);
-                }
-            } else if (duplicate instanceof Entrypoint) {
-                // more than one ENTRYPOINT found, warn the user
-                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionEntrypointMultiple, "ENTRYPOINT");
-                if (diagnostic) {
-                    problems.push(diagnostic);
-                }
-            } else {
-                // more than one HEALTHCHECK found, warn the user
-                let diagnostic = this.createMultipleInstructions(duplicate.getInstructionRange(), this.settings.instructionHealthcheckMultiple, "HEALTHCHECK");
-                if (diagnostic) {
-                    problems.push(diagnostic);
-                }
-            }
-        }
+        this.createDuplicatesDiagnostics(problems, this.settings.instructionCmdMultiple, "CMD", cmds);
+        this.createDuplicatesDiagnostics(problems, this.settings.instructionEntrypointMultiple, "ENTRYPOINT", entrypoints);
+        this.createDuplicatesDiagnostics(problems, this.settings.instructionHealthcheckMultiple, "HEALTHCHECK", healthchecks);
 
         const names: any = {};
         const froms = dockerfile.getFROMs();
@@ -794,6 +761,18 @@ export class Validator {
             }
         }
         return null;
+    }
+
+    private createDuplicatesDiagnostics(problems: Diagnostic[], severity: ValidationSeverity, instruction: string, instructions: Instruction[]): void {
+        if (instructions.length > 1) {
+            // decrement length by 1 because we want to ignore the last one
+            for (let i = 0; i < instructions.length - 1; i++) {
+                const diagnostic = this.createMultipleInstructions(instructions[i].getInstructionRange(), severity, instruction);
+                if (diagnostic) {
+                    problems.push(diagnostic);
+                }
+            }
+        }
     }
 
     private checkJsonDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
