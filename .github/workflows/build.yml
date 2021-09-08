@@ -36,6 +36,7 @@ jobs:
       uses: docker/build-push-action@v2
       if: ${{ matrix.status == 'LTS' && github.ref == 'refs/heads/master' }}
       with:
+        context: .
         push: true
         tags: rcjsuen/dockerfile-utils:latest
     - name: Coveralls
