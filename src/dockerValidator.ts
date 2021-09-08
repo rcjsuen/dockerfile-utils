@@ -60,8 +60,8 @@ export class Validator {
 
         if (duplicatedEscapes.length > 1) {
             // multiple escape parser directives have been found
-            for (const directive of duplicatedEscapes) {
-                problems.push(Validator.createDuplicatedEscapeDirective(directive.getNameRange().start, directive.getValueRange().end));
+            for (let i = 1; i < duplicatedEscapes.length; i++) {
+                problems.push(Validator.createDuplicatedEscapeDirective(duplicatedEscapes[i].getNameRange().start, duplicatedEscapes[i].getValueRange().end));
             }
             return
         }

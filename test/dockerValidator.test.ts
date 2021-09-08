@@ -1810,9 +1810,8 @@ describe("Docker Validator Tests", function() {
 
             it("duplicated escape directive", function() {
                 let diagnostics = validateDockerfile("# escape=`\n# escape=`\nFROM alpine");
-                assert.equal(diagnostics.length, 2);
-                assertDirectiveEscapeDuplicated(diagnostics[0], 0, 2, 0, 10);
-                assertDirectiveEscapeDuplicated(diagnostics[1], 1, 2, 1, 10);
+                assert.strictEqual(diagnostics.length, 1);
+                assertDirectiveEscapeDuplicated(diagnostics[0], 1, 2, 1, 10);
             });
         });
 
