@@ -1128,7 +1128,7 @@ describe("Docker Validator Tests", function() {
             });
 
             it("RUN", function() {
-                return testMissingArgumentLoop("RUN");
+                return testMissingArgumentLoop("RUN", true);
             });
 
             it("SHELL", function() {
@@ -3957,12 +3957,17 @@ describe("Docker Validator Tests", function() {
 
         it("flags only with no argument", function () {
             let diagnostics = validateDockerfile("FROM alpine\nRUN --x=y");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionMissingArgument(diagnostics[0], 1, 0, 1, 3);
+            assert.strictEqual(diagnostics.length, 0);
 
             diagnostics = validateDockerfile("FROM alpine\nRUN --x=y --abc=def");
-            assert.equal(diagnostics.length, 1);
-            assertInstructionMissingArgument(diagnostics[0], 1, 0, 1, 3);
+            assert.strictEqual(diagnostics.length, 0);
+
+            diagnostics = validateDockerfile("FROM alpine\nrun --x=y --abc=def");
+            assertDiagnostics(diagnostics,
+                [ ValidationCode.CASING_INSTRUCTION ],
+                [ assertInstructionCasing ],
+                [ [ DiagnosticSeverity.Warning, 1, 0, 1, 3 ] ]
+            );
         });
 
         createSingleQuotedJSONTests("RUN");

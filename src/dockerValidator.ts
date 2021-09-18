@@ -104,9 +104,11 @@ export class Validator {
         validate: Function, createIncompleteDiagnostic?: Function): void {
         let args = instruction instanceof PropertyInstruction ? instruction.getPropertyArguments() : instruction.getArguments();
         if (args.length === 0) {
-            // all instructions are expected to have at least one argument
-            let range = instruction.getInstructionRange();
-            problems.push(Validator.createMissingArgument(range.start, range.end));
+            if (instruction.getKeyword() !== Keyword.RUN) {
+                // all instructions are expected to have at least one argument
+                const range = instruction.getInstructionRange();
+                problems.push(Validator.createMissingArgument(range.start, range.end));
+            }
         } else if (expectedArgCount[0] === -1) {
             for (let i = 0; i < args.length; i++) {
                 let createInvalidDiagnostic = validate(i, args[i].getValue(), args[i].getRange());
