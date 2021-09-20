@@ -1444,6 +1444,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine\nRU\\N\nRUN echo");
                 assert.equal(diagnostics.length, 1);
                 assertInstructionUnknown(diagnostics[0], "RU\\N", 1, 0, 1, 4);
+
+                diagnostics = validateDockerfile("FROM alpine\nRU\\\nN\nRUN echo");
+                assert.equal(diagnostics.length, 0);
             });
 
             /**
