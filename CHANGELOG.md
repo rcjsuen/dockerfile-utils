@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - prevent merging of instructions if it contains an escape character and spans multiple lines ([#103](https://github.com/rcjsuen/dockerfile-utils/issues/103))
 
-## [0.9.0]
+## [0.9.0] - 2021-09-18
 ### Added
 - support BuildKit by ignoring RUN instructions with no arguments ([#102](https://github.com/rcjsuen/dockerfile-utils/issues/102))
 
