@@ -1447,6 +1447,12 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("FROM alpine\nRU\\\nN\nRUN echo");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nFR\\\n#\nOM alpine");
+                assert.strictEqual(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nHE\\\n#\nAL\\\n#\nTHCHECK NONE");
+                assert.strictEqual(diagnostics.length, 0);
             });
 
             /**

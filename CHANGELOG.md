@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- ignore comments embedded in an instruction's keyword ([#104](https://github.com/rcjsuen/dockerfile-utils/issues/104))
+
 ## [0.9.1] - 2021-09-20
 ### Fixed
 - prevent merging of instructions if it contains an escape character and spans multiple lines ([#103](https://github.com/rcjsuen/dockerfile-utils/issues/103))
