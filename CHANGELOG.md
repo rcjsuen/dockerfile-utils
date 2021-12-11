@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.9.3] - 2021-12-11
 ### Fixed
 - ignore heredoc content when formatting ([#105](https://github.com/rcjsuen/dockerfile-utils/issues/105))
 
@@ -232,7 +232,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.2...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.3...HEAD
+[0.9.3]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.1...v0.9.2
 [0.9.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.8.0...v0.9.0
