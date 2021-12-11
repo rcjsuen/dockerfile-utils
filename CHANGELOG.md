@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- ignore heredoc content when formatting ([#105](https://github.com/rcjsuen/dockerfile-utils/issues/105))
+
 ## [0.9.2] - 2021-09-21
 ### Fixed
 - ignore comments embedded in an instruction's keyword ([#104](https://github.com/rcjsuen/dockerfile-utils/issues/104))

@@ -280,6 +280,43 @@ describe("Dockerfile formatter", function() {
                 assert.equal(edits[0].range.end.character, 2);
             });
         });
+
+        describe("ignore heredocs", () => {
+            it("<<EOT", () => {
+                const document = createDocument("RUN <<EOT\nabc\nEOT");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("<<-EOT", () => {
+                const document = createDocument("RUN <<-EOT\nabc\nEOT");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("heredoc with no content", () => {
+                const document = createDocument("RUN <<-EOT");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("unterminated heredoc", () => {
+                const document = createDocument("RUN <<-EOT\nabc");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("formats non-heredoc content", () => {
+                const document = createDocument("RUN <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2");
+                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                assert.equal(edits.length, 1);
+                assert.equal(edits[0].newText, "\t");
+                assert.equal(edits[0].range.start.line, 1);
+                assert.equal(edits[0].range.start.character, 0);
+                assert.equal(edits[0].range.end.line, 1);
+                assert.equal(edits[0].range.end.character, 0);
+            });
+        });
     });
 
     describe("range", function() {
@@ -849,6 +886,48 @@ describe("Dockerfile formatter", function() {
                 assert.equal(edits[0].range.end.character, 1);
             });
         });
+
+        describe("ignore heredocs", () => {
+            it("<<EOT", () => {
+                const document = createDocument("RUN <<EOT\nabc\nEOT");
+                const range = Range.create(Position.create(0, 1), Position.create(2, 1));
+                const edits = formatRange(document, range);
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("<<-EOT", () => {
+                const document = createDocument("RUN <<-EOT\nabc\nEOT");
+                const range = Range.create(Position.create(0, 1), Position.create(2, 1));
+                const edits = formatRange(document, range);
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("heredoc with no content", () => {
+                const document = createDocument("RUN <<-EOT");
+                const range = Range.create(Position.create(0, 1), Position.create(0, 9));
+                const edits = formatRange(document, range);
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("unterminated heredoc", () => {
+                const document = createDocument("RUN <<-EOT\nabc");
+                const range = Range.create(Position.create(0, 1), Position.create(1, 1));
+                const edits = formatRange(document, range);
+                assert.strictEqual(edits.length, 0);
+            });
+
+            it("formats non-heredoc content", () => {
+                const document = createDocument("RUN <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2");
+                const range = Range.create(Position.create(0, 1), Position.create(5, 1));
+                const edits = formatRange(document, range);
+                assert.equal(edits.length, 1);
+                assert.equal(edits[0].newText, "\t");
+                assert.equal(edits[0].range.start.line, 1);
+                assert.equal(edits[0].range.start.character, 0);
+                assert.equal(edits[0].range.end.line, 1);
+                assert.equal(edits[0].range.end.character, 0);
+            });
+        });
     });
 
     describe("on type", function() {
@@ -963,6 +1042,14 @@ describe("Dockerfile formatter", function() {
             it("ignore multiline", () => {
                 const document = createDocument("#escape=`\nRUN ls \nls");
                 const edits = formatOnType(document, Position.create(1, 7), '`', { insertSpaces: false, tabSize: 4, ignoreMultilineInstructions: true });
+                assert.equal(edits.length, 0);
+            });
+        });
+
+        describe("ignore heredocs", () => {
+            it("<<EOT", () => {
+                const document = createDocument("RUN <<EOT\nabc\nEOT");
+                const edits = formatOnType(document, Position.create(1, 3), '\\', { insertSpaces: false, tabSize: 4 });
                 assert.equal(edits.length, 0);
             });
         });

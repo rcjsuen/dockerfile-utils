@@ -6,8 +6,9 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { TextEdit, Position, Range } from 'vscode-languageserver-types';
-import { DockerfileParser } from 'dockerfile-ast';
+import { Dockerfile, DockerfileParser, Run } from 'dockerfile-ast';
 import { FormatterSettings } from './main';
+import { Heredoc } from 'dockerfile-ast/lib/heredoc';
 
 export class DockerFormatter {
 
@@ -82,7 +83,11 @@ export class DockerFormatter {
             const skippedLines: boolean[] = [];
             indentedLines[line] = true;
             skippedLines[line] = true;
-            return this.formatLines(document, document.getText(), [line], indentedLines, skippedLines, options);
+            const heredocLines = [];
+            if (this.inHeredoc(dockerfile, line)) {
+                heredocLines.push(line);
+            }
+            return this.formatLines(document, document.getText(), [line], indentedLines, skippedLines, heredocLines, options);
         }
         return [];
     }
@@ -103,6 +108,60 @@ export class DockerFormatter {
         return this.format(document, lines, options);
     }
 
+    private inHeredoc(dockerfile: Dockerfile, line: number): boolean {
+        for (const instruction of dockerfile.getInstructions()) {
+            if (instruction instanceof Run) {
+                const lines = this.getHeredocLines(instruction.getHeredocs());
+                if (lines.indexOf(line) !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private getHeredocLines(heredocs: Heredoc[]): number[] {
+        let start = -1;
+        for (let i = 0; i < heredocs.length; i++) {
+            // if there's content, use the first line of the content
+            const contentRange = heredocs[i].getContentRange();
+            if (contentRange !== null) {
+                start = contentRange.start.line;
+                break;
+            }
+            // there may be a delimiter even if there's no content
+            const delimiterRange = heredocs[i].getDelimiterRange();
+            if (delimiterRange !== null) {
+                start = delimiterRange.start.line;
+                break;
+            }
+        }
+        if (start === -1) {
+            return [];
+        }
+
+        let end = -1;
+        for (let i = heredocs.length - 1; i >= 0; i--) {
+            // there may be a delimiter even if there's no content
+            const delimiterRange = heredocs[i].getDelimiterRange();
+            if (delimiterRange !== null) {
+                end = delimiterRange.end.line;
+                break;
+            }
+            // if there's content, use the first line of the content
+            const contentRange = heredocs[i].getContentRange();
+            if (contentRange !== null) {
+                end = contentRange.end.line;
+                break;
+            }
+        }
+        let heredocLines = [];
+        for (let i = start; i <= end; i++) {
+            heredocLines.push(i);
+        }
+        return heredocLines;
+    }
+
     /**
      * Formats the specified lines of the given document based on the
      * provided formatting options.
@@ -117,6 +176,7 @@ export class DockerFormatter {
         let dockerfile = DockerfileParser.parse(content);
         const indentedLines: boolean[] = [];
         const skippedLines: boolean[] = [];
+        const heredocLines: number[] = [];
         for (let i = 0; i < document.lineCount; i++) {
             indentedLines[i] = false;
             skippedLines[i] = false;
@@ -128,19 +188,27 @@ export class DockerFormatter {
                     skippedLines[i] = true;
                 }
             }
+            if (instruction instanceof Run) {
+                const heredocs = instruction.getHeredocs();
+                if (heredocs.length > 0) {
+                    heredocLines.push(...this.getHeredocLines(heredocs));
+                }
+            }
             indentedLines[range.start.line] = false;
             for (let i = range.start.line + 1; i <= range.end.line; i++) {
                 indentedLines[i] = true;
             }
         }
-        return this.formatLines(document, content, lines, indentedLines, skippedLines, options);
+        return this.formatLines(document, content, lines, indentedLines, skippedLines, heredocLines, options);
     }
 
-    private formatLines(document: TextDocument, content: string, lines: number[], indentedLines: boolean[], skippedLines: boolean[], options?: FormatterSettings): TextEdit[] {
+    private formatLines(document: TextDocument, content: string, lines: number[], indentedLines: boolean[], skippedLines: boolean[], heredocLines: number[], options?: FormatterSettings): TextEdit[] {
         const indentation = this.getIndentation(options);
         const edits: TextEdit[] = [];
         lineCheck: for (let i = 0; i < lines.length; i++) {
             if (options && options.ignoreMultilineInstructions && skippedLines[lines[i]]) {
+                continue;
+            } else if (heredocLines.indexOf(lines[i]) !== -1) {
                 continue;
             }
 
