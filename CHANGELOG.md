@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- empty lines in heredoc content should not trigger the empty continuation line warning ([#107](https://github.com/rcjsuen/dockerfile-utils/issues/107))
+
 ## [0.9.3] - 2021-12-11
 ### Fixed
 - ignore heredoc content when formatting ([#105](https://github.com/rcjsuen/dockerfile-utils/issues/105))

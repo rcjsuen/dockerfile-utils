@@ -1595,6 +1595,28 @@ describe("Docker Validator Tests", function() {
                     assertEmptyContinuationLine(diagnostics[0], DiagnosticSeverity.Error, 2, 0, 5, 0);
                 });
             });
+
+            describe("heredocs", () => {
+                it("single, no content at all", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt\n\neot", { emptyContinuationLine: ValidationSeverity.WARNING });
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("single, has some content", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt\nabc\n\neot", { emptyContinuationLine: ValidationSeverity.WARNING });
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("multiple, no content at all", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt <<eot2 file2.txt\n\neot\n\neot2", { emptyContinuationLine: ValidationSeverity.WARNING });
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("multiple, has some content", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt <<eot2 file2.txt\nabc\n\neot\nabc\n\neot2", { emptyContinuationLine: ValidationSeverity.WARNING });
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+            });
         });
     });
 

@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------------------------------ */
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag, Position, Range } from 'vscode-languageserver-types';
-import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword, Argument } from 'dockerfile-ast';
+import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword, Argument, Run } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
 export const KEYWORDS = [
@@ -295,6 +295,31 @@ export class Validator {
         return problems;
     }
 
+    /**
+     * Retrieves the line numbers that corresponds to the content of
+     * here-documents in the given instruction. The line numbers are
+     * zero-based.
+     * 
+     * @param instruction the instruction to check
+     * @returns an array of line numbers where content of
+     *          here-documents are defined
+     */
+    private getHeredocLines(instruction: Instruction): number[] {
+        if (instruction instanceof Run) {
+            const lines: number[] = [];
+            for (const heredoc of instruction.getHeredocs()) {
+                const range = heredoc.getContentRange();
+                if (range !== null) {
+                    for (let i = range.start.line; i <= range.end.line; i++) {
+                        lines.push(i);
+                    }
+                 }
+            }
+            return lines;
+        }
+        return []
+    }
+
     private validateInstruction(document: TextDocument, escapeChar: string, instruction: Instruction, keyword: string, isTrigger: boolean, problems: Diagnostic[]): void {
         if (KEYWORDS.indexOf(keyword) === -1) {
             let range = instruction.getInstructionRange();
@@ -323,8 +348,14 @@ export class Validator {
                 // if the instruction spans multiple lines, check for empty newlines
                 const content = document.getText();
                 const endingLine = fullRange.end.line;
+                const skippedLines = this.getHeredocLines(instruction);
+                let skipIndex = 0;
                 let start = -1;
                 for (let i = fullRange.start.line; i <= endingLine; i++) {
+                    if (i === skippedLines[skipIndex]) {
+                        skipIndex++;
+                        continue;
+                    }
                     const lineContent = content.substring(document.offsetAt(Position.create(i, 0)), document.offsetAt(Position.create(i + 1, 0)));
                     if (lineContent.trim().length === 0) {
                         if (start === -1) {
