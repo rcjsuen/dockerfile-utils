@@ -144,6 +144,18 @@ function assertFlagInvalidFrom(diagnostic: Diagnostic, flag: string, startLine: 
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
+function assertFlagInvalidLink(diagnostic: Diagnostic, value: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+    assert.equal(diagnostic.code, ValidationCode.FLAG_INVALID_LINK_VALUE);
+    assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
+    assert.equal(diagnostic.source, source);
+    assert.strictEqual(diagnostic.tags, undefined);
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value));
+    assert.equal(diagnostic.range.start.line, startLine);
+    assert.equal(diagnostic.range.start.character, startCharacter);
+    assert.equal(diagnostic.range.end.line, endLine);
+    assert.equal(diagnostic.range.end.character, endCharacter);
+}
+
 function assertFlagMissingValue(diagnostic: Diagnostic, flag: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.FLAG_MISSING_VALUE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
@@ -2618,6 +2630,46 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 2);
                     assertFlagDuplicate(diagnostics[0], "from", 1, 7, 1, 11);
                     assertFlagDuplicate(diagnostics[1], "from", 1, 16, 1, 20);
+                });
+            });
+
+            describe("link", function() {
+                it("ok", function() {
+                    let diagnostics = validateDockerfile("FROM alpine\nCOPY --link=true . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --link=false . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --link=TrUE . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --link=fALSe . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("no value", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --link . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("empty value", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --link= . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "link", 1, 7, 1, 11);
+                });
+
+                it("invalid value", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --link=abc . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagInvalidLink(diagnostics[0], "abc", 1, 12, 1, 15);
+                });
+
+                it("duplicate flag", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --link=true --link=false . .");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], "link", 1, 7, 1, 11);
+                    assertFlagDuplicate(diagnostics[1], "link", 1, 19, 1, 23);
                 });
             });
 

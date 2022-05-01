@@ -679,6 +679,17 @@ export class Validator {
                             const flagRange = flag.getRange();
                             if (name === "") {
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, flagRange.end, name));
+                            } else if (name === "link") {
+                                const linkValue = flag.getValue();
+                                if (linkValue === "") {
+                                    const nameRange = flag.getNameRange();
+                                    problems.push(Validator.createFlagMissingValue(nameRange.start, nameRange.end, name));
+                                } else if (linkValue !== null) {
+                                    const convertedLinkValue = linkValue.toLowerCase();
+                                    if (convertedLinkValue !== "true" && convertedLinkValue !== "false") {
+                                        problems.push(Validator.createFlagInvalidLink(flag.getValueRange(), linkValue));
+                                    }
+                                }
                             } else if (name !== "chmod" && name !== "chown" && name !== "from") {
                                 let range = flag.getNameRange();
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, range.end, name));
@@ -702,7 +713,7 @@ export class Validator {
                         problems.push(copyDestinationDiagnostic);
                     }
                     this.checkFlagValue(flags, ["chmod", "chown", "from"], problems);
-                    this.checkDuplicateFlags(flags, ["chmod", "chown", "from"], problems);
+                    this.checkDuplicateFlags(flags, ["chmod", "chown", "from", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "WORKDIR":
@@ -1207,6 +1218,7 @@ export class Validator {
         "flagDuplicate": "Duplicate flag specified: ${0}",
         "flagInvalidDuration": "time: invalid duration ${0}",
         "flagInvalidFrom": "invalid from flag value ${0}: invalid reference format",
+        "flagInvalidLink": "expecting boolean value for flag link, not: ${0}",
         "flagLessThan1ms": "Interval \"${0}\" cannot be less than 1ms",
         "flagMissingDuration": "time: missing unit in duration ${0}",
         "flagMissingValue": "Missing a value on flag: ${0}",
@@ -1298,6 +1310,10 @@ export class Validator {
 
     public static getDiagnosticMessage_FlagInvalidFromValue(value: string): string {
         return Validator.formatMessage(Validator.dockerProblems["flagInvalidFrom"], value);
+    }
+
+    public static getDiagnosticMessage_FlagInvalidLinkValue(value: string): string {
+        return Validator.formatMessage(Validator.dockerProblems["flagInvalidLink"], value);
     }
 
     public static getDiagnosticMessage_FlagMissingValue(flag: string) {
@@ -1486,6 +1502,10 @@ export class Validator {
 
     private static createFlagInvalidFrom(start: Position, end: Position, flag: string): Diagnostic {
         return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag), ValidationCode.FLAG_INVALID_FROM_VALUE);
+    }
+
+    private static createFlagInvalidLink(range: Range, value: string): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value), ValidationCode.FLAG_INVALID_LINK_VALUE);
     }
 
     static createFlagMissingValue(start: Position, end: Position, flag: string): Diagnostic {
