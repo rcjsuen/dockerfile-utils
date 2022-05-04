@@ -94,6 +94,11 @@ export enum ValidationCode {
     FLAG_INVALID_FROM_VALUE,
 
     /**
+     * The error code used if a link flag could not be parsed.
+     */
+    FLAG_INVALID_LINK_VALUE,
+
+    /**
      * The error code used if an instruction has arguments written in
      * JSON form except that it is not actually valid JSON because
      * single quotes are used instead of double quotes.
