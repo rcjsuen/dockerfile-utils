@@ -657,6 +657,11 @@ export class Validator {
                         const flagRange = flag.getRange();
                         if (name === "") {
                             problems.push(Validator.createUnknownAddFlag(flagRange.start, flagRange.end, name));
+                        } else if (name === "link") {
+                            const problem = this.checkFlagBoolean(flag);
+                            if (problem !== null) {
+                                problems.push(problem);
+                            }
                         } else if (name !== "chmod" && name !== "chown") {
                             let range = flag.getNameRange();
                             problems.push(Validator.createUnknownAddFlag(flagRange.start, range.end, name));
@@ -667,7 +672,7 @@ export class Validator {
                         problems.push(addDestinationDiagnostic);
                     }
                     this.checkFlagValue(addFlags, ["chmod", "chown"], problems);
-                    this.checkDuplicateFlags(addFlags, ["chmod", "chown"], problems);
+                    this.checkDuplicateFlags(addFlags, ["chmod", "chown", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
@@ -680,15 +685,9 @@ export class Validator {
                             if (name === "") {
                                 problems.push(Validator.createUnknownCopyFlag(flagRange.start, flagRange.end, name));
                             } else if (name === "link") {
-                                const linkValue = flag.getValue();
-                                if (linkValue === "") {
-                                    const nameRange = flag.getNameRange();
-                                    problems.push(Validator.createFlagMissingValue(nameRange.start, nameRange.end, name));
-                                } else if (linkValue !== null) {
-                                    const convertedLinkValue = linkValue.toLowerCase();
-                                    if (convertedLinkValue !== "true" && convertedLinkValue !== "false") {
-                                        problems.push(Validator.createFlagInvalidLink(flag.getValueRange(), linkValue));
-                                    }
+                                const problem = this.checkFlagBoolean(flag);
+                                if (problem !== null) {
+                                    problems.push(problem);
                                 }
                             } else if (name !== "chmod" && name !== "chown" && name !== "from") {
                                 let range = flag.getNameRange();
@@ -850,10 +849,28 @@ export class Validator {
             let flagName = flag.getName();
             // only validate flags with the right name
             if (flag.getValue() === null && validFlagNames.indexOf(flagName) !== -1) {
-                let range = flag.getNameRange();
-                problems.push(Validator.createFlagMissingValue(range.start, range.end, flagName));
+                problems.push(Validator.createFlagMissingValue(flag.getNameRange(), flagName));
             }
         }
+    }
+
+    /**
+     * Checks that the given boolean flag is valid. A boolean flag should
+     * either have no value defined (--flag) or the value should
+     * case-insensitively be either "true" or "false" (--flag==tRUe is
+     * valid).
+     */
+    private checkFlagBoolean(flag: Flag): Diagnostic | null {
+        const linkValue = flag.getValue();
+        if (linkValue === "") {
+            return Validator.createFlagMissingValue(flag.getNameRange(), flag.getName());
+        } else if (linkValue !== null) {
+            const convertedLinkValue = linkValue.toLowerCase();
+            if (convertedLinkValue !== "true" && convertedLinkValue !== "false") {
+                return Validator.createFlagInvalidLink(flag.getValueRange(), linkValue);
+            }
+        }
+        return null;
     }
 
     private checkFlagDuration(flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
@@ -1508,8 +1525,8 @@ export class Validator {
         return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value), ValidationCode.FLAG_INVALID_LINK_VALUE);
     }
 
-    static createFlagMissingValue(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagMissingValue(flag), ValidationCode.FLAG_MISSING_VALUE);
+    static createFlagMissingValue(range: Range, flag: string): Diagnostic {
+        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagMissingValue(flag), ValidationCode.FLAG_MISSING_VALUE);
     }
 
     static createUnknownAddFlag(start: Position, end: Position, flag: string): Diagnostic {

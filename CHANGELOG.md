@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - support parsing the new `--link` flag for COPY instructions ([#108](https://github.com/rcjsuen/dockerfile-utils/issues/108))
+- support parsing the new `--link` flag for ADD instructions ([#109](https://github.com/rcjsuen/dockerfile-utils/issues/109))
 
 ## [0.9.4] - 2022-01-22
 ### Fixed

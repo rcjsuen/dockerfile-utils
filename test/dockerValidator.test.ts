@@ -2128,6 +2128,46 @@ describe("Docker Validator Tests", function() {
                 });
             });
 
+            describe("link", () => {
+                it("ok", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nADD --link=true . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nADD --link=false . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nADD --link=TrUE . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nADD --link=fALSe . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --link . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("empty value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --link= . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "link", 1, 6, 1, 10);
+                });
+
+                it("invalid value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --link=abc . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagInvalidLink(diagnostics[0], "abc", 1, 11, 1, 14);
+                });
+
+                it("duplicate flag", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --link=true --link=false . .");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], "link", 1, 6, 1, 10);
+                    assertFlagDuplicate(diagnostics[1], "link", 1, 18, 1, 22);
+                });
+            });
+
             it("unknown flag", function() {
                 let diagnostics = validateDockerfile("FROM alpine\nADD --x=bb . .");
                 assert.equal(diagnostics.length, 1);
