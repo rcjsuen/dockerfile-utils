@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- ignore UTF-8 BOM when validating the Dockerfile ([#113](https://github.com/rcjsuen/dockerfile-utils/issues/113))
+
 ## [0.10.0] - 2022-05-04
 ### Added
 - support parsing the new `--link` flag for COPY instructions ([#108](https://github.com/rcjsuen/dockerfile-utils/issues/108))

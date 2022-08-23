@@ -824,6 +824,22 @@ describe("Docker Validator Tests", function() {
         });
     });
 
+    describe("UTF-8", () => {
+        function createUTF8Content(content: string): string {
+            return Buffer.from(`\ufeff${content}`, "UTF-8").toString();
+        }
+
+        it("simple", () => {
+            const diagnostics = validateDockerfile(createUTF8Content("FROM alpine"));
+            assert.equal(diagnostics.length, 0);
+        });
+
+        it("has directive", () => {
+            const diagnostics = validateDockerfile(createUTF8Content("#escape=`\nFROM alpine"));
+            assert.equal(diagnostics.length, 0);
+        });
+    });
+
     function createUppercaseStyleTest(trigger: boolean) {
         let onbuild = trigger ? "ONBUILD " : "";
         let triggerLength = onbuild.length;
