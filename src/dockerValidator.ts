@@ -305,7 +305,7 @@ export class Validator {
      *          here-documents are defined
      */
     private getHeredocLines(instruction: Instruction): number[] {
-        if (instruction instanceof Run) {
+        if (instruction instanceof Copy || instruction instanceof Run) {
             const lines: number[] = [];
             for (const heredoc of instruction.getHeredocs()) {
                 const range = heredoc.getContentRange();

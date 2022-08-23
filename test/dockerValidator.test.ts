@@ -3,6 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import * as assert from "assert";
+import { Keyword } from "dockerfile-ast";
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Diagnostic, DiagnosticSeverity, DiagnosticTag } from 'vscode-languageserver-types';
@@ -1625,25 +1626,30 @@ describe("Docker Validator Tests", function() {
             });
 
             describe("heredocs", () => {
-                it("single, no content at all", () => {
-                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt\n\neot", { emptyContinuationLine: ValidationSeverity.WARNING });
-                    assert.strictEqual(diagnostics.length, 0);
-                });
+                function testHeredocs(instruction: string): void {
+                    it("single, no content at all", () => {
+                        const diagnostics = validateDockerfile(`FROM alpine\n${instruction} <<eot file.txt\n\neot`, { emptyContinuationLine: ValidationSeverity.WARNING });
+                        assert.strictEqual(diagnostics.length, 0);
+                    });
 
-                it("single, has some content", () => {
-                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt\nabc\n\neot", { emptyContinuationLine: ValidationSeverity.WARNING });
-                    assert.strictEqual(diagnostics.length, 0);
-                });
+                    it("single, has some content", () => {
+                        const diagnostics = validateDockerfile(`FROM alpine\n${instruction} <<eot file.txt\nabc\n\neot`, { emptyContinuationLine: ValidationSeverity.WARNING });
+                        assert.strictEqual(diagnostics.length, 0);
+                    });
 
-                it("multiple, no content at all", () => {
-                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt <<eot2 file2.txt\n\neot\n\neot2", { emptyContinuationLine: ValidationSeverity.WARNING });
-                    assert.strictEqual(diagnostics.length, 0);
-                });
+                    it("multiple, no content at all", () => {
+                        const diagnostics = validateDockerfile(`FROM alpine\n${instruction} <<eot file.txt <<eot2 file2.txt\n\neot\n\neot2`, { emptyContinuationLine: ValidationSeverity.WARNING });
+                        assert.strictEqual(diagnostics.length, 0);
+                    });
 
-                it("multiple, has some content", () => {
-                    const diagnostics = validateDockerfile("FROM alpine\nRUN <<eot file.txt <<eot2 file2.txt\nabc\n\neot\nabc\n\neot2", { emptyContinuationLine: ValidationSeverity.WARNING });
-                    assert.strictEqual(diagnostics.length, 0);
-                });
+                    it("multiple, has some content", () => {
+                        const diagnostics = validateDockerfile(`FROM alpine\n${instruction} <<eot file.txt <<eot2 file2.txt\nabc\n\neot\nabc\n\neot2`, { emptyContinuationLine: ValidationSeverity.WARNING });
+                        assert.strictEqual(diagnostics.length, 0);
+                    });
+                }
+
+                testHeredocs(Keyword.COPY);
+                testHeredocs(Keyword.RUN);
             });
         });
     });
