@@ -8,6 +8,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { TextEdit, Position, Range } from 'vscode-languageserver-types';
 import { format, formatRange as apiFormatRange, formatOnType as apiFormatOnType, FormatterSettings } from '../src/main';
 import { DockerFormatter } from '../src/dockerFormatter';
+import { Keyword } from "dockerfile-ast";
 
 function createDocument(content: string): any {
     return TextDocument.create("uri://host/Dockerfile.sample", "dockerfile", 1, content);
@@ -281,42 +282,47 @@ describe("Dockerfile formatter", function() {
             });
         });
 
-        describe("ignore heredocs", () => {
-            it("<<EOT", () => {
-                const document = createDocument("RUN <<EOT\nabc\nEOT");
-                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
-                assert.strictEqual(edits.length, 0);
-            });
+        function testHeredocs(instruction: string): void {
+            describe("ignore heredocs", () => {
+                it("<<EOT", () => {
+                    const document = createDocument(`${instruction} <<EOT\nabc\nEOT`);
+                    const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("<<-EOT", () => {
-                const document = createDocument("RUN <<-EOT\nabc\nEOT");
-                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
-                assert.strictEqual(edits.length, 0);
-            });
+                it("<<-EOT", () => {
+                    const document = createDocument(`${instruction} <<-EOT\nabc\nEOT`);
+                    const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("heredoc with no content", () => {
-                const document = createDocument("RUN <<-EOT");
-                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
-                assert.strictEqual(edits.length, 0);
-            });
+                it("heredoc with no content", () => {
+                    const document = createDocument(`${instruction} <<-EOT`);
+                    const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("unterminated heredoc", () => {
-                const document = createDocument("RUN <<-EOT\nabc");
-                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
-                assert.strictEqual(edits.length, 0);
-            });
+                it("unterminated heredoc", () => {
+                    const document = createDocument(`${instruction} <<-EOT\nabc`);
+                    const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("formats non-heredoc content", () => {
-                const document = createDocument("RUN <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2");
-                const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
-                assert.equal(edits.length, 1);
-                assert.equal(edits[0].newText, "\t");
-                assert.equal(edits[0].range.start.line, 1);
-                assert.equal(edits[0].range.start.character, 0);
-                assert.equal(edits[0].range.end.line, 1);
-                assert.equal(edits[0].range.end.character, 0);
+                it("formats non-heredoc content", () => {
+                    const document = createDocument(`${instruction} <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2`);
+                    const edits = formatDocument(document, { insertSpaces: false, tabSize: 4 });
+                    assert.equal(edits.length, 1);
+                    assert.equal(edits[0].newText, "\t");
+                    assert.equal(edits[0].range.start.line, 1);
+                    assert.equal(edits[0].range.start.character, 0);
+                    assert.equal(edits[0].range.end.line, 1);
+                    assert.equal(edits[0].range.end.character, 0);
+                });
             });
-        });
+        }
+
+        testHeredocs(Keyword.COPY);
+        testHeredocs(Keyword.RUN);
     });
 
     describe("range", function() {
@@ -887,47 +893,52 @@ describe("Dockerfile formatter", function() {
             });
         });
 
-        describe("ignore heredocs", () => {
-            it("<<EOT", () => {
-                const document = createDocument("RUN <<EOT\nabc\nEOT");
-                const range = Range.create(Position.create(0, 1), Position.create(2, 1));
-                const edits = formatRange(document, range);
-                assert.strictEqual(edits.length, 0);
-            });
+        function testHeredocs(instruction: string): void {
+            describe("ignore heredocs", () => {
+                it("<<EOT", () => {
+                    const document = createDocument(`${instruction} <<EOT\nabc\nEOT`);
+                    const range = Range.create(Position.create(0, 1), Position.create(2, 1));
+                    const edits = formatRange(document, range);
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("<<-EOT", () => {
-                const document = createDocument("RUN <<-EOT\nabc\nEOT");
-                const range = Range.create(Position.create(0, 1), Position.create(2, 1));
-                const edits = formatRange(document, range);
-                assert.strictEqual(edits.length, 0);
-            });
+                it("<<-EOT", () => {
+                    const document = createDocument(`${instruction} <<-EOT\nabc\nEOT`);
+                    const range = Range.create(Position.create(0, 1), Position.create(2, 1));
+                    const edits = formatRange(document, range);
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("heredoc with no content", () => {
-                const document = createDocument("RUN <<-EOT");
-                const range = Range.create(Position.create(0, 1), Position.create(0, 9));
-                const edits = formatRange(document, range);
-                assert.strictEqual(edits.length, 0);
-            });
+                it("heredoc with no content", () => {
+                    const document = createDocument(`${instruction} <<-EOT`);
+                    const range = Range.create(Position.create(0, 1), Position.create(0, 9));
+                    const edits = formatRange(document, range);
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("unterminated heredoc", () => {
-                const document = createDocument("RUN <<-EOT\nabc");
-                const range = Range.create(Position.create(0, 1), Position.create(1, 1));
-                const edits = formatRange(document, range);
-                assert.strictEqual(edits.length, 0);
-            });
+                it("unterminated heredoc", () => {
+                    const document = createDocument(`${instruction} <<-EOT\nabc`);
+                    const range = Range.create(Position.create(0, 1), Position.create(1, 1));
+                    const edits = formatRange(document, range);
+                    assert.strictEqual(edits.length, 0);
+                });
 
-            it("formats non-heredoc content", () => {
-                const document = createDocument("RUN <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2");
-                const range = Range.create(Position.create(0, 1), Position.create(5, 1));
-                const edits = formatRange(document, range);
-                assert.equal(edits.length, 1);
-                assert.equal(edits[0].newText, "\t");
-                assert.equal(edits[0].range.start.line, 1);
-                assert.equal(edits[0].range.start.character, 0);
-                assert.equal(edits[0].range.end.line, 1);
-                assert.equal(edits[0].range.end.character, 0);
+                it("formats non-heredoc content", () => {
+                    const document = createDocument(`${instruction} <<EOT cat && \\\n<<EOT2 cat\nabc\nEOT\ndef\nEOT2`);
+                    const range = Range.create(Position.create(0, 1), Position.create(5, 1));
+                    const edits = formatRange(document, range);
+                    assert.equal(edits.length, 1);
+                    assert.equal(edits[0].newText, "\t");
+                    assert.equal(edits[0].range.start.line, 1);
+                    assert.equal(edits[0].range.start.character, 0);
+                    assert.equal(edits[0].range.end.line, 1);
+                    assert.equal(edits[0].range.end.character, 0);
+                });
             });
-        });
+        }
+
+        testHeredocs(Keyword.COPY);
+        testHeredocs(Keyword.RUN);
     });
 
     describe("on type", function() {
@@ -1046,12 +1057,17 @@ describe("Dockerfile formatter", function() {
             });
         });
 
-        describe("ignore heredocs", () => {
-            it("<<EOT", () => {
-                const document = createDocument("RUN <<EOT\nabc\nEOT");
-                const edits = formatOnType(document, Position.create(1, 3), '\\', { insertSpaces: false, tabSize: 4 });
-                assert.equal(edits.length, 0);
+        function testHeredocs(instruction: string): void {
+            describe("ignore heredocs", () => {
+                it("<<EOT", () => {
+                    const document = createDocument(`${instruction} <<EOT\nabc\nEOT`);
+                    const edits = formatOnType(document, Position.create(1, 3), '\\', { insertSpaces: false, tabSize: 4 });
+                    assert.equal(edits.length, 0);
+                });
             });
-        });
+        }
+
+        testHeredocs(Keyword.COPY);
+        testHeredocs(Keyword.RUN);
     });
 });

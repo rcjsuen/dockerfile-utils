@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Added
+- update formatter to ignore heredocs embedded in COPY instructions ([#111](https://github.com/rcjsuen/dockerfile-utils/issues/111))
+
 ### Fixed
 - ignore UTF-8 BOM when validating the Dockerfile ([#113](https://github.com/rcjsuen/dockerfile-utils/issues/113))
 

@@ -6,7 +6,7 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { TextEdit, Position, Range } from 'vscode-languageserver-types';
-import { Dockerfile, DockerfileParser, Run } from 'dockerfile-ast';
+import { Copy, Dockerfile, DockerfileParser, Run } from 'dockerfile-ast';
 import { FormatterSettings } from './main';
 import { Heredoc } from 'dockerfile-ast/lib/heredoc';
 
@@ -110,7 +110,7 @@ export class DockerFormatter {
 
     private inHeredoc(dockerfile: Dockerfile, line: number): boolean {
         for (const instruction of dockerfile.getInstructions()) {
-            if (instruction instanceof Run) {
+            if (instruction instanceof Copy || instruction instanceof Run) {
                 const lines = this.getHeredocLines(instruction.getHeredocs());
                 if (lines.indexOf(line) !== -1) {
                     return true;
@@ -188,7 +188,7 @@ export class DockerFormatter {
                     skippedLines[i] = true;
                 }
             }
-            if (instruction instanceof Run) {
+            if (instruction instanceof Copy || instruction instanceof Run) {
                 const heredocs = instruction.getHeredocs();
                 if (heredocs.length > 0) {
                     heredocLines.push(...this.getHeredocLines(heredocs));
