@@ -7,7 +7,6 @@ import * as assert from "assert";
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { TextEdit, Position, Range } from 'vscode-languageserver-types';
 import { format, formatRange as apiFormatRange, formatOnType as apiFormatOnType, FormatterSettings } from '../src/main';
-import { DockerFormatter } from '../src/dockerFormatter';
 import { Keyword } from "dockerfile-ast";
 
 function createDocument(content: string): any {
