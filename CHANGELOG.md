@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.11.0] - 2022-08-23
 ### Added
 - update formatter to ignore heredocs embedded in COPY instructions ([#111](https://github.com/rcjsuen/dockerfile-utils/issues/111))
 - ignore empty continuation lines in heredocs embedded in COPY instructions ([#112](https://github.com/rcjsuen/dockerfile-utils/issues/112))
@@ -249,7 +249,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.4...v0.10.0
 [0.9.4]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.3...v0.9.4
 [0.9.3]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.2...v0.9.3
