@@ -3540,6 +3540,9 @@ describe("Docker Validator Tests", function() {
 
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout=5.5s10.0ms CMD ls");
                     assert.equal(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-interval=30s CMD ls");
+                    assert.equal(diagnostics.length, 0);
                 });
 
                 it("unknown flag", function() {
@@ -3578,6 +3581,10 @@ describe("Docker Validator Tests", function() {
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --TIMEOUT=30s CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertUnknownHealthcheckFlag(diagnostics[0], "TIMEOUT", 1, 12, 1, 21);
+
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --START-INTERVAL=5s CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertUnknownHealthcheckFlag(diagnostics[0], "START-INTERVAL", 1, 12, 1, 28);
                 });
 
                 it("flag no value", function() {
@@ -3596,10 +3603,14 @@ describe("Docker Validator Tests", function() {
                     diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --timeout CMD ls");
                     assert.equal(diagnostics.length, 1);
                     assertFlagMissingValue(diagnostics[0], "timeout", 1, 14, 1, 21);
+
+                    diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --start-interval CMD ls");
+                    assert.equal(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], "start-interval", 1, 14, 1, 28);
                 });
 
                 it("flags empty value", function() {
-                    let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval= --retries= --start-period= --timeout= CMD ls");
+                    let diagnostics = validateDockerfile("FROM alpine\nHEALTHCHECK --interval= --retries= --start-period= --timeout= --start-interval= CMD ls");
                     assert.equal(diagnostics.length, 0);
                 });
 

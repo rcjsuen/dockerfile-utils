@@ -525,7 +525,7 @@ export class Validator {
                         }
                     }
 
-                    const validFlags = ["interval", "retries", "start-period", "timeout"];
+                    const validFlags = ["interval", "retries", "start-period", "timeout", "start-interval"];
                     for (const flag of healthcheckFlags) {
                         const flagName = flag.getName();
                         if (validFlags.indexOf(flagName) === -1) {
@@ -547,7 +547,7 @@ export class Validator {
                     }
 
                     this.checkFlagValue(healthcheckFlags, validFlags, problems);
-                    this.checkFlagDuration(healthcheckFlags, ["interval", "start-period", "timeout"], problems);
+                    this.checkFlagDuration(healthcheckFlags, ["interval", "start-period", "timeout", "start-interval"], problems);
                     this.checkDuplicateFlags(healthcheckFlags, validFlags, problems);
                     break;
                 case "ONBUILD":
