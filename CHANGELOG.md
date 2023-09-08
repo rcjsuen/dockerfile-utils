@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support parsing the new `--start-interval` flag for HEALTHCHECK instructions ([#115](https://github.com/rcjsuen/dockerfile-utils/issues/115))
+
 ## [0.11.0] - 2022-08-23
 ### Added
 - update formatter to ignore heredocs embedded in COPY instructions ([#111](https://github.com/rcjsuen/dockerfile-utils/issues/111))
