@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.12.0] - 2023-09-09
 ### Added
 - support parsing the new `--start-interval` flag for HEALTHCHECK instructions ([#115](https://github.com/rcjsuen/dockerfile-utils/issues/115))
 - allow some diagnostics to be ignored if a `# dockerfile-utils: ignore` comment precedes the originating line of the error ([#106](https://github.com/rcjsuen/dockerfile-utils/issues/106))
@@ -254,7 +254,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.4...v0.10.0
 [0.9.4]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.3...v0.9.4
