@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support parsing the new `--checksum` flag for ADD instructions ([#116](https://github.com/rcjsuen/dockerfile-utils/issues/116))
+
 ## [0.12.0] - 2023-09-09
 ### Added
 - support parsing the new `--start-interval` flag for HEALTHCHECK instructions ([#115](https://github.com/rcjsuen/dockerfile-utils/issues/115))

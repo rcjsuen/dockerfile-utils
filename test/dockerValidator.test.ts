@@ -2241,6 +2241,26 @@ describe("Docker Validator Tests", function() {
                 });
             });
 
+            describe("checksum", () => {
+                it("ok", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --checksum=sha256:24454f830cdb571e2c4ad15481119c43b3cafd48dd869a9b2945d1036d1dc68d https://mirrors.edge.kernel.org/pub/linux/kernel/Historic/linux-0.01.tar.gz /");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("flag no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --checksum https://mirrors.edge.kernel.org/pub/linux/kernel/Historic/linux-0.01.tar.gz /");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], 1, "checksum", 1, 6, 1, 14);
+                });
+
+                it("duplicate flag", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --checksum=abc --checksum=123 a /b");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], 1, "checksum", 1, 6, 1, 14);
+                    assertFlagDuplicate(diagnostics[1], 1, "checksum", 1, 21, 1, 29);
+                });
+            });
+
             it("unknown flag", function() {
                 let diagnostics = validateDockerfile("FROM alpine\nADD --x=bb . .");
                 assert.equal(diagnostics.length, 1);

@@ -675,7 +675,7 @@ export class Validator {
                             if (problem !== null) {
                                 problems.push(problem);
                             }
-                        } else if (name !== "chmod" && name !== "chown") {
+                        } else if (name !== "chmod" && name !== "chown" && name !== "checksum") {
                             let range = flag.getNameRange();
                             problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, range.end, name));
                         }
@@ -684,8 +684,8 @@ export class Validator {
                     if (addDestinationDiagnostic !== null) {
                         problems.push(addDestinationDiagnostic);
                     }
-                    this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown"], problems);
-                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "link"], problems);
+                    this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum"], problems);
+                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
