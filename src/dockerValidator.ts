@@ -228,7 +228,7 @@ export class Validator {
 
     validate(document: TextDocument): Diagnostic[] {
         this.document = document;
-        let problems: Diagnostic[] = [];
+        let problems: DockerfileDiagnostic[] = [];
         let dockerfile = DockerfileParser.parse(document.getText());
         this.checkDirectives(dockerfile, problems);
         let instructions = dockerfile.getInstructions();
@@ -280,6 +280,25 @@ export class Validator {
 
         for (let instruction of dockerfile.getOnbuildTriggers()) {
             this.validateInstruction(document, escapeChar, instruction, instruction.getKeyword(), true, problems);
+        }
+
+        const ignoredLines = [];
+        for (const comment of dockerfile.getComments()) {
+            if (comment.getContent() === "dockerfile-utils: ignore") {
+                ignoredLines.push(comment.getRange().start.line);
+            }
+        }
+
+        problemsCheck: for (let i = 0; i < problems.length; i++) {
+            if (problems[i].instructionLine !== null) {
+                for (const ignoredLine of ignoredLines) {
+                    if (ignoredLine + 1 === problems[i].instructionLine) {
+                        problems.splice(i, 1);
+                        i--;
+                        continue problemsCheck;
+                    }
+                }
+            }
         }
         return problems;
     }
@@ -1663,7 +1682,7 @@ export class Validator {
         return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionRequiresOneOrThreeArguments(), ValidationCode.ARGUMENT_REQUIRES_ONE_OR_THREE);
     }
 
-    private static createNoSourceImage(start: Position, end: Position): Diagnostic {
+    private static createNoSourceImage(start: Position, end: Position): DockerfileDiagnostic {
         return Validator.createError(null, start, end, Validator.getDiagnosticMessage_NoSourceImage(), ValidationCode.NO_SOURCE_IMAGE);
     }
 
@@ -1691,7 +1710,7 @@ export class Validator {
         return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionUnknown(instruction), ValidationCode.UNKNOWN_INSTRUCTION);
     }
 
-    private static createError(instructionLine: uinteger | null, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+    private static createError(instructionLine: uinteger | null, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): DockerfileDiagnostic {
         return Validator.createDiagnostic(DiagnosticSeverity.Error, instructionLine, start, end, description, code, tags);
     }
 

@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - support parsing the new `--start-interval` flag for HEALTHCHECK instructions ([#115](https://github.com/rcjsuen/dockerfile-utils/issues/115))
+- allow some diagnostics to be ignored if a `# dockerfile-utils: ignore` comment precedes the originating line of the error ([#106](https://github.com/rcjsuen/dockerfile-utils/issues/106))
 
 ## [0.11.0] - 2022-08-23
 ### Added

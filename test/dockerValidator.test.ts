@@ -4563,4 +4563,16 @@ describe("Docker Validator Tests", function() {
             testEscape("WORKDIR", "/or", "ion");
         });
     });
+
+    describe("embedded ignore rules", () => {
+        it("can ignore following diagnostic", () => {
+            const diagnostics = validateDockerfile("FROM alpine\n# dockerfile-utils: ignore\nUNRECOGNIZED argument");
+            assert.strictEqual(diagnostics.length, 0);
+        });
+
+        it("can ignore multiple diagnostics", () => {
+            const diagnostics = validateDockerfile("FROM alpine\n# dockerfile-utils: ignore\nUNRECOGNIZED argument\n# dockerfile-utils: ignore\nUNRECOGNIZED argument");
+            assert.strictEqual(diagnostics.length, 0);
+        });
+    });
 });

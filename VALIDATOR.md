@@ -98,6 +98,37 @@ The output on the command line will not include any whitespaces.
 ```
 
 ## Supported Validation Checks
+If the validator is flagging something you want it to ignore, you can put a `# dockerfile-utils: ignore` comment right before the originating line of the error. Note that not all errors can be ignored this way. Fatal errors (missing `FROM` instruction for example) or errors related to parser directives (since having a comment would make something _not_ a parser directive anymore) cannot be ignored.
+
+```Dockerfile
+FROM alpine
+# dockerfile-utils: ignore
+UNRECOGNIZED argument
+```
+
+The originating line is generally the instruction itself. So if you have a multi-line instruction you must put it before the instruction instead of before the error the line is on.
+
+**Correct:**
+```Dockerfile
+FROM alpine
+# dockerfile-utils: ignore
+HEALTHCHECK \
+    --interval=30s \
+    --typo=example \
+    CMD [ "executable" ]
+```
+**Incorrect:**
+```Dockerfile
+FROM alpine
+HEALTHCHECK \
+    --interval=30s \
+# dockerfile-utils: ignore
+    --typo=example \
+    CMD [ "executable" ]
+```
+
+If you feel an error cannot be ignored but you feel it is a non-fatal error, please let us know by opening an issue.
+
 
 ### General
 #### Instructions
