@@ -670,7 +670,7 @@ export class Validator {
                         const flagRange = flag.getRange();
                         if (name === "") {
                             problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, flagRange.end, name));
-                        } else if (name === "link") {
+                        } else if (name === "link" || name === "keep-git-dir") {
                             const problem = this.checkFlagBoolean(addInstructionRange.start.line, flag);
                             if (problem !== null) {
                                 problems.push(problem);
@@ -685,7 +685,7 @@ export class Validator {
                         problems.push(addDestinationDiagnostic);
                     }
                     this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum"], problems);
-                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "link"], problems);
+                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "keep-git-dir", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
@@ -902,13 +902,13 @@ export class Validator {
      * valid).
      */
     private checkFlagBoolean(instructionLine: uinteger, flag: Flag): Diagnostic | null {
-        const linkValue = flag.getValue();
-        if (linkValue === "") {
+        const flagValue = flag.getValue();
+        if (flagValue === "") {
             return Validator.createFlagMissingValue(instructionLine, flag.getNameRange(), flag.getName());
-        } else if (linkValue !== null) {
-            const convertedLinkValue = linkValue.toLowerCase();
-            if (convertedLinkValue !== "true" && convertedLinkValue !== "false") {
-                return Validator.createFlagInvalidLink(instructionLine, flag.getValueRange(), linkValue);
+        } else if (flagValue !== null) {
+            const convertedFlagValue = flagValue.toLowerCase();
+            if (convertedFlagValue !== "true" && convertedFlagValue !== "false") {
+                return Validator.createFlagExpectedBooleanValue(instructionLine, flag.getValueRange(), flag.getName(), flagValue);
             }
         }
         return null;
@@ -1276,7 +1276,7 @@ export class Validator {
         "flagDuplicate": "Duplicate flag specified: ${0}",
         "flagInvalidDuration": "time: invalid duration ${0}",
         "flagInvalidFrom": "invalid from flag value ${0}: invalid reference format",
-        "flagInvalidLink": "expecting boolean value for flag link, not: ${0}",
+        "flagExpectedBooleanValue": "expecting boolean value for flag ${0}, not: ${1}",
         "flagLessThan1ms": "Interval \"${0}\" cannot be less than 1ms",
         "flagMissingDuration": "time: missing unit in duration ${0}",
         "flagMissingValue": "Missing a value on flag: ${0}",
@@ -1370,8 +1370,8 @@ export class Validator {
         return Validator.formatMessage(Validator.dockerProblems["flagInvalidFrom"], value);
     }
 
-    public static getDiagnosticMessage_FlagInvalidLinkValue(value: string): string {
-        return Validator.formatMessage(Validator.dockerProblems["flagInvalidLink"], value);
+    public static getDiagnosticMessage_FlagExpectedBooleanValue(flag: string, value: string): string {
+        return Validator.formatMessage(Validator.dockerProblems["flagExpectedBooleanValue"], flag, value);
     }
 
     public static getDiagnosticMessage_FlagMissingValue(flag: string) {
@@ -1562,8 +1562,8 @@ export class Validator {
         return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag), ValidationCode.FLAG_INVALID_FROM_VALUE);
     }
 
-    private static createFlagInvalidLink(instructionLine: uinteger | null, range: Range, value: string): Diagnostic {
-        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value), ValidationCode.FLAG_INVALID_LINK_VALUE);
+    private static createFlagExpectedBooleanValue(instructionLine: uinteger | null, range: Range, flag: string, value: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_FlagExpectedBooleanValue(flag, value), ValidationCode.FLAG_EXPECTED_BOOLEAN_VALUE);
     }
 
     private static createFlagMissingValue(instructionLine: uinteger | null, range: Range, flag: string): Diagnostic {

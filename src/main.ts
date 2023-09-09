@@ -95,8 +95,17 @@ export enum ValidationCode {
 
     /**
      * The error code used if a link flag could not be parsed.
+     * 
+     * @deprecated Use FLAG_EXPECTED_BOOLEAN_VALUE instead as more flags
+     *             that require mandatory fields may be introduced in
+     *             the future.
      */
     FLAG_INVALID_LINK_VALUE,
+
+    /**
+     * The error code used if a link flag could not be parsed.
+     */
+    FLAG_EXPECTED_BOOLEAN_VALUE = 48,
 
     /**
      * The error code used if an instruction has arguments written in

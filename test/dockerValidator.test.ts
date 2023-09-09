@@ -153,12 +153,12 @@ function assertFlagInvalidFrom(diagnostic: Diagnostic, instructionLine: uinteger
     assert.equal(diagnostic.range.end.character, endCharacter);
 }
 
-function assertFlagInvalidLink(diagnostic: Diagnostic, instructionLine: uinteger, value: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+function assertFlagExpectedBooleanValue(diagnostic: Diagnostic, instructionLine: uinteger, flag: string, value: string, startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
     assert.equal(diagnostic.code, ValidationCode.FLAG_INVALID_LINK_VALUE);
     assert.equal(diagnostic.severity, DiagnosticSeverity.Error);
     assert.equal(diagnostic.source, source);
     assert.strictEqual(diagnostic.tags, undefined);
-    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value));
+    assert.equal(diagnostic.message, Validator.getDiagnosticMessage_FlagExpectedBooleanValue(flag, value));
     assert.strictEqual((diagnostic as DockerfileDiagnostic).instructionLine, instructionLine);
     assert.equal(diagnostic.range.start.line, startLine);
     assert.equal(diagnostic.range.start.character, startCharacter);
@@ -2230,7 +2230,7 @@ describe("Docker Validator Tests", function() {
                 it("invalid value", () => {
                     const diagnostics = validateDockerfile("FROM alpine\nADD --link=abc . .");
                     assert.strictEqual(diagnostics.length, 1);
-                    assertFlagInvalidLink(diagnostics[0], 1, "abc", 1, 11, 1, 14);
+                    assertFlagExpectedBooleanValue(diagnostics[0], 1, "link", "abc", 1, 11, 1, 14);
                 });
 
                 it("duplicate flag", () => {
@@ -2258,6 +2258,31 @@ describe("Docker Validator Tests", function() {
                     assert.strictEqual(diagnostics.length, 2);
                     assertFlagDuplicate(diagnostics[0], 1, "checksum", 1, 6, 1, 14);
                     assertFlagDuplicate(diagnostics[1], 1, "checksum", 1, 21, 1, 29);
+                });
+            });
+
+            describe("keep-git-dir", () => {
+                it("ok", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --keep-git-dir=true https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("flag no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --keep-git-dir https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 0, "--keep-git-dir defaults to false if no value specified");
+                });
+
+                it("invalid value", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --keep-git-dir=abc https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagExpectedBooleanValue(diagnostics[0], 1, "keep-git-dir", "abc", 1, 19, 1, 22);
+                });
+
+                it("duplicate flag", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --keep-git-dir=true --keep-git-dir=false https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], 1, "keep-git-dir", 1, 6, 1, 18);
+                    assertFlagDuplicate(diagnostics[1], 1, "keep-git-dir", 1, 26, 1, 38);
                 });
             });
 
@@ -2795,7 +2820,7 @@ describe("Docker Validator Tests", function() {
                 it("invalid value", function() {
                     const diagnostics = validateDockerfile("FROM alpine\nCOPY --link=abc . .");
                     assert.strictEqual(diagnostics.length, 1);
-                    assertFlagInvalidLink(diagnostics[0], 1, "abc", 1, 12, 1, 15);
+                    assertFlagExpectedBooleanValue(diagnostics[0], 1, "link", "abc", 1, 12, 1, 15);
                 });
 
                 it("duplicate flag", function() {

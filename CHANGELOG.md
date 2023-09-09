@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Added
 - support parsing the new `--checksum` flag for ADD instructions ([#116](https://github.com/rcjsuen/dockerfile-utils/issues/116))
+- support parsing the new `--keep-git-dir` flag for ADD instructions ([#117](https://github.com/rcjsuen/dockerfile-utils/issues/117))
+
+### Changed
+- `ValidationCode.FLAG_INVALID_LINK_VALUE` has been deprecated in favour of `ValidationCode.FLAG_EXPECTED_BOOLEAN_VALUE`, `ValidationCode.FLAG_INVALID_LINK_VALUE` may be removed in a future release
 
 ## [0.12.0] - 2023-09-09
 ### Added
