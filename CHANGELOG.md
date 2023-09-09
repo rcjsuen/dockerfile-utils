@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.13.0] - 2023-09-09
 ### Added
 - support parsing the new `--checksum` flag for ADD instructions ([#116](https://github.com/rcjsuen/dockerfile-utils/issues/116))
 - support parsing the new `--keep-git-dir` flag for ADD instructions ([#117](https://github.com/rcjsuen/dockerfile-utils/issues/117))
@@ -262,7 +262,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.13.0...HEAD
+[0.13.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.9.4...v0.10.0
