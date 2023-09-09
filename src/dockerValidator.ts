@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { Diagnostic, DiagnosticSeverity, DiagnosticTag, Position, Range } from 'vscode-languageserver-types';
+import { Diagnostic, DiagnosticSeverity, DiagnosticTag, Position, Range, uinteger } from 'vscode-languageserver-types';
 import { Dockerfile, Flag, Instruction, JSONInstruction, Add, Arg, Cmd, Copy, Entrypoint, From, Healthcheck, Onbuild, ModifiableInstruction, PropertyInstruction, Property, DockerfileParser, Directive, Keyword, Argument, Run } from 'dockerfile-ast';
 import { ValidationCode, ValidationSeverity, ValidatorSettings } from './main';
 
@@ -27,6 +27,16 @@ export const KEYWORDS = [
     "VOLUME",
     "WORKDIR"
 ];
+
+export interface DockerfileDiagnostic extends Diagnostic {
+
+    /**
+     * Position of the instruction position in a document (zero-based).
+     * This may be null if the diagnostic is not for an instruction (for
+     * example, the diagnostic may be for a parser directive).
+     */
+    instructionLine: uinteger | null;
+}
 
 export class Validator {
 
@@ -107,14 +117,14 @@ export class Validator {
             if (instruction.getKeyword() !== Keyword.RUN) {
                 // all instructions are expected to have at least one argument
                 const range = instruction.getInstructionRange();
-                problems.push(Validator.createMissingArgument(range.start, range.end));
+                problems.push(Validator.createMissingArgument(range.start.line, range.start, range.end));
             }
         } else if (expectedArgCount[0] === -1) {
             for (let i = 0; i < args.length; i++) {
                 let createInvalidDiagnostic = validate(i, args[i].getValue(), args[i].getRange());
                 if (createInvalidDiagnostic) {
                     let range = args[i].getRange();
-                    problems.push(createInvalidDiagnostic(range.start, range.end, args[i].getValue()));
+                    problems.push(createInvalidDiagnostic(instruction.getInstructionRange().start.line, range.start, range.end, args[i].getValue()));
                 }
             }
         } else {
@@ -124,7 +134,7 @@ export class Validator {
                         let range = args[j].getRange();
                         let createInvalidDiagnostic = validate(j, args[j].getValue(), range);
                         if (createInvalidDiagnostic instanceof Function) {
-                            problems.push(createInvalidDiagnostic(range.start, range.end, args[j].getValue()));
+                            problems.push(createInvalidDiagnostic(instruction.getInstructionRange().start.line, range.start, range.end, args[j].getValue()));
                         } else if (createInvalidDiagnostic !== null) {
                             problems.push(createInvalidDiagnostic);
                         }
@@ -135,9 +145,9 @@ export class Validator {
 
             let range = args[args.length - 1].getRange();
             if (createIncompleteDiagnostic) {
-                problems.push(createIncompleteDiagnostic(range.start, range.end));
+                problems.push(createIncompleteDiagnostic(instruction.getInstructionRange().start.line, range.start, range.end));
             } else {
-                problems.push(Validator.createExtraArgument(range.start, range.end));
+                problems.push(Validator.createExtraArgument(instruction.getInstructionRange().start.line, range.start, range.end));
             }
         }
     }
@@ -154,9 +164,9 @@ export class Validator {
                         break;
                     default:
                         if (modifier === "") {
-                            problems.push(Validator.createVariableUnsupportedModifier(variable.getRange(), variable.toString(), modifier));
+                            problems.push(Validator.createVariableUnsupportedModifier(instruction.getRange().start.line, variable.getRange(), variable.toString(), modifier));
                         } else if (modifier !== '+' && modifier !== '-' && modifier !== '?') {
-                            problems.push(Validator.createVariableUnsupportedModifier(variable.getModifierRange(), variable.toString(), modifier));
+                            problems.push(Validator.createVariableUnsupportedModifier(instruction.getRange().start.line, variable.getModifierRange(), variable.toString(), modifier));
                         }
                         break;
                 }
@@ -164,19 +174,19 @@ export class Validator {
         }
     }
 
-    private checkProperty(document: TextDocument, escapeChar: string, keyword: string, property: Property, firstProperty: boolean, optionalValue: boolean, problems: Diagnostic[]): void {
+    private checkProperty(document: TextDocument, escapeChar: string, keyword: string, instructionLine: uinteger, property: Property, firstProperty: boolean, optionalValue: boolean, problems: Diagnostic[]): void {
         let name = property.getName();
         if (name === "") {
             let range = property.getRange();
-            problems.push(Validator.createSyntaxMissingNames(range.start, range.end, keyword));
+            problems.push(Validator.createSyntaxMissingNames(instructionLine, range.start, range.end, keyword));
         } else if (name.indexOf('=') !== -1) {
             let nameRange = property.getNameRange();
             let unescapedName = document.getText(nameRange);
             let index = unescapedName.indexOf('=');
             if (unescapedName.charAt(0) === '\'') {
-                problems.push(Validator.createSyntaxMissingSingleQuote(nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
+                problems.push(Validator.createSyntaxMissingSingleQuote(instructionLine, nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
             } else if (unescapedName.charAt(0) === '"') {
-                problems.push(Validator.createSyntaxMissingDoubleQuote(nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
+                problems.push(Validator.createSyntaxMissingDoubleQuote(instructionLine, nameRange.start, document.positionAt(document.offsetAt(nameRange.start) + index), unescapedName.substring(0, unescapedName.indexOf('='))));
             }
             return;
         }
@@ -186,9 +196,9 @@ export class Validator {
             if (!optionalValue) {
                 let range = property.getNameRange();
                 if (firstProperty) {
-                    problems.push(Validator.createENVRequiresTwoArguments(range.start, range.end));
+                    problems.push(Validator.createENVRequiresTwoArguments(instructionLine, range.start, range.end));
                 } else {
-                    problems.push(Validator.createSyntaxMissingEquals(range.start, range.end, name));
+                    problems.push(Validator.createSyntaxMissingEquals(instructionLine, range.start, range.end, name));
                 }
             }
         } else if (value.charAt(0) === '"') {
@@ -208,11 +218,11 @@ export class Validator {
 
             if (!found) {
                 let range = property.getValueRange();
-                problems.push(Validator.createSyntaxMissingDoubleQuote(range.start, range.end, property.getUnescapedValue()));
+                problems.push(Validator.createSyntaxMissingDoubleQuote(instructionLine, range.start, range.end, property.getUnescapedValue()));
             }
         } else if (value.charAt(0) === '\'' && value.charAt(value.length - 1) !== '\'') {
             let range = property.getValueRange();
-            problems.push(Validator.createSyntaxMissingSingleQuote(range.start, range.end, value));
+            problems.push(Validator.createSyntaxMissingSingleQuote(instructionLine, range.start, range.end, value));
         }
     }
 
@@ -250,28 +260,7 @@ export class Validator {
         this.createDuplicatesDiagnostics(problems, this.settings.instructionCmdMultiple, "CMD", cmds);
         this.createDuplicatesDiagnostics(problems, this.settings.instructionEntrypointMultiple, "ENTRYPOINT", entrypoints);
         this.createDuplicatesDiagnostics(problems, this.settings.instructionHealthcheckMultiple, "HEALTHCHECK", healthchecks);
-
-        const names: any = {};
-        const froms = dockerfile.getFROMs();
-        for (let from of froms) {
-            let name = from.getBuildStage();
-            if (name) {
-                name = name.toLowerCase();
-                if (!names[name]) {
-                    names[name] = [];
-                }
-                names[name].push(from.getBuildStageRange());
-            }
-        }
-
-        for (let name in names) {
-            // duplicates found
-            if (names[name].length > 1) {
-                for (let range of names[name]) {
-                    problems.push(Validator.createDuplicateBuildStageName(range, name));
-                }
-            }
-        }
+        this.createDuplicateBuildStageNameDiagnostics(problems, dockerfile.getFROMs());
 
         let escapeChar = dockerfile.getEscapeCharacter();
         let hasFrom = false;
@@ -324,12 +313,12 @@ export class Validator {
         if (KEYWORDS.indexOf(keyword) === -1) {
             let range = instruction.getInstructionRange();
             // invalid instruction found
-            problems.push(Validator.createUnknownInstruction(range.start, range.end, keyword));
+            problems.push(Validator.createUnknownInstruction(range.start.line, range.start, range.end, keyword));
         } else {
             if (keyword !== instruction.getInstruction()) {
                 let range = instruction.getInstructionRange();
                 // warn about uppercase convention if the keyword doesn't match the actual instruction
-                let diagnostic = this.createUppercaseInstruction(range.start, range.end);
+                let diagnostic = this.createUppercaseInstruction(range.start.line, range.start, range.end);
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }
@@ -337,7 +326,7 @@ export class Validator {
 
             if (keyword === "MAINTAINER") {
                 let range = instruction.getInstructionRange();
-                let diagnostic = this.createMaintainerDeprecated(range.start, range.end);
+                let diagnostic = this.createMaintainerDeprecated(range.start.line, range.start, range.end);
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }
@@ -397,7 +386,7 @@ export class Validator {
                     let arg = instruction as Arg;
                     let argProperty = arg.getProperty();
                     if (argProperty) {
-                        this.checkProperty(document, escapeChar, keyword, argProperty, true, true, problems);
+                        this.checkProperty(document, escapeChar, keyword, instruction.getRange().start.line, argProperty, true, true, problems);
                     }
                     break;
                 case "ENV":
@@ -407,23 +396,24 @@ export class Validator {
                     });
                     let properties = (instruction as PropertyInstruction).getProperties();
                     if (properties.length === 1) {
-                        this.checkProperty(document, escapeChar, keyword, properties[0], true, false, problems);
+                        this.checkProperty(document, escapeChar, keyword, instruction.getRange().start.line, properties[0], true, false, problems);
                     } else if (properties.length !== 0) {
                         for (let property of properties) {
-                            this.checkProperty(document, escapeChar, keyword, property, false, false, problems);
+                            this.checkProperty(document, escapeChar, keyword, instruction.getRange().start.line, property, false, false, problems);
                         }
                     }
                     break;
                 case "FROM":
+                    const fromInstructionRange = instruction.getInstructionRange();
                     const fromFlags = (instruction as ModifiableInstruction).getFlags();
                     for (const flag of fromFlags) {
                         const flagName = flag.getName();
                         if (flagName !== "platform") {
                             const range = flag.getRange();
-                            problems.push(Validator.createUnknownFromFlag(range.start, flagName === "" ? range.end : flag.getNameRange().end, flag.getName()));
+                            problems.push(Validator.createUnknownFromFlag(fromInstructionRange.start.line, range.start, flagName === "" ? range.end : flag.getNameRange().end, flag.getName()));
                         }
                     }
-                    this.checkFlagValue(fromFlags, [ "platform"], problems);
+                    this.checkFlagValue(fromInstructionRange.start.line, fromFlags, [ "platform"], problems);
                     this.checkArguments(instruction, problems, [1, 3], function (index: number, argument: string, range: Range): Diagnostic | Function | null {
                         switch (index) {
                             case 0:
@@ -435,7 +425,7 @@ export class Validator {
                                             && variableRange.end.line === range.end.line
                                             && variableRange.end.character === range.end.character) {
                                         if (!variables[0].isDefined()) {
-                                            return Validator.createBaseNameEmpty(variableRange, variables[0].toString());
+                                            return Validator.createBaseNameEmpty(fromInstructionRange.start.line, variableRange, variables[0].toString());
                                         }
                                     }
                                     return null;
@@ -450,34 +440,34 @@ export class Validator {
                                     let tag = document.getText(tagRange);
                                     if (tag === "") {
                                         // no tag specified, just highlight the whole argument
-                                        return Validator.createInvalidReferenceFormat(range);
+                                        return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, range);
                                     }
                                     let tagRegexp = new RegExp(/^[\w][\w.-]{0,127}$/);
                                     if (tagRegexp.test(tag)) {
                                         return null;
                                     }
-                                    return Validator.createInvalidReferenceFormat(from.getImageTagRange());
+                                    return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, from.getImageTagRange());
                                 }
                                 let digest = document.getText(digestRange);
                                 let algorithmIndex = digest.indexOf(':');
                                 if (algorithmIndex === -1) {
                                     if (digest === "") {
                                         // no digest specified, just highlight the whole argument
-                                        return Validator.createInvalidReferenceFormat(range);
+                                        return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, range);
                                     }
-                                    return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
+                                    return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, from.getImageDigestRange());
                                 }
                                 let algorithmRegexp = new RegExp(/[A-Fa-f0-9_+.-]+/);
                                 let algorithm = digest.substring(0, algorithmIndex);
                                 if (!algorithmRegexp.test(algorithm)) {
-                                    return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
+                                    return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, from.getImageDigestRange());
                                 }
                                 let hex = digest.substring(algorithmIndex + 1);
                                 let hexRegexp = new RegExp(/[A-Fa-f0-9]+/);
                                 if (hexRegexp.test(hex)) {
                                     return null;
                                 }
-                                return Validator.createInvalidReferenceFormat(from.getImageDigestRange());
+                                return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, from.getImageDigestRange());
                             case 1:
                                 return argument.toUpperCase() === "AS" ? null : Validator.createInvalidAs;
                             case 2:
@@ -486,7 +476,7 @@ export class Validator {
                                 if (regexp.test(argument)) {
                                     return null;
                                 }
-                                return Validator.createInvalidBuildStageName(range, argument);;
+                                return Validator.createInvalidBuildStageName(fromInstructionRange.start.line, range, argument);;
                             default:
                                 return null;
                         }
@@ -494,10 +484,11 @@ export class Validator {
                     break;
                 case "HEALTHCHECK":
                     let args = instruction.getArguments();
+                    const healthcheckInstructionRange = instruction.getInstructionRange();
                     const healthcheckFlags = (instruction as ModifiableInstruction).getFlags();
                     if (args.length === 0) {
                         // all instructions are expected to have at least one argument
-                        problems.push(Validator.createHEALTHCHECKRequiresAtLeastOneArgument(instruction.getInstructionRange()));
+                        problems.push(Validator.createHEALTHCHECKRequiresAtLeastOneArgument(healthcheckInstructionRange.start.line, healthcheckInstructionRange));
                     } else {
                         const value = args[0].getValue();
                         const uppercase = value.toUpperCase();
@@ -509,7 +500,7 @@ export class Validator {
                                 // get the last argument
                                 const end = args[args.length - 1].getRange().end;
                                 // highlight everything after the NONE and warn the user
-                                problems.push(Validator.createHealthcheckNoneUnnecessaryArgument(start, end));
+                                problems.push(Validator.createHealthcheckNoneUnnecessaryArgument(healthcheckInstructionRange.start.line, start, end));
                             }
                             // don't need to validate flags of a NONE
                             break;
@@ -517,11 +508,11 @@ export class Validator {
                             if (args.length === 1) {
                                 // this HEALTHCHECK has a CMD with no arguments
                                 const range = args[0].getRange();
-                                problems.push(Validator.createHealthcheckCmdArgumentMissing(range.start, range.end));
+                                problems.push(Validator.createHealthcheckCmdArgumentMissing(healthcheckInstructionRange.start.line, range.start, range.end));
                             }
                         } else {
                             // unknown HEALTHCHECK type
-                            problems.push(Validator.createHealthcheckTypeUnknown(args[0].getRange(), uppercase));
+                            problems.push(Validator.createHealthcheckTypeUnknown(healthcheckInstructionRange.start.line, args[0].getRange(), uppercase));
                         }
                     }
 
@@ -530,7 +521,7 @@ export class Validator {
                         const flagName = flag.getName();
                         if (validFlags.indexOf(flagName) === -1) {
                             const range = flag.getRange();
-                            problems.push(Validator.createUnknownHealthcheckFlag(range.start, flagName === "" ? range.end : flag.getNameRange().end, flag.getName()));
+                            problems.push(Validator.createUnknownHealthcheckFlag(healthcheckInstructionRange.start.line, range.start, flagName === "" ? range.end : flag.getNameRange().end, flag.getName()));
                         } else if (flagName === "retries") {
                             const value = flag.getValue();
                             if (value) {
@@ -538,17 +529,17 @@ export class Validator {
                                 const integer = parseInt(value);
                                 // test for NaN or numbers with decimals
                                 if (isNaN(integer) || value.indexOf('.') !== -1) {
-                                    problems.push(Validator.createInvalidSyntax(valueRange.start, valueRange.end, value));
+                                    problems.push(Validator.createInvalidSyntax(healthcheckInstructionRange.start.line, valueRange.start, valueRange.end, value));
                                 } else if (integer < 1) {
-                                    problems.push(Validator.createFlagAtLeastOne(valueRange.start, valueRange.end, "--retries", integer.toString()));
+                                    problems.push(Validator.createFlagAtLeastOne(healthcheckInstructionRange.start.line, valueRange.start, valueRange.end, "--retries", integer.toString()));
                                 }
                             }
                         }
                     }
 
-                    this.checkFlagValue(healthcheckFlags, validFlags, problems);
-                    this.checkFlagDuration(healthcheckFlags, ["interval", "start-period", "timeout", "start-interval"], problems);
-                    this.checkDuplicateFlags(healthcheckFlags, validFlags, problems);
+                    this.checkFlagValue(healthcheckInstructionRange.start.line, healthcheckFlags, validFlags, problems);
+                    this.checkFlagDuration(healthcheckInstructionRange.start.line, healthcheckFlags, ["interval", "start-period", "timeout", "start-interval"], problems);
+                    this.checkDuplicateFlags(healthcheckInstructionRange.start.line, healthcheckFlags, validFlags, problems);
                     break;
                 case "ONBUILD":
                     this.checkArguments(instruction, problems, [-1], function (): any {
@@ -559,10 +550,10 @@ export class Validator {
                     switch (trigger) {
                         case "FROM":
                         case "MAINTAINER":
-                            problems.push(Validator.createOnbuildTriggerDisallowed(onbuild.getTriggerRange(), trigger));
+                            problems.push(Validator.createOnbuildTriggerDisallowed(onbuild.getInstructionRange().start.line, onbuild.getTriggerRange(), trigger));
                             break;
                         case "ONBUILD":
-                            problems.push(Validator.createOnbuildChainingDisallowed(onbuild.getTriggerRange()));
+                            problems.push(Validator.createOnbuildChainingDisallowed(onbuild.getInstructionRange().start.line, onbuild.getTriggerRange()));
                             break;
                     }
                     break;
@@ -591,8 +582,9 @@ export class Validator {
                         let variables = instruction.getVariables();
                         if (variables.length === 0) {
                             if (value.indexOf('$') !== -1) {
+                                const instructionRange = instruction.getInstructionRange();
                                 let range = stopsignalArgs[0].getRange();
-                                problems.push(Validator.createInvalidStopSignal(range.start, range.end, value));
+                                problems.push(Validator.createInvalidStopSignal(instructionRange.start.line, range.start, range.end, value));
                             }
                         } else {
                             for (let variable of variables) {
@@ -603,8 +595,9 @@ export class Validator {
                                 );
                                 // an un-expanded variable is here
                                 if (value.includes(variableDefinition) && !variable.isBuildVariable() && !variable.isDefined()) {
+                                    const instructionRange = instruction.getInstructionRange();
                                     let range = stopsignalArgs[0].getRange();
-                                    problems.push(Validator.createInvalidStopSignal(range.start, range.end, ""));
+                                    problems.push(Validator.createInvalidStopSignal(instructionRange.start.line, range.start, range.end, ""));
                                     break;
                                 }
                             }
@@ -616,7 +609,7 @@ export class Validator {
                     let exposeExpandedArgs = instruction.getExpandedArguments();
                     if (exposeExpandedArgs.length === 0) {
                         let range = instruction.getInstructionRange();
-                        problems.push(Validator.createMissingArgument(range.start, range.end));
+                        problems.push(Validator.createMissingArgument(range.start.line, range.start, range.end));
                     } else {
                         const regex = /^([0-9])+(-[0-9]+)?(:([0-9])+(-[0-9]*)?)?(\/(\w*))?(\/\w*)*$/;
                         argCheck: for (let i = 0; i < exposeExpandedArgs.length; i++) {
@@ -636,7 +629,7 @@ export class Validator {
                                         );
                                         const start = rangeStart + rawArg.indexOf(match[7].substring(0, 1));
                                         const end = protocol.length === 1 ? rangeStart + start + 1 : rangeStart + rawArg.length;
-                                        problems.push(Validator.createInvalidProto(this.document.positionAt(start), this.document.positionAt(end), match[7]));
+                                        problems.push(Validator.createInvalidProto(instruction.getInstructionRange().start.line, this.document.positionAt(start), this.document.positionAt(end), match[7]));
                                     }
                                 }
                             } else {
@@ -644,7 +637,7 @@ export class Validator {
                                 if (value.charAt(0) === '$') {
                                     continue argCheck;
                                 }
-                                problems.push(Validator.createInvalidPort(exposeExpandedArgs[i].getRange(), value));
+                                problems.push(Validator.createInvalidPort(instruction.getInstructionRange().start.line, exposeExpandedArgs[i].getRange(), value));
                             }
                         }
                     }
@@ -652,30 +645,32 @@ export class Validator {
                 case "ADD":
                     const add = instruction as Add;
                     const addFlags = add.getFlags();
+                    const addInstructionRange = instruction.getInstructionRange();
                     for (let flag of addFlags) {
                         const name = flag.getName();
                         const flagRange = flag.getRange();
                         if (name === "") {
-                            problems.push(Validator.createUnknownAddFlag(flagRange.start, flagRange.end, name));
+                            problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, flagRange.end, name));
                         } else if (name === "link") {
-                            const problem = this.checkFlagBoolean(flag);
+                            const problem = this.checkFlagBoolean(addInstructionRange.start.line, flag);
                             if (problem !== null) {
                                 problems.push(problem);
                             }
                         } else if (name !== "chmod" && name !== "chown") {
                             let range = flag.getNameRange();
-                            problems.push(Validator.createUnknownAddFlag(flagRange.start, range.end, name));
+                            problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, range.end, name));
                         }
                     }
                     const addDestinationDiagnostic = this.checkDestinationIsDirectory(add, Validator.createADDRequiresAtLeastTwoArguments, Validator.createADDDestinationNotDirectory);
                     if (addDestinationDiagnostic !== null) {
                         problems.push(addDestinationDiagnostic);
                     }
-                    this.checkFlagValue(addFlags, ["chmod", "chown"], problems);
-                    this.checkDuplicateFlags(addFlags, ["chmod", "chown", "link"], problems);
+                    this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown"], problems);
+                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
+                    const copyInstructionRange = instruction.getInstructionRange();
                     let copy = instruction as Copy;
                     let flags = copy.getFlags();
                     if (flags.length > 0) {
@@ -683,15 +678,15 @@ export class Validator {
                             const name = flag.getName();
                             const flagRange = flag.getRange();
                             if (name === "") {
-                                problems.push(Validator.createUnknownCopyFlag(flagRange.start, flagRange.end, name));
+                                problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, flagRange.end, name));
                             } else if (name === "link") {
-                                const problem = this.checkFlagBoolean(flag);
+                                const problem = this.checkFlagBoolean(copyInstructionRange.start.line, flag);
                                 if (problem !== null) {
                                     problems.push(problem);
                                 }
                             } else if (name !== "chmod" && name !== "chown" && name !== "from") {
                                 let range = flag.getNameRange();
-                                problems.push(Validator.createUnknownCopyFlag(flagRange.start, range.end, name));
+                                problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, range.end, name));
                             }
                         }
 
@@ -702,7 +697,7 @@ export class Validator {
                                 let regexp = new RegExp(/^[a-zA-Z0-9].*$/);
                                 if (!regexp.test(value)) {
                                     let range = value === "" ? flag.getRange() : flag.getValueRange();
-                                    problems.push(Validator.createFlagInvalidFrom(range.start, range.end, value));
+                                    problems.push(Validator.createFlagInvalidFrom(copyInstructionRange.start.line, range.start, range.end, value));
                                 }
                             }
                         }
@@ -711,8 +706,8 @@ export class Validator {
                     if (copyDestinationDiagnostic !== null) {
                         problems.push(copyDestinationDiagnostic);
                     }
-                    this.checkFlagValue(flags, ["chmod", "chown", "from"], problems);
-                    this.checkDuplicateFlags(flags, ["chmod", "chown", "from", "link"], problems);
+                    this.checkFlagValue(copyInstructionRange.start.line, flags, ["chmod", "chown", "from"], problems);
+                    this.checkDuplicateFlags(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "WORKDIR":
@@ -730,7 +725,7 @@ export class Validator {
                         }
                         let regexp = new RegExp(/^(\$|([a-zA-Z](\$|:(\$|\\|\/)))).*$/);
                         if (!content.startsWith('/') && !regexp.test(content)) {
-                            let problem = this.createWORKDIRNotAbsolute(instruction.getArgumentsRange());
+                            let problem = this.createWORKDIRNotAbsolute(instruction.getInstructionRange().start.line, instruction.getArgumentsRange());
                             if (problem) {
                                 problems.push(problem);
                             }
@@ -772,20 +767,22 @@ export class Validator {
         return args[args.length - 1];
     }
 
-    private checkDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
+    private checkDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: (instructionLine: uinteger, range: Range) => Diagnostic, notDirectoryFunction: (instructionLine: uinteger, range: Range) => Diagnostic): Diagnostic | null {
         if (instruction.getClosingBracket()) {
             return this.checkJsonDestinationIsDirectory(instruction, requiresTwoArgumentsFunction, notDirectoryFunction);
         }
 
         const args = instruction.getArguments();
         if (args.length === 1) {
-            return requiresTwoArgumentsFunction(args[0].getRange());
+            return requiresTwoArgumentsFunction(instruction.getInstructionRange().start.line, args[0].getRange());
         } else if (args.length === 0) {
-            return requiresTwoArgumentsFunction(instruction.getInstructionRange());
+            const instructionRange = instruction.getInstructionRange();
+            return requiresTwoArgumentsFunction(instructionRange.start.line, instructionRange);
         } else if (args.length > 2) {
             const lastArg = this.getDestinationArgument(args);
             if (lastArg === null) {
-                return requiresTwoArgumentsFunction(instruction.getInstructionRange());
+                const instructionRange = instruction.getInstructionRange();
+                return requiresTwoArgumentsFunction(instructionRange.start.line, instructionRange);
             } else if (this.hasHeredocs(args)) {
                 return null;
             }
@@ -800,7 +797,7 @@ export class Validator {
             const destination = lastArg.getValue();
             const lastChar = destination.charAt(destination.length - 1);
             if (lastChar !== '\\' && lastChar !== '/') {
-                return notDirectoryFunction(lastArg.getRange());
+                return notDirectoryFunction(instruction.getInstructionRange().start.line, lastArg.getRange());
             }
         }
         return null;
@@ -810,7 +807,8 @@ export class Validator {
         if (instructions.length > 1) {
             // decrement length by 1 because we want to ignore the last one
             for (let i = 0; i < instructions.length - 1; i++) {
-                const diagnostic = this.createMultipleInstructions(instructions[i].getInstructionRange(), severity, instruction);
+                const instructionRange = instructions[i].getInstructionRange();
+                const diagnostic = this.createMultipleInstructions(instructionRange.start.line, instructionRange, severity, instruction);
                 if (diagnostic) {
                     problems.push(diagnostic);
                 }
@@ -818,12 +816,36 @@ export class Validator {
         }
     }
 
-    private checkJsonDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: Function, notDirectoryFunction: Function): Diagnostic | null {
+    private createDuplicateBuildStageNameDiagnostics(problems: Diagnostic[], froms: From[]): void {
+        const names: any = {};
+        for (let from of froms) {
+            let name = from.getBuildStage();
+            if (name !== null) {
+                name = name.toLowerCase();
+                if (names[name] === undefined) {
+                    names[name] = [from];
+                } else {
+                    names[name].push(from);
+                }
+            }
+        }
+
+        for (const name in names) {
+            // duplicates found
+            if (names[name].length > 1) {
+                for (const from of names[name]) {
+                    problems.push(Validator.createDuplicateBuildStageName(from.getInstructionRange().start.line, from.getBuildStageRange(), name));
+                }
+            }
+        }
+    }
+
+    private checkJsonDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: (instructionLine: uinteger, range: Range) => Diagnostic, notDirectoryFunction: (instructionLine: uinteger, range: Range) => Diagnostic): Diagnostic | null {
         const jsonStrings = instruction.getJSONStrings();
         if (jsonStrings.length === 0) {
-            return requiresTwoArgumentsFunction(instruction.getArgumentsRange());
+            return requiresTwoArgumentsFunction(instruction.getInstructionRange().start.line, instruction.getArgumentsRange());
         } else if (jsonStrings.length === 1) {
-            return requiresTwoArgumentsFunction(jsonStrings[0].getJSONRange());
+            return requiresTwoArgumentsFunction(instruction.getInstructionRange().start.line, jsonStrings[0].getJSONRange());
         } else if (jsonStrings.length > 2) {
             const lastJsonString = jsonStrings[jsonStrings.length - 1];
             const variables = instruction.getVariables();
@@ -838,18 +860,18 @@ export class Validator {
             const destination = lastJsonString.getValue();
             const lastChar = destination.charAt(destination.length - 2);
             if (lastChar !== '\\' && lastChar !== '/') {
-                return notDirectoryFunction(jsonStrings[jsonStrings.length - 1].getJSONRange());
+                return notDirectoryFunction(instruction.getInstructionRange().start.line, jsonStrings[jsonStrings.length - 1].getJSONRange());
             }
         }
         return null;
     }
 
-    private checkFlagValue(flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
+    private checkFlagValue(instructionLine: uinteger, flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
         for (let flag of flags) {
             let flagName = flag.getName();
             // only validate flags with the right name
             if (flag.getValue() === null && validFlagNames.indexOf(flagName) !== -1) {
-                problems.push(Validator.createFlagMissingValue(flag.getNameRange(), flagName));
+                problems.push(Validator.createFlagMissingValue(instructionLine, flag.getNameRange(), flagName));
             }
         }
     }
@@ -860,20 +882,20 @@ export class Validator {
      * case-insensitively be either "true" or "false" (--flag==tRUe is
      * valid).
      */
-    private checkFlagBoolean(flag: Flag): Diagnostic | null {
+    private checkFlagBoolean(instructionLine: uinteger, flag: Flag): Diagnostic | null {
         const linkValue = flag.getValue();
         if (linkValue === "") {
-            return Validator.createFlagMissingValue(flag.getNameRange(), flag.getName());
+            return Validator.createFlagMissingValue(instructionLine, flag.getNameRange(), flag.getName());
         } else if (linkValue !== null) {
             const convertedLinkValue = linkValue.toLowerCase();
             if (convertedLinkValue !== "true" && convertedLinkValue !== "false") {
-                return Validator.createFlagInvalidLink(flag.getValueRange(), linkValue);
+                return Validator.createFlagInvalidLink(instructionLine, flag.getValueRange(), linkValue);
             }
         }
         return null;
     }
 
-    private checkFlagDuration(flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
+    private checkFlagDuration(instructionLine: uinteger, flags: Flag[], validFlagNames: string[], problems: Diagnostic[]): void {
         flagCheck: for (let flag of flags) {
             let flagName = flag.getName();
             // only validate flags with the right name
@@ -896,7 +918,7 @@ export class Validator {
                             break;
                         default:
                             let range = flag.getValueRange();
-                            problems.push(Validator.createFlagInvalidDuration(range.start, range.end, value));
+                            problems.push(Validator.createFlagInvalidDuration(instructionLine, range.start, range.end, value));
                             continue flagCheck;
                     }
 
@@ -912,11 +934,11 @@ export class Validator {
                             case '-':
                                 if (digitFound) {
                                     let range = flag.getValueRange();
-                                    problems.push(Validator.createFlagUnknownUnit(range, value.charAt(i), value));
+                                    problems.push(Validator.createFlagUnknownUnit(instructionLine, range, value.charAt(i), value));
                                     continue flagCheck;
                                 } else if (hyphenFound) {
                                     let range = flag.getValueRange();
-                                    problems.push(Validator.createFlagInvalidDuration(range.start, range.end, value));
+                                    problems.push(Validator.createFlagInvalidDuration(instructionLine, range.start, range.end, value));
                                     continue flagCheck;
                                 }
                                 hyphenFound = true;
@@ -939,7 +961,7 @@ export class Validator {
                             default:
                                 if (periodsDetected > 1) {
                                     let range = flag.getValueRange();
-                                    problems.push(Validator.createFlagMissingDuration(range.start, range.end, value));
+                                    problems.push(Validator.createFlagMissingDuration(instructionLine, range.start, range.end, value));
                                     continue flagCheck;
                                 }
                                 periodsDetected = 0;
@@ -949,7 +971,7 @@ export class Validator {
                                         let unit = value.substring(i, j);
                                         if (time < 0 || (value.charAt(start) === '-' && time === 0)) {
                                             let nameRange = flag.getNameRange();
-                                            problems.push(Validator.createFlagLessThan1ms(nameRange.start, nameRange.end, flagName));
+                                            problems.push(Validator.createFlagLessThan1ms(instructionLine, nameRange.start, nameRange.end, flagName));
                                             continue flagCheck;
                                         }
                                         switch (unit) {
@@ -998,14 +1020,14 @@ export class Validator {
                                                 continue durationParse;
                                             default:
                                                 let range = flag.getValueRange();
-                                                problems.push(Validator.createFlagUnknownUnit(range, unit, value));
+                                                problems.push(Validator.createFlagUnknownUnit(instructionLine, range, unit, value));
                                                 continue flagCheck;
                                         }
                                     }
                                 }
                                 if (time < 0 || (value.charAt(start) === '-' && time === 0)) {
                                     let nameRange = flag.getNameRange();
-                                    problems.push(Validator.createFlagLessThan1ms(nameRange.start, nameRange.end, flagName));
+                                    problems.push(Validator.createFlagLessThan1ms(instructionLine, nameRange.start, nameRange.end, flagName));
                                     continue flagCheck;
                                 }
                                 let unit = value.substring(i, value.length);
@@ -1043,7 +1065,7 @@ export class Validator {
                                         break durationParse;
                                     default:
                                         let range = flag.getValueRange();
-                                        problems.push(Validator.createFlagUnknownUnit(range, unit, value));
+                                        problems.push(Validator.createFlagUnknownUnit(instructionLine, range, unit, value));
                                         break;
                                 }
                                 continue flagCheck;
@@ -1052,10 +1074,10 @@ export class Validator {
 
                     if (!durationSpecified) {
                         let range = flag.getValueRange();
-                        problems.push(Validator.createFlagMissingDuration(range.start, range.end, value));
+                        problems.push(Validator.createFlagMissingDuration(instructionLine, range.start, range.end, value));
                     } else if (duration < 1) {
                         let range = flag.getNameRange();
-                        problems.push(Validator.createFlagLessThan1ms(range.start, range.end, flagName));
+                        problems.push(Validator.createFlagLessThan1ms(instructionLine, range.start, range.end, flagName));
                     }
                 }
             }
@@ -1080,7 +1102,7 @@ export class Validator {
         return false;
     }
 
-    private checkDuplicateFlags(flags: Flag[], validFlags: string[], problems: Diagnostic[]): void {
+    private checkDuplicateFlags(instructionLine: uinteger, flags: Flag[], validFlags: string[], problems: Diagnostic[]): void {
         let flagNames = flags.map(function (flag) {
             return flag.getName();
         });
@@ -1089,9 +1111,9 @@ export class Validator {
             let lastIndex = flagNames.lastIndexOf(validFlag);
             if (index !== lastIndex) {
                 let range = flags[index].getNameRange();
-                problems.push(Validator.createFlagDuplicate(range.start, range.end, flagNames[index]));
+                problems.push(Validator.createFlagDuplicate(instructionLine, range.start, range.end, flagNames[index]));
                 range = flags[lastIndex].getNameRange();
-                problems.push(Validator.createFlagDuplicate(range.start, range.end, flagNames[index]));
+                problems.push(Validator.createFlagDuplicate(instructionLine, range.start, range.end, flagNames[index]));
             }
         }
     }
@@ -1106,7 +1128,7 @@ export class Validator {
         let args = instruction.getArguments();
         if ((args.length === 1 && args[0].getValue() === "[]") ||
             (args.length === 2 && args[0].getValue() === '[' && args[1].getValue() === ']')) {
-            problems.push(Validator.createShellRequiresOne(argsRange));
+            problems.push(Validator.createShellRequiresOne(instruction.getInstructionRange().start.line, argsRange));
             return;
         }
 
@@ -1119,10 +1141,10 @@ export class Validator {
             );
             content = content.trim();
             if (content.charAt(content.length - 1) !== '"') {
-                problems.push(Validator.createShellJsonForm(argsRange));
+                problems.push(Validator.createShellJsonForm(instruction.getInstructionRange().start.line, argsRange));
             }
         } else {
-            problems.push(Validator.createShellJsonForm(argsRange));
+            problems.push(Validator.createShellJsonForm(instruction.getInstructionRange().start.line, argsRange));
         }
     }
 
@@ -1182,7 +1204,7 @@ export class Validator {
                     if (!quoted) {
                         if (last === '\'' || last === ',') {
                             last = null;
-                            const problem = Validator.createJSONInSingleQuotes(argsRange, this.settings.instructionJSONInSingleQuotes);
+                            const problem = Validator.createJSONInSingleQuotes(instruction.getInstructionRange().start.line, argsRange, this.settings.instructionJSONInSingleQuotes);
                             if (problem) {
                                 problems.push(problem);
                             }
@@ -1482,266 +1504,267 @@ export class Validator {
     }
 
     private static createDuplicatedEscapeDirective(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated(), ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE, [DiagnosticTag.Unnecessary]);
+        return Validator.createError(null, start, end, Validator.getDiagnosticMessage_DirectiveEscapeDuplicated(), ValidationCode.DUPLICATED_ESCAPE_DIRECTIVE, [DiagnosticTag.Unnecessary]);
     }
 
-    static createInvalidEscapeDirective(start: Position, end: Position, value: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveEscapeInvalid(value), ValidationCode.INVALID_ESCAPE_DIRECTIVE);
+    private static createInvalidEscapeDirective(start: Position, end: Position, value: string): Diagnostic {
+        return Validator.createError(null, start, end, Validator.getDiagnosticMessage_DirectiveEscapeInvalid(value), ValidationCode.INVALID_ESCAPE_DIRECTIVE);
     }
 
-    private static createDuplicateBuildStageName(range: Range, name: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_DuplicateBuildStageName(name), ValidationCode.DUPLICATE_BUILD_STAGE_NAME);
+    private static createDuplicateBuildStageName(instructionLine: uinteger, range: Range, name: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_DuplicateBuildStageName(name), ValidationCode.DUPLICATE_BUILD_STAGE_NAME);
     }
 
-    private static createInvalidBuildStageName(range: Range, name: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InvalidBuildStageName(name), ValidationCode.INVALID_BUILD_STAGE_NAME);
+    private static createInvalidBuildStageName(instructionLine: uinteger | null, range: Range, name: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InvalidBuildStageName(name), ValidationCode.INVALID_BUILD_STAGE_NAME);
     }
 
-    static createFlagAtLeastOne(start: Position, end: Position, flagName: string, flagValue: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagAtLeastOne(flagName, flagValue), ValidationCode.FLAG_AT_LEAST_ONE);
+    private static createFlagAtLeastOne(instructionLine: uinteger | null, start: Position, end: Position, flagName: string, flagValue: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagAtLeastOne(flagName, flagValue), ValidationCode.FLAG_AT_LEAST_ONE);
     }
 
-    static createFlagDuplicate(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagDuplicate(flag), ValidationCode.FLAG_DUPLICATE);
+    private static createFlagDuplicate(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagDuplicate(flag), ValidationCode.FLAG_DUPLICATE);
     }
 
-    private static createFlagInvalidDuration(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagInvalidDuration(flag), ValidationCode.FLAG_INVALID_DURATION);
+    private static createFlagInvalidDuration(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagInvalidDuration(flag), ValidationCode.FLAG_INVALID_DURATION);
     }
 
-    private static createFlagLessThan1ms(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagLessThan1ms(flag), ValidationCode.FLAG_LESS_THAN_1MS);
+    private static createFlagLessThan1ms(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagLessThan1ms(flag), ValidationCode.FLAG_LESS_THAN_1MS);
     }
 
-    private static createFlagMissingDuration(start: Position, end: Position, duration: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagMissingDuration(duration), ValidationCode.FLAG_MISSING_DURATION);
+    private static createFlagMissingDuration(instructionLine: uinteger | null, start: Position, end: Position, duration: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagMissingDuration(duration), ValidationCode.FLAG_MISSING_DURATION);
     }
 
-    private static createFlagInvalidFrom(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag), ValidationCode.FLAG_INVALID_FROM_VALUE);
+    private static createFlagInvalidFrom(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagInvalidFromValue(flag), ValidationCode.FLAG_INVALID_FROM_VALUE);
     }
 
-    private static createFlagInvalidLink(range: Range, value: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value), ValidationCode.FLAG_INVALID_LINK_VALUE);
+    private static createFlagInvalidLink(instructionLine: uinteger | null, range: Range, value: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_FlagInvalidLinkValue(value), ValidationCode.FLAG_INVALID_LINK_VALUE);
     }
 
-    static createFlagMissingValue(range: Range, flag: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagMissingValue(flag), ValidationCode.FLAG_MISSING_VALUE);
+    private static createFlagMissingValue(instructionLine: uinteger | null, range: Range, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_FlagMissingValue(flag), ValidationCode.FLAG_MISSING_VALUE);
     }
 
-    static createUnknownAddFlag(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_ADD_FLAG);
+    private static createUnknownAddFlag(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_ADD_FLAG);
     }
 
-    static createUnknownCopyFlag(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_COPY_FLAG);
+    private static createUnknownCopyFlag(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_COPY_FLAG);
     }
 
-    static createUnknownFromFlag(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_FROM_FLAG);
+    private static createUnknownFromFlag(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_FROM_FLAG);
     }
 
-    static createUnknownHealthcheckFlag(start: Position, end: Position, flag: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_HEALTHCHECK_FLAG);
+    private static createUnknownHealthcheckFlag(instructionLine: uinteger | null, start: Position, end: Position, flag: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_FlagUnknown(flag), ValidationCode.UNKNOWN_HEALTHCHECK_FLAG);
     }
 
-    private static createFlagUnknownUnit(range: Range, unit: string, duration: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_FlagUnknownUnit(unit, duration), ValidationCode.FLAG_UNKNOWN_UNIT);
+    private static createFlagUnknownUnit(instructionLine: uinteger | null, range: Range, unit: string, duration: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_FlagUnknownUnit(unit, duration), ValidationCode.FLAG_UNKNOWN_UNIT);
     }
 
-    private static createBaseNameEmpty(range: Range, name: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_BaseNameEmpty(name), ValidationCode.BASE_NAME_EMPTY);
+    private static createBaseNameEmpty(instructionLine: uinteger | null, range: Range, name: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_BaseNameEmpty(name), ValidationCode.BASE_NAME_EMPTY);
     }
 
-    static createInvalidAs(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidAs(), ValidationCode.INVALID_AS);
+    private static createInvalidAs(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InvalidAs(), ValidationCode.INVALID_AS);
     }
 
-    static createInvalidPort(range: Range, port: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InvalidPort(port), ValidationCode.INVALID_PORT);
+    private static createInvalidPort(instructionLine: uinteger | null, range: Range, port: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InvalidPort(port), ValidationCode.INVALID_PORT);
     }
 
-    private static createInvalidProto(start: Position, end: Position, protocol: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidProto(protocol), ValidationCode.INVALID_PROTO);
+    private static createInvalidProto(instructionLine: uinteger | null, start: Position, end: Position, protocol: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InvalidProto(protocol), ValidationCode.INVALID_PROTO);
     }
 
-    private static createInvalidReferenceFormat(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InvalidReferenceFormat(), ValidationCode.INVALID_REFERENCE_FORMAT);
+    private static createInvalidReferenceFormat(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InvalidReferenceFormat(), ValidationCode.INVALID_REFERENCE_FORMAT);
     }
 
-    static createInvalidStopSignal(start: Position, end: Position, signal: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidSignal(signal), ValidationCode.INVALID_SIGNAL);
+    private static createInvalidStopSignal(instructionLine: uinteger | null, start: Position, end: Position, signal: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InvalidSignal(signal), ValidationCode.INVALID_SIGNAL);
     }
 
-    static createInvalidSyntax(start: Position, end: Position, syntax: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InvalidSyntax(syntax), ValidationCode.INVALID_SYNTAX);
+    private static createInvalidSyntax(instructionLine: uinteger | null, start: Position, end: Position, syntax: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InvalidSyntax(syntax), ValidationCode.INVALID_SYNTAX);
     }
 
-    static createMissingArgument(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionMissingArgument(), ValidationCode.ARGUMENT_MISSING);
+    private static createMissingArgument(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionMissingArgument(), ValidationCode.ARGUMENT_MISSING);
     }
 
-    static createExtraArgument(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionExtraArgument(), ValidationCode.ARGUMENT_EXTRA);
+    private static createExtraArgument(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionExtraArgument(), ValidationCode.ARGUMENT_EXTRA);
     }
 
-    private static createHealthcheckNoneUnnecessaryArgument(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_HealthcheckNoneUnnecessaryArgument(), ValidationCode.ARGUMENT_UNNECESSARY);
+    private static createHealthcheckNoneUnnecessaryArgument(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_HealthcheckNoneUnnecessaryArgument(), ValidationCode.ARGUMENT_UNNECESSARY);
     }
 
-    private static createADDDestinationNotDirectory(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ADDDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
+    private static createADDDestinationNotDirectory(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_ADDDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
     }
 
-    private static createADDRequiresAtLeastTwoArguments(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ADDRequiresAtLeastTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
+    private static createADDRequiresAtLeastTwoArguments(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_ADDRequiresAtLeastTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
     }
 
-    private static createCOPYDestinationNotDirectory(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_COPYDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
+    private static createCOPYDestinationNotDirectory(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_COPYDestinationNotDirectory(), ValidationCode.INVALID_DESTINATION);
     }
 
-    private static createCOPYRequiresAtLeastTwoArguments(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_COPYRequiresAtLeastTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
+    private static createCOPYRequiresAtLeastTwoArguments(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_COPYRequiresAtLeastTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_TWO);
     }
 
-    static createENVRequiresTwoArguments(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_ENVRequiresTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_TWO);
+    private static createENVRequiresTwoArguments(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_ENVRequiresTwoArguments(), ValidationCode.ARGUMENT_REQUIRES_TWO);
     }
 
-    private static createHEALTHCHECKRequiresAtLeastOneArgument(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_HEALTHCHECKRequiresAtLeastOneArgument(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_ONE);
+    private static createHEALTHCHECKRequiresAtLeastOneArgument(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_HEALTHCHECKRequiresAtLeastOneArgument(), ValidationCode.ARGUMENT_REQUIRES_AT_LEAST_ONE);
     }
 
-    private static createHealthcheckCmdArgumentMissing(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_HealthcheckCmdArgumentMissing(), ValidationCode.HEALTHCHECK_CMD_ARGUMENT_MISSING);
+    private static createHealthcheckCmdArgumentMissing(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_HealthcheckCmdArgumentMissing(), ValidationCode.HEALTHCHECK_CMD_ARGUMENT_MISSING);
     }
 
-    private static createHealthcheckTypeUnknown(range: Range, type: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_HealthcheckTypeUnknown(type), ValidationCode.UNKNOWN_TYPE);
+    private static createHealthcheckTypeUnknown(instructionLine: uinteger | null, range: Range, type: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_HealthcheckTypeUnknown(type), ValidationCode.UNKNOWN_TYPE);
     }
 
-    private static createOnbuildChainingDisallowed(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_OnbuildChainingDisallowed(), ValidationCode.ONBUILD_CHAINING_DISALLOWED);
+    private static createOnbuildChainingDisallowed(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_OnbuildChainingDisallowed(), ValidationCode.ONBUILD_CHAINING_DISALLOWED);
     }
 
-    private static createOnbuildTriggerDisallowed(range: Range, trigger: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_OnbuildTriggerDisallowed(trigger), ValidationCode.ONBUILD_TRIGGER_DISALLOWED);
+    private static createOnbuildTriggerDisallowed(instructionLine: uinteger | null, range: Range, trigger: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_OnbuildTriggerDisallowed(trigger), ValidationCode.ONBUILD_TRIGGER_DISALLOWED);
     }
 
-    private static createShellJsonForm(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ShellJsonForm(), ValidationCode.SHELL_JSON_FORM);
+    private static createShellJsonForm(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_ShellJsonForm(), ValidationCode.SHELL_JSON_FORM);
     }
 
-    private static createShellRequiresOne(range: Range): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_ShellRequiresOne(), ValidationCode.SHELL_REQUIRES_ONE);
+    private static createShellRequiresOne(instructionLine: uinteger | null, range: Range): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_ShellRequiresOne(), ValidationCode.SHELL_REQUIRES_ONE);
     }
 
-    static createRequiresOneOrThreeArguments(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionRequiresOneOrThreeArguments(), ValidationCode.ARGUMENT_REQUIRES_ONE_OR_THREE);
+    private static createRequiresOneOrThreeArguments(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionRequiresOneOrThreeArguments(), ValidationCode.ARGUMENT_REQUIRES_ONE_OR_THREE);
     }
 
-    static createNoSourceImage(start: Position, end: Position): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_NoSourceImage(), ValidationCode.NO_SOURCE_IMAGE);
+    private static createNoSourceImage(start: Position, end: Position): Diagnostic {
+        return Validator.createError(null, start, end, Validator.getDiagnosticMessage_NoSourceImage(), ValidationCode.NO_SOURCE_IMAGE);
     }
 
-    static createSyntaxMissingEquals(start: Position, end: Position, argument: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_SyntaxMissingEquals(argument), ValidationCode.SYNTAX_MISSING_EQUALS);
+    private static createSyntaxMissingEquals(instructionLine: uinteger | null, start: Position, end: Position, argument: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_SyntaxMissingEquals(argument), ValidationCode.SYNTAX_MISSING_EQUALS);
     }
 
-    private static createSyntaxMissingSingleQuote(start: Position, end: Position, argument: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_SyntaxMissingSingleQuote(argument), ValidationCode.SYNTAX_MISSING_SINGLE_QUOTE);
+    private static createSyntaxMissingSingleQuote(instructionLine: uinteger | null, start: Position, end: Position, argument: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_SyntaxMissingSingleQuote(argument), ValidationCode.SYNTAX_MISSING_SINGLE_QUOTE);
     }
 
-    private static createSyntaxMissingDoubleQuote(start: Position, end: Position, argument: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_SyntaxMissingDoubleQuote(argument), ValidationCode.SYNTAX_MISSING_DOUBLE_QUOTE);
+    private static createSyntaxMissingDoubleQuote(instructionLine: uinteger | null, start: Position, end: Position, argument: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_SyntaxMissingDoubleQuote(argument), ValidationCode.SYNTAX_MISSING_DOUBLE_QUOTE);
     }
 
-    private static createSyntaxMissingNames(start: Position, end: Position, instruction: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_SyntaxMissingNames(instruction), ValidationCode.SYNTAX_MISSING_NAMES);
+    private static createSyntaxMissingNames(instructionLine: uinteger | null, start: Position, end: Position, instruction: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_SyntaxMissingNames(instruction), ValidationCode.SYNTAX_MISSING_NAMES);
     }
 
-    private static createVariableUnsupportedModifier(range: Range, variable: string, modifier: string): Diagnostic {
-        return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier), ValidationCode.UNSUPPORTED_MODIFIER);
+    private static createVariableUnsupportedModifier(instructionLine: uinteger | null, range: Range, variable: string, modifier: string): Diagnostic {
+        return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_VariableModifierUnsupported(variable, modifier), ValidationCode.UNSUPPORTED_MODIFIER);
     }
 
-    static createUnknownInstruction(start: Position, end: Position, instruction: string): Diagnostic {
-        return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionUnknown(instruction), ValidationCode.UNKNOWN_INSTRUCTION);
+    private static createUnknownInstruction(instructionLine: uinteger | null, start: Position, end: Position, instruction: string): Diagnostic {
+        return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionUnknown(instruction), ValidationCode.UNKNOWN_INSTRUCTION);
     }
 
-    static createError(start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
-        return Validator.createDiagnostic(DiagnosticSeverity.Error, start, end, description, code, tags);
+    private static createError(instructionLine: uinteger | null, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+        return Validator.createDiagnostic(DiagnosticSeverity.Error, instructionLine, start, end, description, code, tags);
     }
 
-    private static createJSONInSingleQuotes(range: Range, severity: ValidationSeverity | undefined): Diagnostic | null {
+    private static createJSONInSingleQuotes(instructionLine: uinteger | null, range: Range, severity: ValidationSeverity | undefined): Diagnostic | null {
         if (severity === ValidationSeverity.ERROR) {
-            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
+            return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
         } else if (severity === ValidationSeverity.WARNING) {
-            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
+            return Validator.createWarning(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InstructionJSONInSingleQuotes(), ValidationCode.JSON_IN_SINGLE_QUOTES);
         }
         return null;
     }
 
     private static createEmptyContinuationLine(start: Position, end: Position, severity: ValidationSeverity | undefined): Diagnostic | null {
         if (severity === ValidationSeverity.ERROR) {
-            return Validator.createError(start, end, Validator.getDiagnosticMessage_EmptyContinuationLine(), ValidationCode.EMPTY_CONTINUATION_LINE);
+            return Validator.createError(null, start, end, Validator.getDiagnosticMessage_EmptyContinuationLine(), ValidationCode.EMPTY_CONTINUATION_LINE);
         } else if (severity === ValidationSeverity.WARNING) {
-            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_EmptyContinuationLine(), ValidationCode.EMPTY_CONTINUATION_LINE);
+            return Validator.createWarning(null, start, end, Validator.getDiagnosticMessage_EmptyContinuationLine(), ValidationCode.EMPTY_CONTINUATION_LINE);
         }
         return null;
     }
 
-    private createMultipleInstructions(range: Range, severity: ValidationSeverity | undefined, instruction: string): Diagnostic | null {
+    private createMultipleInstructions(instructionLine: uinteger | null, range: Range, severity: ValidationSeverity | undefined, instruction: string): Diagnostic | null {
         if (severity === ValidationSeverity.ERROR) {
-            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
+            return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
         } else if (severity === ValidationSeverity.WARNING) {
-            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
+            return Validator.createWarning(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_InstructionMultiple(instruction), ValidationCode.MULTIPLE_INSTRUCTIONS, [DiagnosticTag.Unnecessary]);
         }
         return null;
     }
 
     private createLowercaseDirective(start: Position, end: Position): Diagnostic | null {
         if (this.settings.directiveCasing === ValidationSeverity.ERROR) {
-            return Validator.createError(start, end, Validator.getDiagnosticMessage_DirectiveCasing(), ValidationCode.CASING_DIRECTIVE);
+            return Validator.createError(null, start, end, Validator.getDiagnosticMessage_DirectiveCasing(), ValidationCode.CASING_DIRECTIVE);
         } else if (this.settings.directiveCasing === ValidationSeverity.WARNING) {
-            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_DirectiveCasing(), ValidationCode.CASING_DIRECTIVE);
+            return Validator.createWarning(null, start, end, Validator.getDiagnosticMessage_DirectiveCasing(), ValidationCode.CASING_DIRECTIVE);
         }
         return null;
     }
 
-    createUppercaseInstruction(start: Position, end: Position): Diagnostic | null {
+    createUppercaseInstruction(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic | null {
         if (this.settings.instructionCasing === ValidationSeverity.ERROR) {
-            return Validator.createError(start, end, Validator.getDiagnosticMessage_InstructionCasing(), ValidationCode.CASING_INSTRUCTION);
+            return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionCasing(), ValidationCode.CASING_INSTRUCTION);
         } else if (this.settings.instructionCasing === ValidationSeverity.WARNING) {
-            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_InstructionCasing(), ValidationCode.CASING_INSTRUCTION);
+            return Validator.createWarning(instructionLine, start, end, Validator.getDiagnosticMessage_InstructionCasing(), ValidationCode.CASING_INSTRUCTION);
         }
         return null;
     }
 
-    createMaintainerDeprecated(start: Position, end: Position): Diagnostic | null {
+    createMaintainerDeprecated(instructionLine: uinteger | null, start: Position, end: Position): Diagnostic | null {
         if (this.settings.deprecatedMaintainer === ValidationSeverity.ERROR) {
-            return Validator.createError(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
+            return Validator.createError(instructionLine, start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
         } else if (this.settings.deprecatedMaintainer === ValidationSeverity.WARNING) {
-            return Validator.createWarning(start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
+            return Validator.createWarning(instructionLine, start, end, Validator.getDiagnosticMessage_DeprecatedMaintainer(), ValidationCode.DEPRECATED_MAINTAINER, [DiagnosticTag.Deprecated]);
         }
         return null;
     }
 
-    private createWORKDIRNotAbsolute(range: Range): Diagnostic | null {
+    private createWORKDIRNotAbsolute(instructionLine: uinteger | null,range: Range): Diagnostic | null {
         if (this.settings.instructionWorkdirRelative === ValidationSeverity.ERROR) {
-            return Validator.createError(range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
+            return Validator.createError(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
         } else if (this.settings.instructionWorkdirRelative === ValidationSeverity.WARNING) {
-            return Validator.createWarning(range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
+            return Validator.createWarning(instructionLine, range.start, range.end, Validator.getDiagnosticMessage_WORKDIRPathNotAbsolute(), ValidationCode.WORKDIR_IS_NOT_ABSOLUTE);
         }
         return null;
     }
 
-    static createWarning(start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
-        return Validator.createDiagnostic(DiagnosticSeverity.Warning, start, end, description, code, tags);
+    static createWarning(instructionLine: uinteger | null, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+        return Validator.createDiagnostic(DiagnosticSeverity.Warning, instructionLine, start, end, description, code, tags);
     }
 
-    static createDiagnostic(severity: DiagnosticSeverity, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): Diagnostic {
+    static createDiagnostic(severity: DiagnosticSeverity, instructionLine: uinteger | null, start: Position, end: Position, description: string, code?: ValidationCode, tags?: DiagnosticTag[]): DockerfileDiagnostic {
         return {
+            instructionLine: instructionLine,
             range: {
                 start: start,
                 end: end
