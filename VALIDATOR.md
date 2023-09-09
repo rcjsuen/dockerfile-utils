@@ -6,7 +6,7 @@ If the validator generates an error for a Dockerfile that the Docker builder is 
 
 However, errors that the Docker builder generates may not necessarily be replicated by the validator due to difficulties in verifying the validity of a given Dockerfile instruction and its arguments given the builder's build context and other factors.
 
-The currently supported version of the Docker builder is **Docker CE 17.09 [2017-09-26]**.
+The currently supported version of the Docker builder is **Docker CE 20.10 [2020-12-08]**.
 
 ## Command Line Interface
 
