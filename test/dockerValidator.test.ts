@@ -3209,6 +3209,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM node@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM node:non-existent-tag@sha256:613685c22f65d01f2264bdd49b8a336488e14faf29f3ff9b6bf76a4da23c4700");
+                assert.strictEqual(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM repository.mycompany:5000/tomcat:8.0");
                 assert.equal(diagnostics.length, 0);
 
@@ -3307,6 +3310,11 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("FROM alpine:123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
                 assert.equal(diagnostics.length, 1);
                 assertInvalidReferenceFormat(diagnostics[0], 0, 0, 12, 0, 141);
+
+                // empty tag specified with a digest
+                diagnostics = validateDockerfile("FROM alpine:@sha256:1fd62556954250bac80d601a196bb7fd480ceba7c10e94dd8fd4c6d1c08783d5");
+                assert.strictEqual(diagnostics.length, 1);
+                assertInvalidReferenceFormat(diagnostics[0], 0, 0, 5, 0, 84);
             });
 
             it("invalid reference format (digest)", function() {

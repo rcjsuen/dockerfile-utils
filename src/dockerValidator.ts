@@ -451,8 +451,8 @@ export class Validator {
                                 }
                                 let from = instruction as From;
                                 let digestRange = from.getImageDigestRange();
+                                const tagRange = from.getImageTagRange();
                                 if (digestRange === null) {
-                                    let tagRange = from.getImageTagRange();
                                     if (tagRange === null) {
                                         return null;
                                     }
@@ -466,6 +466,13 @@ export class Validator {
                                         return null;
                                     }
                                     return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, from.getImageTagRange());
+                                }
+                                if (tagRange !== null) {
+                                    // specified an optional tag with the digest
+                                    if (tagRange.start.line === tagRange.end.line && tagRange.start.character === tagRange.end.character) {
+                                        // tag is empty, flag the whole argument as an error
+                                        return Validator.createInvalidReferenceFormat(fromInstructionRange.start.line, range);
+                                    }
                                 }
                                 let digest = document.getText(digestRange);
                                 let algorithmIndex = digest.indexOf(':');

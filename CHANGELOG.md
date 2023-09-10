@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- flag empty tag specified with a digest in FROM instructions as an error ([#118](https://github.com/rcjsuen/dockerfile-utils/issues/118))
+
 ## [0.13.0] - 2023-09-09
 ### Added
 - support parsing the new `--checksum` flag for ADD instructions ([#116](https://github.com/rcjsuen/dockerfile-utils/issues/116))
