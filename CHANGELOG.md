@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- ignore predefined platform ARG variables if they are used as a base image ([#119](https://github.com/rcjsuen/dockerfile-utils/issues/119))
+
 ## [0.14.0] - 2023-09-10
 ### Added
 - flag empty tag specified with a digest in FROM instructions as an error ([#118](https://github.com/rcjsuen/dockerfile-utils/issues/118))

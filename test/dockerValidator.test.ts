@@ -3283,6 +3283,12 @@ describe("Docker Validator Tests", function() {
 
                 diagnostics = validateDockerfile("ARG image=latest\nFROM alpine:${latest:-latest}");
                 assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM $TARGETPLATFORM");
+                assert.strictEqual(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM ${TARGETPLATFORM}");
+                assert.strictEqual(diagnostics.length, 0);
             });
 
             it("invalid reference format (tag)", function() {

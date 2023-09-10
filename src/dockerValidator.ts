@@ -38,6 +38,21 @@ export interface DockerfileDiagnostic extends Diagnostic {
     instructionLine: uinteger | null;
 }
 
+/**
+ * A list of variables that are prepopulated when using the BuildKit
+ * backend.
+ */
+const PREDEFINED_VARIABLES = [
+    "TARGETPLATFORM",
+    "TARGETOS",
+    "TARGETARCH",
+    "TARGETVARIANT",
+    "BUILDPLATFORM",
+    "BUILDOS",
+    "BUILDARCH",
+    "BUILDVARIAN"
+];
+
 export class Validator {
 
     private document: TextDocument;
@@ -444,6 +459,9 @@ export class Validator {
                                             && variableRange.end.line === range.end.line
                                             && variableRange.end.character === range.end.character) {
                                         if (!variables[0].isDefined()) {
+                                            if (PREDEFINED_VARIABLES.indexOf(variables[0].getName()) !== -1) {
+                                                return null;
+                                            }
                                             return Validator.createBaseNameEmpty(fromInstructionRange.start.line, variableRange, variables[0].toString());
                                         }
                                     }
