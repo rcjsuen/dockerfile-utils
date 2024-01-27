@@ -723,7 +723,7 @@ export class Validator {
                             const flagRange = flag.getRange();
                             if (name === "") {
                                 problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, flagRange.end, name));
-                            } else if (name === "link") {
+                            } else if (name === "link" || name === "parents") {
                                 const problem = this.checkFlagBoolean(copyInstructionRange.start.line, flag);
                                 if (problem !== null) {
                                     problems.push(problem);
