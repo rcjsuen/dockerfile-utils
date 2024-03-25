@@ -2241,6 +2241,29 @@ describe("Docker Validator Tests", function() {
                 });
             });
 
+            describe("exclude", () => {
+                it("ok", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --exclude=*.txt . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("duplicate flag is allowed", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --exclude=*.txt --exclude=*.md . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --exclude . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], 1, "exclude", 1, 6, 1, 13);
+                });
+
+                it("empty value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --exclude= . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+            });
+
             describe("checksum", () => {
                 it("ok", () => {
                     const diagnostics = validateDockerfile("FROM alpine\nADD --checksum=sha256:24454f830cdb571e2c4ad15481119c43b3cafd48dd869a9b2945d1036d1dc68d https://mirrors.edge.kernel.org/pub/linux/kernel/Historic/linux-0.01.tar.gz /");
@@ -2752,6 +2775,29 @@ describe("Docker Validator Tests", function() {
                     assert.equal(diagnostics.length, 2);
                     assertFlagDuplicate(diagnostics[0], 1, "chown", 1, 7, 1, 12);
                     assertFlagDuplicate(diagnostics[1], 1, "chown", 1, 17, 1, 22);
+                });
+            });
+
+            describe("exclude", () => {
+                it("ok", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --exclude=*.txt . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("duplicate flag is allowed", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --exclude=*.txt --exclude=*.md . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --exclude . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], 1, "exclude", 1, 7, 1, 14);
+                });
+
+                it("empty value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --exclude= . .");
+                    assert.strictEqual(diagnostics.length, 0);
                 });
             });
 

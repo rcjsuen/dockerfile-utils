@@ -700,7 +700,7 @@ export class Validator {
                             if (problem !== null) {
                                 problems.push(problem);
                             }
-                        } else if (name !== "chmod" && name !== "chown" && name !== "checksum") {
+                        } else if (name !== "chmod" && name !== "chown" && name !== "checksum" && name !== "exclude") {
                             let range = flag.getNameRange();
                             problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, range.end, name));
                         }
@@ -709,7 +709,7 @@ export class Validator {
                     if (addDestinationDiagnostic !== null) {
                         problems.push(addDestinationDiagnostic);
                     }
-                    this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum"], problems);
+                    this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "exclude"], problems);
                     this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "keep-git-dir", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
@@ -728,7 +728,7 @@ export class Validator {
                                 if (problem !== null) {
                                     problems.push(problem);
                                 }
-                            } else if (name !== "chmod" && name !== "chown" && name !== "from") {
+                            } else if (name !== "chmod" && name !== "chown" && name !== "from" && name !== "exclude") {
                                 let range = flag.getNameRange();
                                 problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, range.end, name));
                             }
@@ -750,7 +750,7 @@ export class Validator {
                     if (copyDestinationDiagnostic !== null) {
                         problems.push(copyDestinationDiagnostic);
                     }
-                    this.checkFlagValue(copyInstructionRange.start.line, flags, ["chmod", "chown", "from"], problems);
+                    this.checkFlagValue(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "exclude"], problems);
                     this.checkDuplicateFlags(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "link"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;

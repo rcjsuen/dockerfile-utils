@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support parsing the new `--exclude` flag for ADD and COPY instructions ([#124](https://github.com/rcjsuen/dockerfile-utils/issues/124))
+
 ## [0.15.0] - 2023-09-10
 ### Added
 - ignore predefined platform ARG variables if they are used as a base image ([#119](https://github.com/rcjsuen/dockerfile-utils/issues/119))
