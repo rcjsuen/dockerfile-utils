@@ -723,12 +723,12 @@ export class Validator {
                             const flagRange = flag.getRange();
                             if (name === "") {
                                 problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, flagRange.end, name));
-                            } else if (name === "link") {
+                            } else if (name === "link" || name === "parents") {
                                 const problem = this.checkFlagBoolean(copyInstructionRange.start.line, flag);
                                 if (problem !== null) {
                                     problems.push(problem);
                                 }
-                            } else if (name !== "chmod" && name !== "chown" && name !== "from" && name !== "exclude") {
+                            } else if (name !== "chmod" && name !== "chown" && name !== "from" && name !== "exclude" && name !== "parents") {
                                 let range = flag.getNameRange();
                                 problems.push(Validator.createUnknownCopyFlag(copyInstructionRange.start.line, flagRange.start, range.end, name));
                             }
@@ -751,7 +751,7 @@ export class Validator {
                         problems.push(copyDestinationDiagnostic);
                     }
                     this.checkFlagValue(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "exclude"], problems);
-                    this.checkDuplicateFlags(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "link"], problems);
+                    this.checkDuplicateFlags(copyInstructionRange.start.line, flags, ["chmod", "chown", "from", "link", "parents"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "WORKDIR":

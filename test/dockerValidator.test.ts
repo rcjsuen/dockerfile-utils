@@ -2877,6 +2877,46 @@ describe("Docker Validator Tests", function() {
                 });
             });
 
+            describe("parents", () => {
+                it("ok", () => {
+                    let diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=true . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=false . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=TrUE . .");
+                    assert.strictEqual(diagnostics.length, 0);
+
+                    diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=fALSe . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --parents . .");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("empty value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --parents= . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagMissingValue(diagnostics[0], 1, "parents", 1, 7, 1, 14);
+                });
+
+                it("invalid value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=abc . .");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagExpectedBooleanValue(diagnostics[0], 1, "parents", "abc", 1, 15, 1, 18);
+                });
+
+                it("duplicate flag", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nCOPY --parents=true --parents=false . .");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], 1, "parents", 1, 7, 1, 14);
+                    assertFlagDuplicate(diagnostics[1], 1, "parents", 1, 22, 1, 29);
+                });
+            });
+
             it("all flags", function() {
                 let diagnostics = validateDockerfile("FROM node AS bb\nFROM alpine\nCOPY --from=bb --chown=node:node . .");
                 assert.equal(diagnostics.length, 0);
