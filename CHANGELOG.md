@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.16.0] - 2024-03-25
 ### Added
 - support parsing the new `--exclude` flag for ADD and COPY instructions ([#124](https://github.com/rcjsuen/dockerfile-utils/issues/124))
 - support parsing the new `--parents` flag for COPY instructions ([#123](https://github.com/rcjsuen/dockerfile-utils/issues/123))
@@ -275,7 +275,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.12.0...v0.13.0
