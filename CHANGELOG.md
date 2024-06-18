@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.16.1] - 2024-06-18
 ### Fixed
 - consider default value of a variable when determining if FROM is invalid or not ([#126](https://github.com/rcjsuen/dockerfile-utils/issues/126))
 
@@ -279,7 +279,8 @@ export interface FormatterSettings extends FormattingOptions {
 - create formatter for Dockerfiles
 - create linter for Dockerfiles
 
-[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.16.1...HEAD
+[0.16.1]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/rcjsuen/dockerfile-utils/compare/v0.13.0...v0.14.0
