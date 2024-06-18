@@ -3370,6 +3370,9 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("ARG image=latest\nFROM alpine:${latest:-latest}");
                 assert.equal(diagnostics.length, 0);
 
+                diagnostics = validateDockerfile("FROM ${var:-alpine}"); 
+                assert.strictEqual(diagnostics.length, 0);
+
                 diagnostics = validateDockerfile("FROM $TARGETPLATFORM");
                 assert.strictEqual(diagnostics.length, 0);
 
@@ -3555,6 +3558,10 @@ describe("Docker Validator Tests", function() {
                 let diagnostics = validateDockerfile("FROM $image");
                 assert.equal(diagnostics.length, 1);
                 assertBaseNameEmpty(diagnostics[0], 0, "$image", 0, 5, 0, 11);
+
+                diagnostics = validateDockerfile("FROM ${var:-}"); 
+                assert.strictEqual(diagnostics.length, 1);
+                assertBaseNameEmpty(diagnostics[0], 0, "${var:-}", 0, 5, 0, 13);
             });
         });
 

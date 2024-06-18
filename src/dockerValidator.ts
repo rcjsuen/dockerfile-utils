@@ -462,6 +462,13 @@ export class Validator {
                                             if (PREDEFINED_VARIABLES.indexOf(variables[0].getName()) !== -1) {
                                                 return null;
                                             }
+                                            // the '-' sign suggests a default value so even if the variable is not defined it's okay
+                                            if (variables[0].getModifier() === '-') {
+                                                const parameter = variables[0].getSubstitutionParameter()
+                                                if (parameter !== "" && parameter !== null) {
+                                                    return null;
+                                                }
+                                            }
                                             return Validator.createBaseNameEmpty(fromInstructionRange.start.line, variableRange, variables[0].toString());
                                         }
                                     }

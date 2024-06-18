@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Fixed
+- consider default value of a variable when determining if FROM is invalid or not ([#126](https://github.com/rcjsuen/dockerfile-utils/issues/126))
+
 ## [0.16.0] - 2024-03-25
 ### Added
 - support parsing the new `--exclude` flag for ADD and COPY instructions ([#124](https://github.com/rcjsuen/dockerfile-utils/issues/124))
