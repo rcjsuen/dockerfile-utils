@@ -55,6 +55,10 @@ const PREDEFINED_VARIABLES = [
 
 export class Validator {
 
+    private static readonly IS_RELATIVE_DIR = /^(\.\.?[\/\\])*\.\.?[\/\\]?$/;
+    private static readonly IS_PATH_WITH_DIR_NAMES = /^[\/\\]?(\.\.?|[^/\\]+)([\/\\](\.\.?|[^/\\]+))*[\/\\]?$/;
+    private static readonly ENDS_WITH_DIR_INDICATOR = /[\/\\]$|[\/\\]\.\.?[\/\\]?$/;
+
     private document: TextDocument;
 
     private settings: ValidatorSettings = {
@@ -818,6 +822,13 @@ export class Validator {
         return args[args.length - 1];
     }
 
+    private isValidDirectoryDestination(destinationNormalized: string): boolean {
+        const isRelativeDir = Validator.IS_RELATIVE_DIR.test(destinationNormalized);
+        const isPathWithDirNames = Validator.IS_PATH_WITH_DIR_NAMES.test(destinationNormalized);
+        const endsWithDirIndicator = Validator.ENDS_WITH_DIR_INDICATOR.test(destinationNormalized);
+        return isRelativeDir || (isPathWithDirNames && endsWithDirIndicator);
+    }
+
     private checkDestinationIsDirectory(instruction: JSONInstruction, requiresTwoArgumentsFunction: (instructionLine: uinteger, range: Range) => Diagnostic, notDirectoryFunction: (instructionLine: uinteger, range: Range) => Diagnostic): Diagnostic | null {
         if (instruction.getClosingBracket()) {
             return this.checkJsonDestinationIsDirectory(instruction, requiresTwoArgumentsFunction, notDirectoryFunction);
@@ -846,8 +857,9 @@ export class Validator {
                 }
             }
             const destination = lastArg.getValue();
+            const destinationNormalized = destination.trim().replace(/^["']+|["']+$/g, '');
             const lastChar = destination.charAt(destination.length - 1);
-            if (lastChar !== '\\' && lastChar !== '/') {
+            if (!this.isValidDirectoryDestination(destinationNormalized) && lastChar !== '\\' && lastChar !== '/') {
                 return notDirectoryFunction(instruction.getInstructionRange().start.line, lastArg.getRange());
             }
         }
@@ -909,8 +921,9 @@ export class Validator {
                 }
             }
             const destination = lastJsonString.getValue();
+            const destinationNormalized = destination.trim().replace(/^["']+|["']+$/g, '');
             const lastChar = destination.charAt(destination.length - 2);
-            if (lastChar !== '\\' && lastChar !== '/') {
+            if (!this.isValidDirectoryDestination(destinationNormalized) && lastChar !== '\\' && lastChar !== '/') {
                 return notDirectoryFunction(instruction.getInstructionRange().start.line, jsonStrings[jsonStrings.length - 1].getJSONRange());
             }
         }

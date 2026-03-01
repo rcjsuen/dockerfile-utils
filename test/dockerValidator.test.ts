@@ -2213,6 +2213,63 @@ describe("Docker Validator Tests", function() {
                 assert.equal(diagnostics.length, 1);
                 assertADDDestinationNotDirectory(diagnostics[0], 2, 2, 33, 2, 39);
             });
+
+            it("multiple sources with destination . or ./ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 .");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 ./");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"file1\", \"file2\", \"file3\", \".\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"file1\", \"file2\", \"file3\", \"./\" ]");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("multiple sources with destination .. or ../ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 ..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 ../");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"file1\", \"file2\", \"file3\", \"..\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD [ \"file1\", \"file2\", \"file3\", \"../\" ]");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("destination with trailing slash (./ and ../) accepted so relative-dir regex does not regress", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 ./");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 ../");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("deeper relative paths ../.. and ../../ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 ../..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 file3 ../../");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("relative paths with backslash (Windows-style) do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("#escape=`\nFROM alpine\nADD file1 file2 ..\\..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM alpine\nADD file1 file2 ..\\");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("destination with leading slash or path segments (e.g. /.././../directory1/.) do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nADD file1 file2 /.././../directory1/.");
+                assert.equal(diagnostics.length, 0);
+            });
         });
 
         describe("flags", function() {
@@ -2789,6 +2846,60 @@ describe("Docker Validator Tests", function() {
                 diagnostics = validateDockerfile("#escape=`\nFROM microsoft/nanoserver\nCOPY [\"Dockerfile\",\"Dockerfile2\",\"C:\\tmp\" ]");
                 assert.equal(diagnostics.length, 1);
                 assertCOPYDestinationNotDirectory(diagnostics[0], 2, 2, 34, 2, 40);
+            });
+
+            it("multiple sources with destination . or ./ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 .");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 ./");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"file1\", \"file2\", \"file3\", \".\" ]");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"file1\", \"file2\", \"file3\", \"./\" ]");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("multiple sources with destination .. or ../ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 ..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 ../");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("destination with trailing slash (./ and ../) accepted so relative-dir regex does not regress", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 ./");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 ../");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("deeper relative paths ../.. and ../../ do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 ../..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 file3 ../../");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("relative paths with backslash (Windows-style) do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("#escape=`\nFROM alpine\nCOPY file1 file2 ..\\..");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("#escape=`\nFROM alpine\nCOPY file1 file2 ..\\");
+                assert.equal(diagnostics.length, 0);
+            });
+
+            it("destination with leading slash or path segments (e.g. /.././../directory1/.) do not produce invalidDestination", function() {
+                let diagnostics = validateDockerfile("FROM alpine\nCOPY file1 file2 /.././../directory1/.");
+                assert.equal(diagnostics.length, 0);
+
+                diagnostics = validateDockerfile("FROM alpine\nCOPY [ \"file1\", \"file2\", \"/.././../directory1/.\" ]");
+                assert.equal(diagnostics.length, 0);
             });
         });
 
