@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- support parsing the new `--unpack` flag for ADD instructions ([#131](https://github.com/rcjsuen/dockerfile-utils/issues/131))
+
 ## [0.16.3] - 2025-07-21
 ### Fixed
 - prevent tabbed delimiters in heredocs from crashing the linter and formatter ([#129](https://github.com/rcjsuen/dockerfile-utils/issues/129))
