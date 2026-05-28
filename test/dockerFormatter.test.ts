@@ -9,7 +9,7 @@ import { TextEdit, Position, Range } from 'vscode-languageserver-types';
 import { format, formatRange as apiFormatRange, formatOnType as apiFormatOnType, FormatterSettings } from '../src/main';
 import { Keyword } from "dockerfile-ast";
 
-function createDocument(content: string): any {
+function createDocument(content: string): TextDocument {
     return TextDocument.create("uri://host/Dockerfile.sample", "dockerfile", 1, content);
 }
 

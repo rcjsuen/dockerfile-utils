@@ -12,7 +12,7 @@ import { ValidationCode, ValidatorSettings, ValidationSeverity, validate } from 
 
 let source = "dockerfile-utils";
 
-function createDocument(content: string): any {
+function createDocument(content: string): TextDocument {
     return TextDocument.create("uri://host/Dockerfile.sample", "dockerfile", 1, content);
 }
 
@@ -1395,14 +1395,14 @@ describe("Docker Validator Tests", function() {
                 });
 
                 it("ignore", function() {
-                    let settings: any = {};
+                    let settings: Record<string, unknown> = {};
                     settings[settingsName] = ValidationSeverity.IGNORE;
                     let diagnostics = validateDockerfile(content, settings);
                     assert.strictEqual(diagnostics.length, 0);
                 });
 
                 it("warning", function() {
-                    let settings: any = {};
+                    let settings: Record<string, unknown> = {};
                     settings[settingsName] = ValidationSeverity.WARNING;
                     let diagnostics = validateDockerfile(content, settings);
                     assert.strictEqual(diagnostics.length, 1);
@@ -1415,7 +1415,7 @@ describe("Docker Validator Tests", function() {
                 });
 
                 it("error", function() {
-                    let settings: any = {};
+                    let settings: Record<string, unknown> = {};
                     settings[settingsName] = ValidationSeverity.ERROR;
                     let diagnostics = validateDockerfile(content, settings);
                     assert.strictEqual(diagnostics.length, 1);
@@ -2361,6 +2361,31 @@ describe("Docker Validator Tests", function() {
                     assert.strictEqual(diagnostics.length, 2);
                     assertFlagDuplicate(diagnostics[0], 1, "keep-git-dir", 1, 6, 1, 18);
                     assertFlagDuplicate(diagnostics[1], 1, "keep-git-dir", 1, 26, 1, 38);
+                });
+            });
+
+            describe("unpack", () => {
+                it("ok", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --unpack=true https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 0);
+                });
+
+                it("flag no value", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --unpack https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 0, "--unpack defaults to false if no value specified");
+                });
+
+                it("invalid value", function() {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --unpack=abc https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 1);
+                    assertFlagExpectedBooleanValue(diagnostics[0], 1, "unpack", "abc", 1, 13, 1, 16);
+                });
+
+                it("duplicate flag", () => {
+                    const diagnostics = validateDockerfile("FROM alpine\nADD --unpack=true --unpack=false https://github.com/moby/buildkit.git#v0.10.1 /buildkit");
+                    assert.strictEqual(diagnostics.length, 2);
+                    assertFlagDuplicate(diagnostics[0], 1, "unpack", 1, 6, 1, 12);
+                    assertFlagDuplicate(diagnostics[1], 1, "unpack", 1, 20, 1, 26);
                 });
             });
 

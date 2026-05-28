@@ -702,7 +702,7 @@ export class Validator {
                         const flagRange = flag.getRange();
                         if (name === "") {
                             problems.push(Validator.createUnknownAddFlag(addInstructionRange.start.line, flagRange.start, flagRange.end, name));
-                        } else if (name === "link" || name === "keep-git-dir") {
+                        } else if (name === "link" || name === "keep-git-dir" || name === "unpack") {
                             const problem = this.checkFlagBoolean(addInstructionRange.start.line, flag);
                             if (problem !== null) {
                                 problems.push(problem);
@@ -717,7 +717,7 @@ export class Validator {
                         problems.push(addDestinationDiagnostic);
                     }
                     this.checkFlagValue(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "exclude"], problems);
-                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "keep-git-dir", "link"], problems);
+                    this.checkDuplicateFlags(addInstructionRange.start.line, addFlags, ["chmod", "chown", "checksum", "keep-git-dir", "link", "unpack"], problems);
                     this.checkJSONQuotes(instruction, problems);
                     break;
                 case "COPY":
